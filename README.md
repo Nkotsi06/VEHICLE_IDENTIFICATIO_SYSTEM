@@ -69,5 +69,5 @@ The Vehicle Identification System is a comprehensive JavaFX desktop application 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/VehicleIdentificationSystem.git
+git clone https:https://github.com/Nkotsi06/VEHICLE_IDENTIFICATIO_SYSTEM
 cd VehicleIdentificationSystem
