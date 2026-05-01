@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.VehicleSightingController">
+
+    <top>
+        <VBox>
+            <fx:include source="MenuBarComponent.fxml"/>
+        </VBox>
+    </top>
+
+    <center>
+        <SplitPane dividerPositions="0.5">
+            <VBox spacing="10" style="-fx-padding: 10;">
+                <Label text="Vehicle Sightings" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                <TableView fx:id="sightingsTable">
+                    <columns>
+                        <TableColumn fx:id="timestampColumn" text="Timestamp" prefWidth="150"/>
+                        <TableColumn fx:id="vehicleColumn" text="Vehicle" prefWidth="120"/>
+                        <TableColumn fx:id="sourceColumn" text="Source" prefWidth="120"/>
+                        <TableColumn fx:id="confidenceColumn" text="Confidence" prefWidth="80"/>
+                        <TableColumn fx:id="locationColumn" text="Location" prefWidth="150"/>
+                    </columns>
+                </TableView>
+                <HBox spacing="10">
+                    <Button fx:id="refreshButton" text="Refresh"/>
+                    <Button fx:id="mapViewButton" text="View on Map"/>
+                </HBox>
+            </VBox>
+
+            <VBox spacing="15" style="-fx-padding: 10;">
+                <Label text="Add Sighting" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+
+                <GridPane hgap="10" vgap="10">
+                    <Label text="License Plate:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <TextField fx:id="licensePlateField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                    <Label text="Source Type:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <ComboBox fx:id="sourceTypeComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                    <Label text="Device ID:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                    <TextField fx:id="cameraIdField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                    <Label text="Latitude:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                    <TextField fx:id="latitudeField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                    <Label text="Longitude:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                    <TextField fx:id="longitudeField" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                    <Label text="Date:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                    <DatePicker fx:id="sightingDatePicker" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+                </GridPane>
+
+                <Button fx:id="addButton" text="Add Sighting" style="-fx-background-color: #27ae60; -fx-text-fill: white;"/>
+
+                <Separator/>
+
+                <Label text="Search by Plate" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+                <HBox spacing="10">
+                    <TextField fx:id="searchPlateField" promptText="License plate" HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="searchButton" text="Search" style="-fx-background-color: #2980b9; -fx-text-fill: white;"/>
+                </HBox>
+
+                <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d;"/>
+            </VBox>
+        </SplitPane>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
+            <Button fx:id="backButton" text="Back"/>
+        </HBox>
+        <fx:include source="FooterComponent.fxml"/>
+    </bottom>
+</BorderPane>

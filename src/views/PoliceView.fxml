@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.PoliceController">
+
+    <top>
+        <VBox>
+            <fx:include source="MenuBarComponent.fxml"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+            <VBox spacing="20" style="-fx-padding: 20;">
+
+                <!-- Welcome Section -->
+                <Label fx:id="welcomeLabel" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                <Label text="Police Module" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+
+                <Separator/>
+
+                <!-- Progress Indicator -->
+                <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
+
+                <!-- Stats Cards Row 1 -->
+                <HBox spacing="15" alignment="CENTER">
+                    <VBox style="-fx-background-color: #e74c3c; -fx-background-radius: 8; -fx-padding: 15; -fx-alignment: CENTER;" HBox.hgrow="ALWAYS">
+                        <Label text="Stolen Vehicles" style="-fx-text-fill: white; -fx-font-size: 12px;"/>
+                        <Label fx:id="stolenCountLabel" text="0" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;"/>
+                    </VBox>
+
+                    <VBox style="-fx-background-color: #e67e22; -fx-background-radius: 8; -fx-padding: 15; -fx-alignment: CENTER;" HBox.hgrow="ALWAYS">
+                        <Label text="Violations (Today)" style="-fx-text-fill: white; -fx-font-size: 12px;"/>
+                        <Label fx:id="violationsTodayLabel" text="0" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;"/>
+                    </VBox>
+
+                    <VBox style="-fx-background-color: #9b59b6; -fx-background-radius: 8; -fx-padding: 15; -fx-alignment: CENTER;" HBox.hgrow="ALWAYS">
+                        <Label text="Active Warrants" style="-fx-text-fill: white; -fx-font-size: 12px;"/>
+                        <Label fx:id="activeWarrantsLabel" text="0" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;"/>
+                    </VBox>
+
+                    <VBox style="-fx-background-color: #f39c12; -fx-background-radius: 8; -fx-padding: 15; -fx-alignment: CENTER;" HBox.hgrow="ALWAYS">
+                        <Label text="BOLO Alerts" style="-fx-text-fill: white; -fx-font-size: 12px;"/>
+                        <Label fx:id="boloAlertsLabel" text="0" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;"/>
+                    </VBox>
+
+                    <VBox style="-fx-background-color: #e84393; -fx-background-radius: 8; -fx-padding: 15; -fx-alignment: CENTER;" HBox.hgrow="ALWAYS">
+                        <Label text="Expired Documents" style="-fx-text-fill: white; -fx-font-size: 12px;"/>
+                        <Label fx:id="expiredDocsLabel" text="0" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;"/>
+                    </VBox>
+
+                    <VBox style="-fx-background-color: #1abc9c; -fx-background-radius: 8; -fx-padding: 15; -fx-alignment: CENTER;" HBox.hgrow="ALWAYS">
+                        <Label text="Unpaid Fines" style="-fx-text-fill: white; -fx-font-size: 12px;"/>
+                        <Label fx:id="unpaidFinesLabel" text="M0.00" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Stats Cards Row 2 -->
+                <HBox spacing="15" alignment="CENTER">
+                    <VBox style="-fx-background-color: #3498db; -fx-background-radius: 8; -fx-padding: 15; -fx-alignment: CENTER;" HBox.hgrow="ALWAYS">
+                        <Label text="Geofence Alerts" style="-fx-text-fill: white; -fx-font-size: 12px;"/>
+                        <Label fx:id="geofenceAlertsLabel" text="0" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;"/>
+                    </VBox>
+
+                    <VBox style="-fx-background-color: #2ecc71; -fx-background-radius: 8; -fx-padding: 15; -fx-alignment: CENTER;" HBox.hgrow="ALWAYS">
+                        <Label text="Active Tracking" style="-fx-text-fill: white; -fx-font-size: 12px;"/>
+                        <Label fx:id="activeTrackingLabel" text="0" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;"/>
+                    </VBox>
+                </HBox>
+
+                <Separator/>
+
+                <!-- Progress Bar for Operations -->
+                <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+
+                <!-- Search Section -->
+                <TitledPane text="Search Vehicle" expanded="true" style="-fx-font-weight: bold;">
+                    <HBox spacing="10" alignment="CENTER" style="-fx-padding: 10;">
+                        <TextField fx:id="searchRegistrationField" promptText="Enter Registration Number" HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="searchButton" text="Search" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
+                            <effect>
+                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                            </effect>
+                        </Button>
+                        <Button fx:id="refreshButton" text="Refresh" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
+                            <effect>
+                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                            </effect>
+                        </Button>
+                        <Button fx:id="fadeButton" text="Animate" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
+                            <effect>
+                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                            </effect>
+                        </Button>
+                    </HBox>
+                </TitledPane>
+
+                <!-- Recent Police Activity Table with Pagination -->
+                <TitledPane text="Recent Police Activity" expanded="true" style="-fx-font-weight: bold;">
+                    <VBox spacing="10" style="-fx-padding: 10;">
+                        <TableView fx:id="recentActivityTable" prefHeight="250">
+                            <columns>
+                                <TableColumn fx:id="activityTimeColumn" text="Time" prefWidth="180"/>
+                                <TableColumn fx:id="activityActionColumn" text="Action" prefWidth="250"/>
+                                <TableColumn fx:id="activityVehicleColumn" text="Vehicle" prefWidth="150"/>
+                                <TableColumn fx:id="activityOfficerColumn" text="Officer" prefWidth="150"/>
+                            </columns>
+                            <columnResizePolicy>
+                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                            </columnResizePolicy>
+                            <placeholder>
+                                <Label text="No recent activity" style="-fx-text-fill: #7f8c8d;"/>
+                            </placeholder>
+                        </TableView>
+                        <Pagination fx:id="activityPagination" pageCount="1" maxPageIndicatorCount="5"/>
+                    </VBox>
+                </TitledPane>
+
+                <!-- Status Label -->
+                <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <fx:include source="FooterComponent.fxml"/>
+    </bottom>
+
+</BorderPane>

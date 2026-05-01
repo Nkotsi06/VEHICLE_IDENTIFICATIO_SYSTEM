@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.InsuranceComparisonController">
+
+    <top>
+        <VBox>
+            <fx:include source="MenuBarComponent.fxml"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+            <VBox spacing="20" style="-fx-padding: 20;">
+                <Label text="Insurance Policy Comparison" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                <Label text="Compare insurance policies side by side" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+
+                <Separator/>
+
+                <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
+
+                <TitledPane text="Select Policies to Compare" expanded="true" style="-fx-font-weight: bold;">
+                    <VBox spacing="15" style="-fx-padding: 10;">
+                        <GridPane hgap="15" vgap="10">
+                            <Label text="Policy 1:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="policy1ComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="300" promptText="Select first policy"/>
+
+                            <Label text="Policy 2:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="policy2ComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="300" promptText="Select second policy"/>
+
+                            <Label text="Policy 3:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="policy3ComboBox" GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="300" promptText="Select third policy"/>
+                        </GridPane>
+
+                        <HBox spacing="10" alignment="CENTER">
+                            <Button fx:id="compareButton" text="Compare Policies" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;">
+                                <effect>
+                                    <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                                </effect>
+                            </Button>
+                            <Button fx:id="resetButton" text="Reset" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                            <Button fx:id="fadeButton" text="Animate" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                        </HBox>
+                    </VBox>
+                </TitledPane>
+
+                <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+
+                <TitledPane text="Comparison Results" expanded="true" style="-fx-font-weight: bold;">
+                    <TableView fx:id="comparisonTable" prefHeight="400">
+                        <columns>
+                            <TableColumn fx:id="criteriaColumn" text="Criteria" prefWidth="200"/>
+                            <TableColumn fx:id="policy1ValueColumn" text="Policy 1" prefWidth="200"/>
+                            <TableColumn fx:id="policy2ValueColumn" text="Policy 2" prefWidth="200"/>
+                            <TableColumn fx:id="policy3ValueColumn" text="Policy 3" prefWidth="200"/>
+                        </columns>
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
+                        <placeholder>
+                            <Label text="Select policies to compare" style="-fx-text-fill: #7f8c8d;"/>
+                        </placeholder>
+                    </TableView>
+                </TitledPane>
+
+                <TitledPane text="Recommendation" expanded="true" style="-fx-font-weight: bold;">
+                    <VBox spacing="10" style="-fx-padding: 10;">
+                        <Label text="Best Value Policy:" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                        <Label fx:id="bestValueLabel" style="-fx-text-fill: #27ae60; -fx-font-size: 16px; -fx-font-weight: bold;"/>
+                        <Label text="Recommendation Reason:" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                        <TextArea fx:id="recommendationArea" prefHeight="80" editable="false"/>
+                    </VBox>
+                </TitledPane>
+
+                <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
+            <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;"/>
+        </HBox>
+        <fx:include source="FooterComponent.fxml"/>
+    </bottom>
+</BorderPane>

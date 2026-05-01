@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.WaitTimeEstimatorController">
+
+    <top>
+        <VBox>
+            <fx:include source="MenuBarComponent.fxml"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+            <VBox spacing="20" style="-fx-padding: 20;">
+                <Label text="Wait Time Estimator" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                <Label text="Estimate service wait times for workshops" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+
+                <Separator/>
+
+                <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
+
+                <TitledPane text="Select Workshop" expanded="true" style="-fx-font-weight: bold;">
+                    <GridPane hgap="15" vgap="10" style="-fx-padding: 10;">
+                        <Label text="Select Workshop:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <ComboBox fx:id="workshopComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="300"/>
+                        <Button fx:id="estimateButton" text="Estimate Wait Time" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
+                            <effect>
+                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                            </effect>
+                        </Button>
+                        <Button fx:id="fadeButton" text="Animate" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+                    </GridPane>
+                </TitledPane>
+
+                <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+
+                <GridPane hgap="20" vgap="15" style="-fx-background-color: linear-gradient(to bottom, #2c3e50, #1a252f); -fx-padding: 25; -fx-border-radius: 15; -fx-background-radius: 15;" alignment="CENTER">
+                    <Label text="Current Wait Time" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2" style="-fx-text-fill: white; -fx-font-size: 14px;"/>
+                    <HBox spacing="10" alignment="CENTER" GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.columnSpan="2">
+                        <Label fx:id="waitTimeLabel" style="-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: #f1c40f;"/>
+                        <Label text="hours" style="-fx-text-fill: white; -fx-font-size: 20px;"/>
+                    </HBox>
+                    <ProgressBar fx:id="waitTimeProgress" prefWidth="300" progress="0" GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2"/>
+                </GridPane>
+
+                <Separator/>
+
+                <GridPane hgap="20" vgap="10" style="-fx-background-color: #f8f9fa; -fx-padding: 15; -fx-border-radius: 8;">
+                    <Label text="Active Services:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="activeServicesLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+
+                    <Label text="Average Service Time:" GridPane.rowIndex="0" GridPane.columnIndex="2" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="avgServiceTimeLabel" GridPane.rowIndex="0" GridPane.columnIndex="3" style="-fx-text-fill: #2c3e50;"/>
+
+                    <Label text="Mechanics Available:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="mechanicsAvailableLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+
+                    <Label text="Queue Length:" GridPane.rowIndex="1" GridPane.columnIndex="2" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="queueLengthLabel" GridPane.rowIndex="1" GridPane.columnIndex="3" style="-fx-text-fill: #2c3e50;"/>
+
+                    <Label text="Busy Level:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="busyLevelLabel" GridPane.rowIndex="2" GridPane.columnIndex="1" style="-fx-font-weight: bold;"/>
+                    <ProgressBar fx:id="busyProgressBar" prefWidth="200" progress="0" GridPane.rowIndex="2" GridPane.columnIndex="2" GridPane.columnSpan="2"/>
+                </GridPane>
+
+                <Separator/>
+
+                <Label text="Recommendation" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                <Label fx:id="recommendationLabel" style="-fx-text-fill: #7f8c8d; -fx-wrap-text: true;"/>
+
+                <HBox spacing="15" alignment="CENTER">
+                    <Button fx:id="bookButton" text="Book Appointment" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;" disable="true">
+                        <effect>
+                            <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                        </effect>
+                    </Button>
+                    <Button fx:id="refreshButton" text="Refresh" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                </HBox>
+
+                <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
+            <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;"/>
+        </HBox>
+        <fx:include source="FooterComponent.fxml"/>
+    </bottom>
+</BorderPane>

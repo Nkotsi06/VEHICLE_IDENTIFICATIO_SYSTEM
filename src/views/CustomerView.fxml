@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.CustomerController">
+
+    <top>
+        <VBox>
+            <fx:include source="MenuBarComponent.fxml"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+            <VBox spacing="20" style="-fx-padding: 20;">
+
+                <!-- Welcome Section -->
+                <Label fx:id="welcomeLabel" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                <Label text="Customer Dashboard" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+
+                <Separator/>
+
+                <!-- Progress Indicator -->
+                <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
+
+                <!-- Pagination for Cards -->
+                <Pagination fx:id="cardPagination" pageCount="1" maxPageIndicatorCount="3">
+                    <pageFactory>
+                        <HBox spacing="15" alignment="CENTER">
+                            <VBox fx:id="vehiclesCard" style="-fx-background-color: #3498db; -fx-background-radius: 8; -fx-padding: 15; -fx-alignment: CENTER;" HBox.hgrow="ALWAYS">
+                                <Label text="My Vehicles" style="-fx-text-fill: white; -fx-font-size: 12px;"/>
+                                <Label fx:id="vehiclesCountLabel" text="0" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;"/>
+                            </VBox>
+
+                            <VBox fx:id="queriesCard" style="-fx-background-color: #f39c12; -fx-background-radius: 8; -fx-padding: 15; -fx-alignment: CENTER;" HBox.hgrow="ALWAYS">
+                                <Label text="Active Queries" style="-fx-text-fill: white; -fx-font-size: 12px;"/>
+                                <Label fx:id="activeQueriesLabel" text="0" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;"/>
+                            </VBox>
+
+                            <VBox fx:id="complaintsCard" style="-fx-background-color: #e74c3c; -fx-background-radius: 8; -fx-padding: 15; -fx-alignment: CENTER;" HBox.hgrow="ALWAYS">
+                                <Label text="Pending Complaints" style="-fx-text-fill: white; -fx-font-size: 12px;"/>
+                                <Label fx:id="pendingComplaintsLabel" text="0" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;"/>
+                            </VBox>
+
+                            <VBox fx:id="walletCard" style="-fx-background-color: #2ecc71; -fx-background-radius: 8; -fx-padding: 15; -fx-alignment: CENTER;" HBox.hgrow="ALWAYS">
+                                <Label text="Wallet Balance" style="-fx-text-fill: white; -fx-font-size: 12px;"/>
+                                <Label fx:id="walletBalanceLabel" text="M0.00" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;"/>
+                            </VBox>
+
+                            <VBox fx:id="notificationsCard" style="-fx-background-color: #9b59b6; -fx-background-radius: 8; -fx-padding: 15; -fx-alignment: CENTER;" HBox.hgrow="ALWAYS">
+                                <Label text="Unread Notifications" style="-fx-text-fill: white; -fx-font-size: 12px;"/>
+                                <Label fx:id="unreadNotificationsLabel" text="0" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;"/>
+                            </VBox>
+
+                            <VBox fx:id="reviewsCard" style="-fx-background-color: #1abc9c; -fx-background-radius: 8; -fx-padding: 15; -fx-alignment: CENTER;" HBox.hgrow="ALWAYS">
+                                <Label text="Reviews Written" style="-fx-text-fill: white; -fx-font-size: 12px;"/>
+                                <Label fx:id="reviewsCountLabel" text="0" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;"/>
+                            </VBox>
+                        </HBox>
+                    </pageFactory>
+                </Pagination>
+
+                <Separator/>
+
+                <!-- Progress Bar -->
+                <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+
+                <!-- Recent Vehicles Table with Pagination -->
+                <TitledPane text="Recent Vehicles" expanded="true" style="-fx-font-weight: bold;">
+                    <VBox spacing="10" style="-fx-padding: 10;">
+                        <TableView fx:id="recentVehiclesTable" prefHeight="200">
+                            <columns>
+                                <TableColumn fx:id="vehicleRegCol" text="Registration" prefWidth="120"/>
+                                <TableColumn fx:id="vehicleMakeCol" text="Make" prefWidth="100"/>
+                                <TableColumn fx:id="vehicleModelCol" text="Model" prefWidth="100"/>
+                                <TableColumn fx:id="vehicleYearCol" text="Year" prefWidth="80"/>
+                                <TableColumn fx:id="vehicleStatusCol" text="Status" prefWidth="100"/>
+                            </columns>
+                            <columnResizePolicy>
+                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                            </columnResizePolicy>
+                            <placeholder>
+                                <Label text="No vehicles found" style="-fx-text-fill: #7f8c8d;"/>
+                            </placeholder>
+                        </TableView>
+                        <Pagination fx:id="vehiclesPagination" pageCount="1" maxPageIndicatorCount="5"/>
+                    </VBox>
+                </TitledPane>
+
+                <!-- Recent Notifications Table with Pagination -->
+                <TitledPane text="Recent Notifications" expanded="true" style="-fx-font-weight: bold;">
+                    <VBox spacing="10" style="-fx-padding: 10;">
+                        <TableView fx:id="recentNotificationsTable" prefHeight="200">
+                            <columns>
+                                <TableColumn fx:id="notifMessageCol" text="Message" prefWidth="350"/>
+                                <TableColumn fx:id="notifTypeCol" text="Type" prefWidth="100"/>
+                                <TableColumn fx:id="notifDateCol" text="Date" prefWidth="150"/>
+                                <TableColumn fx:id="notifStatusCol" text="Status" prefWidth="80"/>
+                            </columns>
+                            <columnResizePolicy>
+                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                            </columnResizePolicy>
+                            <placeholder>
+                                <Label text="No notifications found" style="-fx-text-fill: #7f8c8d;"/>
+                            </placeholder>
+                        </TableView>
+                        <Pagination fx:id="notificationsPagination" pageCount="1" maxPageIndicatorCount="5"/>
+                    </VBox>
+                </TitledPane>
+
+                <!-- Status Label -->
+                <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <fx:include source="FooterComponent.fxml"/>
+    </bottom>
+
+</BorderPane>

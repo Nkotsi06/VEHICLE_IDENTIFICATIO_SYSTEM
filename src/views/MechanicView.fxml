@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MechanicController">
+
+    <top>
+        <VBox>
+            <fx:include source="MenuBarComponent.fxml"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+            <SplitPane dividerPositions="0.5">
+                <VBox spacing="10" style="-fx-padding: 15;">
+                    <Label text="Mechanics List" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                    <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="30"/>
+
+                    <TableView fx:id="mechanicsTable" prefHeight="400">
+                        <columns>
+                            <TableColumn fx:id="nameColumn" text="Name" prefWidth="150"/>
+                            <TableColumn fx:id="specializationColumn" text="Specialization" prefWidth="180"/>
+                            <TableColumn fx:id="phoneColumn" text="Phone" prefWidth="120"/>
+                            <TableColumn fx:id="emailColumn" text="Email" prefWidth="150"/>
+                            <TableColumn fx:id="statusColumn" text="Status" prefWidth="80"/>
+                        </columns>
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
+                        <placeholder>
+                            <Label text="No mechanics found" style="-fx-text-fill: #7f8c8d;"/>
+                        </placeholder>
+                    </TableView>
+
+                    <Pagination fx:id="mechanicsPagination" pageCount="1" maxPageIndicatorCount="5"/>
+
+                    <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+
+                    <HBox spacing="10">
+                        <Button fx:id="refreshButton" text="Refresh" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                        <Button fx:id="fadeButton" text="Animate" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
+                            <effect>
+                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                            </effect>
+                        </Button>
+                    </HBox>
+                </VBox>
+
+                <VBox spacing="15" style="-fx-padding: 15;">
+                    <Label text="Mechanic Details" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                    <GridPane hgap="10" vgap="10">
+                        <Label text="Name:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="nameField" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250"/>
+
+                        <Label text="Specialization:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="specializationField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                        <Label text="Quick Specialization:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <ComboBox fx:id="specializationComboBox" GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="250"/>
+
+                        <Label text="Phone:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="phoneField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                        <Label text="Email:" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="emailField" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                        <Label text="Hire Date:" GridPane.rowIndex="5" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <DatePicker fx:id="hireDatePicker" GridPane.rowIndex="5" GridPane.columnIndex="1" prefWidth="200"/>
+                    </GridPane>
+
+                    <HBox spacing="10">
+                        <Button fx:id="addButton" text="Add Mechanic" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
+                            <effect>
+                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                            </effect>
+                        </Button>
+                        <Button fx:id="updateButton" text="Update" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                        <Button fx:id="deleteButton" text="Delete" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                        <Button fx:id="clearButton" text="Clear" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                    </HBox>
+
+                    <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+                </VBox>
+            </SplitPane>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
+            <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;"/>
+        </HBox>
+        <fx:include source="FooterComponent.fxml"/>
+    </bottom>
+</BorderPane>

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.StolenVehicleController">
+
+    <top>
+        <VBox>
+            <fx:include source="MenuBarComponent.fxml"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+            <SplitPane dividerPositions="0.5">
+
+                <!-- Left Panel - Stolen Vehicles List -->
+                <VBox spacing="10" style="-fx-padding: 15;">
+                    <Label text="Stolen Vehicles List" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                    <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="30"/>
+
+                    <TableView fx:id="stolenVehiclesTable" prefHeight="400">
+                        <columns>
+                            <TableColumn fx:id="regNumberColumn" text="Registration" prefWidth="120"/>
+                            <TableColumn fx:id="makeColumn" text="Make" prefWidth="100"/>
+                            <TableColumn fx:id="modelColumn" text="Model" prefWidth="100"/>
+                            <TableColumn fx:id="caseNumberColumn" text="Case Number" prefWidth="150"/>
+                            <TableColumn fx:id="statusColumn" text="Status" prefWidth="100"/>
+                            <TableColumn fx:id="officerColumn" text="Assigned Officer" prefWidth="150"/>
+                            <TableColumn fx:id="stolenDateColumn" text="Stolen Date" prefWidth="120"/>
+                        </columns>
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
+                        <placeholder>
+                            <Label text="No stolen vehicles found" style="-fx-text-fill: #7f8c8d;"/>
+                        </placeholder>
+                    </TableView>
+
+                    <Pagination fx:id="stolenPagination" pageCount="1" maxPageIndicatorCount="5"/>
+
+                    <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+
+                    <HBox spacing="10">
+                        <Button fx:id="refreshButton" text="Refresh" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                        <Button fx:id="fadeButton" text="Animate" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
+                            <effect>
+                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                            </effect>
+                        </Button>
+                    </HBox>
+                </VBox>
+
+                <!-- Right Panel - Report Stolen Vehicle -->
+                <VBox spacing="15" style="-fx-padding: 15;">
+                    <Label text="Report Stolen Vehicle" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                    <GridPane hgap="10" vgap="10">
+                        <Label text="Vehicle:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <ComboBox fx:id="vehicleComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250" promptText="Select vehicle"/>
+
+                        <Label text="Case Number:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="caseNumberField" GridPane.rowIndex="1" GridPane.columnIndex="1" promptText="Enter case number"/>
+
+                        <Label text="Assigned Officer:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="assignedOfficerField" GridPane.rowIndex="2" GridPane.columnIndex="1" promptText="Officer name"/>
+
+                        <Label text="Reported Date:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <DatePicker fx:id="reportedDatePicker" GridPane.rowIndex="3" GridPane.columnIndex="1" prefWidth="200"/>
+
+                        <Label text="Status:" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <ComboBox fx:id="statusComboBox" GridPane.rowIndex="4" GridPane.columnIndex="1" prefWidth="200"/>
+                    </GridPane>
+
+                    <Label text="Description:" style="-fx-font-weight: bold;"/>
+                    <TextArea fx:id="descriptionArea" prefHeight="100" promptText="Enter description..."/>
+
+                    <HBox spacing="10">
+                        <Button fx:id="reportButton" text="Report Stolen" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 120;">
+                            <effect>
+                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                            </effect>
+                        </Button>
+                        <Button fx:id="markRecoveredButton" text="Mark Recovered" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 120;"/>
+                    </HBox>
+
+                    <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+                </VBox>
+            </SplitPane>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
+            <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+        </HBox>
+        <fx:include source="FooterComponent.fxml"/>
+    </bottom>
+
+</BorderPane>

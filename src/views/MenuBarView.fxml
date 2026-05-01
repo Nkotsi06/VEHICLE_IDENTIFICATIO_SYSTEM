@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+
+<MenuBar xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MenuBarComponentController">
+    <Menu text="File">
+        <MenuItem fx:id="exitMenuItem" text="Exit"/>
+    </Menu>
+    <Menu text="Navigation">
+        <MenuItem fx:id="dashboardMenuItem" text="Dashboard"/>
+        <MenuItem fx:id="vehiclesMenuItem" text="Vehicles"/>
+        <MenuItem fx:id="customersMenuItem" text="Customers"/>
+        <MenuItem fx:id="workshopsMenuItem" text="Workshops"/>
+        <MenuItem fx:id="insuranceMenuItem" text="Insurance"/>
+        <MenuItem fx:id="policeMenuItem" text="Police"/>
+    </Menu>
+    <Menu text="Reports">
+        <MenuItem fx:id="reportsMenuItem" text="Generate Reports"/>
+    </Menu>
+    <Menu text="Settings">
+        <MenuItem fx:id="settingsMenuItem" text="Settings"/>
+    </Menu>
+    <Menu text="Help">
+        <MenuItem fx:id="helpMenuItem" text="Help"/>
+        <MenuItem fx:id="aboutMenuItem" text="About"/>
+    </Menu>
+    <Menu text="Account">
+        <MenuItem fx:id="logoutMenuItem" text="Logout"/>
+    </Menu>
+</MenuBar>

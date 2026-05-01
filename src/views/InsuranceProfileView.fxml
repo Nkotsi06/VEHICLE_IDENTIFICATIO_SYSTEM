@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.InsuranceProfileController">
+
+    <top>
+        <VBox>
+            <fx:include source="MenuBarComponent.fxml"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+            <VBox spacing="20" style="-fx-padding: 20;">
+
+                <Label text="Insurance Provider Profile" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                <Label text="View and manage your company information" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+
+                <Separator/>
+
+                <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
+
+                <HBox spacing="30">
+
+                    <!-- Left Panel -->
+                    <VBox spacing="15" style="-fx-background-color: #f8f9fa; -fx-background-radius: 10; -fx-padding: 20;" HBox.hgrow="NEVER" prefWidth="300">
+                        <ImageView fx:id="logoImageView" fitHeight="120" fitWidth="120" style="-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 5);"/>
+                        <Button fx:id="uploadLogoButton" text="Upload Logo" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+
+                        <Separator/>
+
+                        <Label text="Company Information" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                        <GridPane hgap="10" vgap="8">
+                            <Label text="License #:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="licenseNumberLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+
+                            <Label text="Registration #:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="registrationNumberLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+
+                            <Label text="Rating:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="ratingDisplayLabel" GridPane.rowIndex="2" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+
+                            <Label text="Member Since:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="memberSinceLabel" GridPane.rowIndex="3" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+                        </GridPane>
+                    </VBox>
+
+                    <!-- Right Panel -->
+                    <VBox spacing="15" style="-fx-background-color: #ffffff; -fx-background-radius: 10; -fx-padding: 20; -fx-border-color: #e0e0e0; -fx-border-radius: 10;" HBox.hgrow="ALWAYS">
+
+                        <Label text="Company Information" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                        <GridPane hgap="15" vgap="12">
+                            <Label text="Company Name:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="companyNameField" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="300"/>
+
+                            <Label text="Email:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="emailField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                            <Label text="Phone:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="phoneField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                            <Label text="Website:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="websiteField" GridPane.rowIndex="3" GridPane.columnIndex="1" promptText="www.example.com"/>
+
+                            <Label text="Address:" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <TextArea fx:id="addressField" GridPane.rowIndex="4" GridPane.columnIndex="1" prefHeight="60" wrapText="true"/>
+
+                            <Label text="Coverage Details:" GridPane.rowIndex="5" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <TextArea fx:id="coverageDetailsField" GridPane.rowIndex="5" GridPane.columnIndex="1" prefHeight="80" wrapText="true"/>
+                        </GridPane>
+
+                        <Separator/>
+
+                        <Label text="Account Security" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                        <GridPane hgap="15" vgap="12">
+                            <Label text="Username:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="usernameLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-text-fill: #7f8c8d;"/>
+
+                            <Label text="Account Status:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="accountStatusLabel" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                            <Button fx:id="changePasswordButton" text="Change Password" GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;"/>
+                        </GridPane>
+
+                        <Separator/>
+
+                        <Label text="Statistics" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                        <GridPane hgap="15" vgap="12">
+                            <Label text="Active Policies:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="activePoliciesLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-text-fill: #27ae60; -fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+                            <Label text="Pending Claims:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="pendingClaimsLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-text-fill: #e67e22; -fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+                            <Label text="Total Premium Collected:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="totalPremiumLabel" GridPane.rowIndex="2" GridPane.columnIndex="1" style="-fx-text-fill: #2980b9; -fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+                            <Label text="Customer Satisfaction:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <ProgressBar fx:id="satisfactionProgress" prefWidth="200" progress="0.85"/>
+                        </GridPane>
+
+                        <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+
+                        <HBox spacing="15" alignment="CENTER_RIGHT">
+                            <Button fx:id="saveButton" text="Save Changes" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 120;">
+                                <effect>
+                                    <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                                </effect>
+                            </Button>
+                            <Button fx:id="cancelButton" text="Cancel" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 100;"/>
+                            <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #7f8c8d; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;"/>
+                        </HBox>
+                    </VBox>
+                </HBox>
+
+                <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <fx:include source="FooterComponent.fxml"/>
+    </bottom>
+</BorderPane>

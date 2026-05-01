@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.QRCheckinController">
+
+    <top>
+        <VBox>
+            <fx:include source="MenuBarComponent.fxml"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+            <VBox spacing="20" style="-fx-padding: 20;" alignment="CENTER">
+                <Label text="QR Code Vehicle Check-in" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                <Label text="Scan QR code for quick vehicle check-in" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+
+                <Separator/>
+
+                <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
+
+                <TitledPane text="Scan QR Code" expanded="true" style="-fx-font-weight: bold;">
+                    <VBox spacing="15" style="-fx-padding: 15;" alignment="CENTER">
+                        <HBox spacing="10" alignment="CENTER">
+                            <TextField fx:id="qrCodeField" promptText="Scan or enter QR code" HBox.hgrow="ALWAYS" prefWidth="300"/>
+                            <Button fx:id="scanButton" text="Scan" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
+                                <effect>
+                                    <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                                </effect>
+                            </Button>
+                            <Button fx:id="manualEntryButton" text="Manual Entry" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                            <Button fx:id="fadeButton" text="Animate" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                        </HBox>
+                    </VBox>
+                </TitledPane>
+
+                <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+
+                <TitledPane text="Vehicle Information" expanded="false" style="-fx-font-weight: bold;">
+                    <HBox spacing="30" alignment="CENTER" style="-fx-padding: 20;">
+                        <ImageView fx:id="qrImageView" fitWidth="150" fitHeight="150" style="-fx-border-color: #dddddd; -fx-border-width: 2; -fx-border-radius: 10;"/>
+                        <VBox spacing="15">
+                            <GridPane hgap="15" vgap="10">
+                                <Label text="Registration:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <Label fx:id="registrationLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+
+                                <Label text="Make/Model:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <Label fx:id="vehicleInfoLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+
+                                <Label text="Owner:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <Label fx:id="ownerInfoLabel" GridPane.rowIndex="2" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+
+                                <Label text="Status:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <Label fx:id="statusLabel" GridPane.rowIndex="3" GridPane.columnIndex="1" style="-fx-text-fill: #f39c12; -fx-font-weight: bold;"/>
+                            </GridPane>
+                        </VBox>
+                    </HBox>
+                </TitledPane>
+
+                <TitledPane text="Service Details" expanded="false" style="-fx-font-weight: bold;">
+                    <GridPane hgap="15" vgap="12" style="-fx-padding: 15;">
+                        <Label text="Service Type:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <ComboBox fx:id="serviceTypeComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="200"/>
+
+                        <Label text="Cost (M):" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="costField" GridPane.rowIndex="1" GridPane.columnIndex="1" promptText="Enter cost"/>
+
+                        <Label text="Odometer (km):" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="odometerField" GridPane.rowIndex="2" GridPane.columnIndex="1" promptText="Enter odometer reading"/>
+
+                        <Label text="Mechanic:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <ComboBox fx:id="mechanicComboBox" GridPane.rowIndex="3" GridPane.columnIndex="1" prefWidth="200"/>
+                    </GridPane>
+                </TitledPane>
+
+                <HBox spacing="15" alignment="CENTER">
+                    <Button fx:id="checkinButton" text="Complete Check-in" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;" disable="true">
+                        <effect>
+                            <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                        </effect>
+                    </Button>
+                    <Button fx:id="clearButton" text="Clear" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 100;"/>
+                </HBox>
+
+                <Label fx:id="messageLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
+            <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;"/>
+        </HBox>
+        <fx:include source="FooterComponent.fxml"/>
+    </bottom>
+</BorderPane>

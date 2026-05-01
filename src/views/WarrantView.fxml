@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.WarrantController">
+
+    <top>
+        <VBox>
+            <fx:include source="MenuBarComponent.fxml"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+            <SplitPane dividerPositions="0.5">
+
+                <!-- Left Panel - Active Warrants -->
+                <VBox spacing="10" style="-fx-padding: 15;">
+                    <Label text="Active Warrants" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                    <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="30"/>
+
+                    <TableView fx:id="warrantsTable" prefHeight="400">
+                        <columns>
+                            <TableColumn fx:id="vehicleColumn" text="Vehicle" prefWidth="150"/>
+                            <TableColumn fx:id="issueDateColumn" text="Issue Date" prefWidth="100"/>
+                            <TableColumn fx:id="expiryDateColumn" text="Expiry Date" prefWidth="100"/>
+                            <TableColumn fx:id="judgeColumn" text="Judge" prefWidth="150"/>
+                            <TableColumn fx:id="warrantStatusColumn" text="Status" prefWidth="80"/>
+                            <TableColumn fx:id="warrantNumberColumn" text="Warrant #" prefWidth="120"/>
+                        </columns>
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
+                        <placeholder>
+                            <Label text="No active warrants" style="-fx-text-fill: #7f8c8d;"/>
+                        </placeholder>
+                    </TableView>
+
+                    <Pagination fx:id="warrantsPagination" pageCount="1" maxPageIndicatorCount="5"/>
+
+                    <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+
+                    <HBox spacing="10">
+                        <Button fx:id="refreshButton" text="Refresh" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                        <Button fx:id="fadeButton" text="Animate" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
+                            <effect>
+                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                            </effect>
+                        </Button>
+                    </HBox>
+                </VBox>
+
+                <!-- Right Panel - Issue Warrant -->
+                <VBox spacing="15" style="-fx-padding: 15;">
+                    <Label text="Issue New Warrant" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                    <GridPane hgap="10" vgap="10">
+                        <Label text="Violation:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <ComboBox fx:id="violationComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="300" promptText="Select violation"/>
+
+                        <Label text="Judge Name:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="judgeNameField" GridPane.rowIndex="1" GridPane.columnIndex="1" promptText="Enter judge name"/>
+
+                        <Label text="Issue Date:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <DatePicker fx:id="issueDatePicker" GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="200"/>
+
+                        <Label text="Expiry Date:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <DatePicker fx:id="expiryDatePicker" GridPane.rowIndex="3" GridPane.columnIndex="1" prefWidth="200"/>
+                    </GridPane>
+
+                    <Label text="Notes:" style="-fx-font-weight: bold;"/>
+                    <TextArea fx:id="notesArea" prefHeight="100" promptText="Enter additional notes..."/>
+
+                    <HBox spacing="10">
+                        <Button fx:id="issueButton" text="Issue Warrant" style="-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 120;">
+                            <effect>
+                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                            </effect>
+                        </Button>
+                        <Button fx:id="executeButton" text="Execute Warrant" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 120;"/>
+                    </HBox>
+
+                    <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+                </VBox>
+            </SplitPane>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
+            <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+        </HBox>
+        <fx:include source="FooterComponent.fxml"/>
+    </bottom>
+
+</BorderPane>

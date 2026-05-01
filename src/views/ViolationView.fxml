@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ViolationController">
+
+    <top>
+        <VBox>
+            <fx:include source="MenuBarComponent.fxml"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+            <SplitPane dividerPositions="0.5">
+
+                <!-- Left Panel - Violations List -->
+                <VBox spacing="10" style="-fx-padding: 15;">
+                    <Label text="Violations List" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                    <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="30"/>
+
+                    <TableView fx:id="violationsTable" prefHeight="400">
+                        <columns>
+                            <TableColumn fx:id="regNumberColumn" text="Registration" prefWidth="120"/>
+                            <TableColumn fx:id="violationTypeColumn" text="Violation Type" prefWidth="150"/>
+                            <TableColumn fx:id="violationDateColumn" text="Date" prefWidth="100"/>
+                            <TableColumn fx:id="fineAmountColumn" text="Fine Amount (M)" prefWidth="100"/>
+                            <TableColumn fx:id="paymentStatusColumn" text="Payment Status" prefWidth="100"/>
+                            <TableColumn fx:id="officerColumn" text="Officer" prefWidth="120"/>
+                        </columns>
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
+                        <placeholder>
+                            <Label text="No violations found" style="-fx-text-fill: #7f8c8d;"/>
+                        </placeholder>
+                    </TableView>
+
+                    <Pagination fx:id="violationsPagination" pageCount="1" maxPageIndicatorCount="5"/>
+
+                    <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+
+                    <HBox spacing="10">
+                        <Button fx:id="refreshButton" text="Refresh" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                        <Button fx:id="fadeButton" text="Animate" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
+                            <effect>
+                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                            </effect>
+                        </Button>
+                    </HBox>
+                </VBox>
+
+                <!-- Right Panel - Violation Details -->
+                <VBox spacing="15" style="-fx-padding: 15;">
+                    <Label text="Violation Details" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                    <GridPane hgap="10" vgap="10">
+                        <Label text="Vehicle:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <ComboBox fx:id="vehicleComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250" promptText="Select vehicle"/>
+
+                        <Label text="Violation Type:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="violationTypeField" GridPane.rowIndex="1" GridPane.columnIndex="1" promptText="Enter violation type"/>
+
+                        <Label text="Fine Amount (M):" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="fineAmountField" GridPane.rowIndex="2" GridPane.columnIndex="1" promptText="Enter fine amount"/>
+
+                        <Label text="Location:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="locationField" GridPane.rowIndex="3" GridPane.columnIndex="1" promptText="Enter location"/>
+
+                        <Label text="Violation Date:" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <DatePicker fx:id="violationDatePicker" GridPane.rowIndex="4" GridPane.columnIndex="1" prefWidth="200"/>
+
+                        <Label text="Payment Status:" GridPane.rowIndex="5" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <ComboBox fx:id="paymentStatusComboBox" GridPane.rowIndex="5" GridPane.columnIndex="1" prefWidth="200"/>
+                    </GridPane>
+
+                    <Label text="Description:" style="-fx-font-weight: bold;"/>
+                    <TextArea fx:id="descriptionArea" prefHeight="80" promptText="Enter description..."/>
+
+                    <HBox spacing="10">
+                        <Button fx:id="addButton" text="Add Violation" style="-fx-background-color: #e67e22; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 110;">
+                            <effect>
+                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                            </effect>
+                        </Button>
+                        <Button fx:id="updateButton" text="Update" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 90;"/>
+                        <Button fx:id="deleteButton" text="Delete" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 90;"/>
+                        <Button fx:id="markPaidButton" text="Mark Paid" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 90;"/>
+                    </HBox>
+
+                    <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+                </VBox>
+            </SplitPane>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
+            <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+        </HBox>
+        <fx:include source="FooterComponent.fxml"/>
+    </bottom>
+
+</BorderPane>

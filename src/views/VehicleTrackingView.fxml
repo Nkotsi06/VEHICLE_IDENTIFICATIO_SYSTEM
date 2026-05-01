@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.VehicleTrackingController">
+
+    <top>
+        <VBox>
+            <fx:include source="MenuBarComponent.fxml"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+            <VBox spacing="20" style="-fx-padding: 20;">
+
+                <Label text="Vehicle Tracking" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                <Label text="Track and monitor vehicle locations" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+
+                <Separator/>
+
+                <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
+
+                <TitledPane text="Search Vehicle" expanded="true" style="-fx-font-weight: bold;">
+                    <HBox spacing="10" alignment="CENTER" style="-fx-padding: 10;">
+                        <TextField fx:id="registrationField" promptText="Enter Registration Number" HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="trackButton" text="Track" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
+                            <effect>
+                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                            </effect>
+                        </Button>
+                        <Button fx:id="fadeButton" text="Animate" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
+                            <effect>
+                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                            </effect>
+                        </Button>
+                    </HBox>
+                </TitledPane>
+
+                <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+
+                <TitledPane fx:id="trackingDetailsBox" text="Vehicle Information" expanded="false" style="-fx-font-weight: bold;">
+                    <VBox spacing="15" style="-fx-padding: 15;">
+                        <GridPane hgap="15" vgap="10">
+                            <Label text="Registration:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="registrationInfoLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+
+                            <Label text="Vehicle:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="vehicleInfoLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+
+                            <Label text="Status:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="statusLabel" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                            <Label text="Last Location:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="lastLocationLabel" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                            <Label text="Last Updated:" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="lastUpdatedLabel" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                        </GridPane>
+
+                        <Separator/>
+
+                        <Label text="Location History" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+
+                        <TableView fx:id="locationHistoryTable" prefHeight="200">
+                            <columns>
+                                <TableColumn fx:id="historyDateColumn" text="Date" prefWidth="150"/>
+                                <TableColumn fx:id="historyLocationColumn" text="Location" prefWidth="200"/>
+                                <TableColumn fx:id="historySourceColumn" text="Source" prefWidth="150"/>
+                            </columns>
+                            <columnResizePolicy>
+                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                            </columnResizePolicy>
+                        </TableView>
+
+                        <Pagination fx:id="historyPagination" pageCount="1" maxPageIndicatorCount="5"/>
+
+                        <Separator/>
+
+                        <Label text="Send Alert" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+                        <TextArea fx:id="alertMessageArea" promptText="Enter alert message..." prefHeight="80"/>
+
+                        <HBox spacing="10">
+                            <Button fx:id="alertButton" text="Send Alert" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 100;">
+                                <effect>
+                                    <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                                </effect>
+                            </Button>
+                            <Button fx:id="locateButton" text="Locate on Map" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 120;"/>
+                        </HBox>
+                    </VBox>
+                </TitledPane>
+
+                <Label fx:id="statusMessageLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
+            <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+        </HBox>
+        <fx:include source="FooterComponent.fxml"/>
+    </bottom>
+
+</BorderPane>

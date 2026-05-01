@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.DocumentExpiryCalendarController">
+
+    <top>
+        <VBox>
+            <fx:include source="MenuBarComponent.fxml"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+            <VBox spacing="15" style="-fx-padding: 20;">
+                <Label text="Document Expiry Calendar" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                <Label text="Track important document expiry dates" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+
+                <Separator/>
+
+                <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
+
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Vehicle:" style="-fx-font-weight: bold;"/>
+                    <ComboBox fx:id="vehicleComboBox" prefWidth="250"/>
+                    <Label text="Year:" style="-fx-font-weight: bold;"/>
+                    <ComboBox fx:id="yearComboBox" prefWidth="80"/>
+                    <Label text="Month:" style="-fx-font-weight: bold;"/>
+                    <ComboBox fx:id="monthComboBox" prefWidth="80"/>
+                    <Button fx:id="loadButton" text="Load" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
+                        <effect>
+                            <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                        </effect>
+                    </Button>
+                    <Button fx:id="refreshButton" text="Refresh" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                    <Button fx:id="fadeButton" text="Animate" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                </HBox>
+
+                <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+
+                <HBox spacing="20" style="-fx-background-color: #f8f9fa; -fx-padding: 15; -fx-border-radius: 8;">
+                    <VBox spacing="5" alignment="CENTER">
+                        <Label text="Expired" style="-fx-text-fill: #e74c3c; -fx-font-weight: bold;"/>
+                        <Label fx:id="expiredCountLabel" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;"/>
+                    </VBox>
+                    <Separator orientation="VERTICAL"/>
+                    <VBox spacing="5" alignment="CENTER">
+                        <Label text="Expiring Soon (30 days)" style="-fx-text-fill: #f39c12; -fx-font-weight: bold;"/>
+                        <Label fx:id="expiringSoonLabel" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #f39c12;"/>
+                    </VBox>
+                    <Separator orientation="VERTICAL"/>
+                    <VBox spacing="5" alignment="CENTER">
+                        <Label text="Valid" style="-fx-text-fill: #27ae60; -fx-font-weight: bold;"/>
+                        <Label fx:id="validCountLabel" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #27ae60;"/>
+                    </VBox>
+                </HBox>
+
+                <Separator/>
+
+                <Label text="Calendar View" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                <Label fx:id="monthYearLabel" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+                <GridPane fx:id="calendarGrid" hgap="5" vgap="5" alignment="CENTER"/>
+
+                <Separator/>
+
+                <Label text="Expiring Documents" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                <TableView fx:id="expiringDocumentsTable" prefHeight="200">
+                    <columns>
+                        <TableColumn fx:id="documentTypeColumn" text="Document Type" prefWidth="200"/>
+                        <TableColumn fx:id="documentNumberColumn" text="Document Number" prefWidth="180"/>
+                        <TableColumn fx:id="expiryDateColumn" text="Expiry Date" prefWidth="120"/>
+                        <TableColumn fx:id="expiryStatusColumn" text="Status" prefWidth="100"/>
+                    </columns>
+                    <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                    </columnResizePolicy>
+                    <placeholder>
+                        <Label text="No expiring documents" style="-fx-text-fill: #7f8c8d;"/>
+                    </placeholder>
+                </TableView>
+
+                <Pagination fx:id="documentsPagination" pageCount="1" maxPageIndicatorCount="5"/>
+
+                <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
+            <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;"/>
+        </HBox>
+        <fx:include source="FooterComponent.fxml"/>
+    </bottom>
+</BorderPane>

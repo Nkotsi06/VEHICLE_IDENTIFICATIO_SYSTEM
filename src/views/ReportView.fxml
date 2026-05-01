@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ReportController">
+
+    <top>
+        <VBox>
+            <fx:include source="MenuBarComponent.fxml"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true" style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;"
+                    hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" style="-fx-padding: 20; -fx-background-color: #f0f2f5;"
+                  maxHeight="Infinity" maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                  VBox.vgrow="ALWAYS">
+
+                <!-- Title Section -->
+                <VBox spacing="5" VBox.vgrow="NEVER">
+                    <Label text="Report Generator" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                    <Label text="Generate and export system reports" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+                </VBox>
+
+                <Separator VBox.vgrow="NEVER"/>
+
+                <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40" style="-fx-padding: 5;" VBox.vgrow="NEVER"/>
+
+                <!-- Report Configuration Section -->
+                <TitledPane text="Report Configuration" expanded="true" style="-fx-font-weight: bold;" VBox.vgrow="NEVER">
+                    <GridPane hgap="15" vgap="15" style="-fx-padding: 15;" maxWidth="Infinity">
+                        <columnConstraints>
+                            <ColumnConstraints minWidth="100" maxWidth="150"/>
+                            <ColumnConstraints minWidth="200" maxWidth="400" hgrow="ALWAYS"/>
+                            <ColumnConstraints minWidth="100" maxWidth="150"/>
+                        </columnConstraints>
+
+                        <Label text="Report Type:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <ComboBox fx:id="reportTypeComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="350" promptText="Select report type" maxWidth="400"/>
+
+                        <Label text="Start Date:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <DatePicker fx:id="startDatePicker" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="200"/>
+
+                        <Label text="End Date:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <DatePicker fx:id="endDatePicker" GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="200"/>
+
+                        <Button fx:id="fadeButton" text="Animate" GridPane.rowIndex="0" GridPane.columnIndex="2"
+                                style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 100; -fx-padding: 8 15;">
+                            <effect>
+                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                            </effect>
+                        </Button>
+                    </GridPane>
+                </TitledPane>
+
+                <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false" style="-fx-padding: 5;" VBox.vgrow="NEVER"/>
+
+                <!-- Action Buttons -->
+                <HBox spacing="15" VBox.vgrow="NEVER">
+                    <Button fx:id="generateButton" text="Generate Report"
+                            style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150; -fx-padding: 8 15;">
+                        <effect>
+                            <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                        </effect>
+                    </Button>
+                    <Button fx:id="exportButton" text="Export CSV" disable="true"
+                            style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 120; -fx-padding: 8 15;"/>
+                    <Button fx:id="printButton" text="Print" disable="true"
+                            style="-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 100; -fx-padding: 8 15;"/>
+                    <Button fx:id="clearButton" text="Clear"
+                            style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 100; -fx-padding: 8 15;"/>
+                </HBox>
+
+                <Separator VBox.vgrow="NEVER"/>
+
+                <!-- Report Results Table - THIS WILL EXPAND -->
+                <TitledPane text="Report Results" expanded="true" style="-fx-font-weight: bold;"
+                            VBox.vgrow="ALWAYS" maxHeight="1.7976931348623157E308">
+                    <VBox spacing="10" style="-fx-padding: 10; -fx-background-color: white;"
+                          VBox.vgrow="ALWAYS" maxHeight="Infinity">
+                        <TableView fx:id="reportTable" VBox.vgrow="ALWAYS"
+                                   prefHeight="400" minHeight="250" maxHeight="1.7976931348623157E308">
+                            <columnResizePolicy>
+                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                            </columnResizePolicy>
+                            <placeholder>
+                                <Label text="Select a report type and click Generate" style="-fx-text-fill: #7f8c8d; -fx-font-size: 14px;"/>
+                            </placeholder>
+                        </TableView>
+
+                        <HBox spacing="10" alignment="CENTER" VBox.vgrow="NEVER">
+                            <Pagination fx:id="reportPagination" pageCount="1" maxPageIndicatorCount="10" style="-fx-padding: 5;"/>
+                        </HBox>
+                        <Label fx:id="recordCountLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic; -fx-padding: 5 0;" VBox.vgrow="NEVER"/>
+                    </VBox>
+                </TitledPane>
+
+                <!-- Report Summary Section - Fixed height -->
+                <TitledPane text="Report Summary" expanded="true" style="-fx-font-weight: bold;" VBox.vgrow="NEVER">
+                    <TextArea fx:id="reportSummaryArea" prefHeight="150" minHeight="100" maxHeight="200" wrapText="true"
+                              style="-fx-font-family: monospace; -fx-font-size: 12px; -fx-background-color: white; -fx-border-color: #dddddd; -fx-border-radius: 5;"
+                              promptText="Report summary will appear here..."/>
+                </TitledPane>
+
+                <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic; -fx-padding: 5 0;" VBox.vgrow="NEVER"/>
+
+                <!-- Footer Buttons -->
+                <HBox spacing="10" alignment="CENTER_RIGHT" VBox.vgrow="NEVER">
+                    <Button fx:id="backButton" text="Back to Dashboard"
+                            style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150; -fx-padding: 8 15;">
+                        <effect>
+                            <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                        </effect>
+                    </Button>
+                </HBox>
+
+                <!-- Extra padding at bottom for better scrolling -->
+                <Region prefHeight="10" VBox.vgrow="NEVER"/>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <VBox spacing="0">
+            <Separator VBox.vgrow="NEVER"/>
+            <fx:include source="FooterComponent.fxml"/>
+        </VBox>
+    </bottom>
+
+</BorderPane>

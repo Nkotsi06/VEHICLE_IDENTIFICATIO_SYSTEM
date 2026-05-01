@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ReportScheduleController">
+
+    <top>
+        <VBox>
+            <fx:include source="MenuBarComponent.fxml"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+            <SplitPane dividerPositions="0.4">
+
+                <!-- Scheduled Reports Panel -->
+                <VBox spacing="15" style="-fx-padding: 15;">
+                    <Label text="Scheduled Reports" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                    <Label text="List of all scheduled reports" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;"/>
+
+                    <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="30"/>
+
+                    <ListView fx:id="scheduledReportsList" prefHeight="350">
+                        <placeholder>
+                            <Label text="No scheduled reports found" style="-fx-text-fill: #7f8c8d;"/>
+                        </placeholder>
+                    </ListView>
+
+                    <HBox spacing="10">
+                        <Button fx:id="unscheduleButton" text="Unschedule Selected" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;"/>
+                        <Button fx:id="refreshButton" text="Refresh" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                        <Button fx:id="fadeButton" text="Animate" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
+                            <effect>
+                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                            </effect>
+                        </Button>
+                    </HBox>
+                </VBox>
+
+                <!-- Schedule New Report Panel -->
+                <ScrollPane fitToWidth="true">
+                    <VBox spacing="15" style="-fx-padding: 15;">
+                        <Label text="Schedule New Report" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                        <Label text="Configure and schedule automated reports" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;"/>
+
+                        <Separator/>
+
+                        <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+
+                        <TitledPane text="Report Configuration" expanded="true" style="-fx-font-weight: bold;">
+                            <GridPane hgap="15" vgap="15" style="-fx-padding: 15;">
+                                <Label text="Report Type:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <ComboBox fx:id="reportTypeComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="300" promptText="Select report type"/>
+
+                                <Label text="Frequency:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <ComboBox fx:id="frequencyComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="300" promptText="Select frequency"/>
+
+                                <Label text="Report Name:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <TextField fx:id="reportNameField" GridPane.rowIndex="2" GridPane.columnIndex="1" promptText="Optional - custom report name"/>
+                            </GridPane>
+                        </TitledPane>
+
+                        <TitledPane text="Recipient Information" expanded="true" style="-fx-font-weight: bold;">
+                            <GridPane hgap="15" vgap="15" style="-fx-padding: 15;">
+                                <Label text="Recipient Email:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <TextField fx:id="recipientEmailField" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="350" promptText="email@example.com"/>
+                                <Label text="Format:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <ComboBox fx:id="formatComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="150"/>
+                            </GridPane>
+                        </TitledPane>
+
+                        <TitledPane text="Schedule Period" expanded="true" style="-fx-font-weight: bold;">
+                            <GridPane hgap="15" vgap="15" style="-fx-padding: 15;">
+                                <Label text="Start Date:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <DatePicker fx:id="startDatePicker" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="200"/>
+
+                                <Label text="End Date:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <DatePicker fx:id="endDatePicker" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="200"/>
+
+                                <Label text="Next Run:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <Label fx:id="nextRunLabel" GridPane.rowIndex="2" GridPane.columnIndex="1" style="-fx-text-fill: #27ae60; -fx-font-weight: bold;"/>
+                            </GridPane>
+                        </TitledPane>
+
+                        <HBox spacing="15">
+                            <Button fx:id="scheduleButton" text="Schedule Report" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;">
+                                <effect>
+                                    <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                                </effect>
+                            </Button>
+                            <Button fx:id="clearButton" text="Clear Form" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 120;"/>
+                        </HBox>
+
+                        <Separator/>
+                        <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+                    </VBox>
+                </ScrollPane>
+            </SplitPane>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
+            <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;"/>
+        </HBox>
+        <fx:include source="FooterComponent.fxml"/>
+    </bottom>
+</BorderPane>

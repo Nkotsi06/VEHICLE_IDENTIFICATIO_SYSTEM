@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.VehicleRegistrationWizardController">
+
+    <top>
+        <VBox>
+            <fx:include source="MenuBarComponent.fxml"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+            <VBox spacing="20" style="-fx-padding: 20;">
+                <Label text="Vehicle Registration Wizard" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                <Label text="Step-by-step vehicle registration process" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+
+                <Separator/>
+
+                <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
+
+                <HBox spacing="20" style="-fx-padding: 15; -fx-background-color: #f8f9fa; -fx-border-radius: 8;" alignment="CENTER">
+                    <HBox spacing="5">
+                        <Label text="Step 1:" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                        <Label fx:id="step1Status" text="Pending" style="-fx-text-fill: #7f8c8d;"/>
+                    </HBox>
+                    <Label text="→" style="-fx-font-size: 18px;"/>
+                    <HBox spacing="5">
+                        <Label text="Step 2:" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                        <Label fx:id="step2Status" text="Pending" style="-fx-text-fill: #7f8c8d;"/>
+                    </HBox>
+                    <Label text="→" style="-fx-font-size: 18px;"/>
+                    <HBox spacing="5">
+                        <Label text="Step 3:" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                        <Label fx:id="step3Status" text="Pending" style="-fx-text-fill: #7f8c8d;"/>
+                    </HBox>
+                    <Label text="→" style="-fx-font-size: 18px;"/>
+                    <HBox spacing="5">
+                        <Label text="Step 4:" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                        <Label fx:id="step4Status" text="Pending" style="-fx-text-fill: #7f8c8d;"/>
+                    </HBox>
+                </HBox>
+
+                <ProgressBar fx:id="stepProgress" prefWidth="Infinity" progress="0.25"/>
+
+                <!-- Step 1: Vehicle Information -->
+                <VBox fx:id="step1Box" spacing="15">
+                    <Label text="Step 1: Vehicle Information" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2980b9;"/>
+                    <Separator/>
+                    <GridPane hgap="15" vgap="12">
+                        <Label text="Registration Number:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="registrationNumberField" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250"/>
+
+                        <Label text="Make:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="makeField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                        <Label text="Model:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="modelField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                        <Label text="Year:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="yearField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                        <Label text="Color:" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="colorField" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                        <Label text="Engine Number:" GridPane.rowIndex="5" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="engineNumberField" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+                        <Label text="Chassis Number:" GridPane.rowIndex="6" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="chassisNumberField" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+
+                        <Label text="Owner:" GridPane.rowIndex="7" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <ComboBox fx:id="ownerComboBox" GridPane.rowIndex="7" GridPane.columnIndex="1" prefWidth="250"/>
+                    </GridPane>
+                    <HBox alignment="CENTER_RIGHT">
+                        <Button fx:id="next1Button" text="Next →" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
+                            <effect>
+                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                            </effect>
+                        </Button>
+                    </HBox>
+                </VBox>
+
+                <!-- Step 2: Additional Information -->
+                <VBox fx:id="step2Box" spacing="15" visible="false">
+                    <Label text="Step 2: Additional Information" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2980b9;"/>
+                    <Separator/>
+                    <Label text="Optional: Add vehicle photos and additional details" style="-fx-text-fill: #7f8c8d;"/>
+
+                    <GridPane hgap="15" vgap="12">
+                        <Label text="Vehicle Condition:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <ComboBox fx:id="conditionComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="200">
+                            <items>
+                                <FXCollections fx:factory="observableArrayList">
+                                    <String fx:value="Excellent"/>
+                                    <String fx:value="Good"/>
+                                    <String fx:value="Fair"/>
+                                    <String fx:value="Needs Repair"/>
+                                </FXCollections>
+                            </items>
+                        </ComboBox>
+
+                        <Label text="Purchase Date:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <DatePicker fx:id="purchaseDatePicker" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                        <Label text="Additional Notes:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextArea fx:id="notesArea" GridPane.rowIndex="2" GridPane.columnIndex="1" prefHeight="80"/>
+                    </GridPane>
+                    <HBox alignment="CENTER_LEFT">
+                        <Button fx:id="back2Button" text="← Back" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="next2Button" text="Next →" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                    </HBox>
+                </VBox>
+
+                <!-- Step 3: Document Information -->
+                <VBox fx:id="step3Box" spacing="15" visible="false">
+                    <Label text="Step 3: Document Information" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2980b9;"/>
+                    <Separator/>
+
+                    <GridPane hgap="15" vgap="12">
+                        <Label text="Document Type:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <ComboBox fx:id="documentTypeComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="200">
+                            <items>
+                                <FXCollections fx:factory="observableArrayList">
+                                    <String fx:value="Registration Certificate"/>
+                                    <String fx:value="Insurance Policy"/>
+                                    <String fx:value="Roadworthy Certificate"/>
+                                    <String fx:value="License Disk"/>
+                                </FXCollections>
+                            </items>
+                        </ComboBox>
+
+                        <Label text="Document Number:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="documentNumberField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                        <Label text="Issue Date:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <DatePicker fx:id="issueDatePicker" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                        <Label text="Expiry Date:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <DatePicker fx:id="expiryDatePicker" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                    </GridPane>
+                    <HBox alignment="CENTER_LEFT">
+                        <Button fx:id="back3Button" text="← Back" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="next3Button" text="Next →" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                    </HBox>
+                </VBox>
+
+                <!-- Step 4: Review and Submit -->
+                <VBox fx:id="step4Box" spacing="15" visible="false">
+                    <Label text="Step 4: Review and Submit" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2980b9;"/>
+                    <Separator/>
+
+                    <Label text="Please review all information before submitting." style="-fx-text-fill: #7f8c8d;"/>
+
+                    <TitledPane text="Vehicle Details" expanded="true">
+                        <GridPane hgap="15" vgap="8" style="-fx-padding: 10;">
+                            <Label text="Registration:" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="reviewRegLabel"/>
+                            <Label text="Make/Model:" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="reviewMakeModelLabel"/>
+                            <Label text="Year/Color:" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="reviewYearColorLabel"/>
+                            <Label text="Engine/Chassis:" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="reviewEngineChassisLabel"/>
+                        </GridPane>
+                    </TitledPane>
+
+                    <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+
+                    <HBox spacing="15" alignment="CENTER">
+                        <Button fx:id="back4Button" text="← Back" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                        <Button fx:id="submitButton" text="Submit Registration" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 180;">
+                            <effect>
+                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                            </effect>
+                        </Button>
+                        <Button fx:id="cancelButton" text="Cancel" style="-fx-background-color: #7f8c8d; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                    </HBox>
+                </VBox>
+
+                <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <fx:include source="FooterComponent.fxml"/>
+    </bottom>
+</BorderPane>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.VehicleController">
+
+    <top>
+        <VBox>
+            <fx:include source="MenuBarComponent.fxml"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+            <SplitPane dividerPositions="0.6">
+                <VBox spacing="10" style="-fx-padding: 10;">
+                    <Label text="Vehicle List" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                    <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="30"/>
+
+                    <TableView fx:id="vehiclesTable" prefHeight="400">
+                        <columns>
+                            <TableColumn fx:id="regNumberColumn" text="Registration" prefWidth="120"/>
+                            <TableColumn fx:id="makeColumn" text="Make" prefWidth="100"/>
+                            <TableColumn fx:id="modelColumn" text="Model" prefWidth="100"/>
+                            <TableColumn fx:id="yearColumn" text="Year" prefWidth="80"/>
+                            <TableColumn fx:id="statusColumn" text="Status" prefWidth="100"/>
+                            <TableColumn fx:id="ownerColumn" text="Owner" prefWidth="150"/>
+                        </columns>
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
+                        <placeholder>
+                            <Label text="No vehicles found" style="-fx-text-fill: #7f8c8d;"/>
+                        </placeholder>
+                    </TableView>
+
+                    <Pagination fx:id="vehiclesPagination" pageCount="1" maxPageIndicatorCount="5"/>
+
+                    <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+
+                    <HBox spacing="10">
+                        <Button fx:id="refreshButton" text="Refresh" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
+                            <effect>
+                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                            </effect>
+                        </Button>
+                        <Button fx:id="viewHistoryButton" text="View History" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                        <Button fx:id="fadeButton" text="Animate" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                    </HBox>
+                </VBox>
+
+                <VBox spacing="15" style="-fx-padding: 10;">
+                    <Label text="Vehicle Details" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                    <GridPane hgap="10" vgap="10">
+                        <Label text="Registration:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="registrationNumberField" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250"/>
+
+                        <Label text="Make:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="makeField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                        <Label text="Model:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="modelField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                        <Label text="Year:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="yearField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                        <Label text="Color:" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="colorField" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                        <Label text="Engine Number:" GridPane.rowIndex="5" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="engineNumberField" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+                        <Label text="Chassis Number:" GridPane.rowIndex="6" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="chassisNumberField" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+
+                        <Label text="Owner:" GridPane.rowIndex="7" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <ComboBox fx:id="ownerComboBox" GridPane.rowIndex="7" GridPane.columnIndex="1" prefWidth="250"/>
+
+                        <Label text="Status:" GridPane.rowIndex="8" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <ComboBox fx:id="statusComboBox" GridPane.rowIndex="8" GridPane.columnIndex="1" prefWidth="250"/>
+                    </GridPane>
+
+                    <Label text="Description:" style="-fx-font-weight: bold;"/>
+                    <TextArea fx:id="descriptionArea" prefHeight="80"/>
+
+                    <HBox spacing="10">
+                        <Button fx:id="addButton" text="Add" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
+                            <effect>
+                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                            </effect>
+                        </Button>
+                        <Button fx:id="updateButton" text="Update" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                        <Button fx:id="deleteButton" text="Delete" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                        <Button fx:id="clearButton" text="Clear" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                    </HBox>
+
+                    <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+                </VBox>
+            </SplitPane>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <fx:include source="FooterComponent.fxml"/>
+    </bottom>
+</BorderPane>

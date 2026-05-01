@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.InsuranceClaimApprovalController">
+
+    <top>
+        <VBox>
+            <fx:include source="MenuBarComponent.fxml"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+            <SplitPane dividerPositions="0.5">
+                <VBox spacing="10" style="-fx-padding: 10;">
+                    <Label text="Pending Claims" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                    <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="30"/>
+
+                    <TableView fx:id="pendingClaimsTable" prefHeight="400">
+                        <columns>
+                            <TableColumn fx:id="claimIdColumn" text="Claim ID" prefWidth="80"/>
+                            <TableColumn fx:id="policyNumberColumn" text="Policy #" prefWidth="120"/>
+                            <TableColumn fx:id="vehicleColumn" text="Vehicle" prefWidth="150"/>
+                            <TableColumn fx:id="claimAmountColumn" text="Amount Claimed (M)" prefWidth="120"/>
+                            <TableColumn fx:id="claimDateColumn" text="Claim Date" prefWidth="100"/>
+                            <TableColumn fx:id="priorityColumn" text="Priority" prefWidth="80"/>
+                        </columns>
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
+                        <placeholder>
+                            <Label text="No pending claims" style="-fx-text-fill: #7f8c8d;"/>
+                        </placeholder>
+                    </TableView>
+
+                    <Pagination fx:id="claimsPagination" pageCount="1" maxPageIndicatorCount="5"/>
+
+                    <HBox spacing="10">
+                        <Button fx:id="refreshButton" text="Refresh" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                        <Button fx:id="fadeButton" text="Animate" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
+                            <effect>
+                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                            </effect>
+                        </Button>
+                    </HBox>
+                </VBox>
+
+                <VBox spacing="15" style="-fx-padding: 10;">
+                    <Label text="Claim Review" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                    <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+
+                    <TitledPane text="Claim Details" expanded="true" style="-fx-font-weight: bold;">
+                        <GridPane hgap="15" vgap="8" style="-fx-padding: 10;">
+                            <Label text="Claim ID:" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="claimIdLabel"/>
+                            <Label text="Policy Holder:" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="policyHolderLabel"/>
+                            <Label text="Incident Date:" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="incidentDateLabel"/>
+                            <Label text="Incident Location:" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="incidentLocationLabel"/>
+                        </GridPane>
+                    </TitledPane>
+
+                    <Label text="Claim Description:" style="-fx-font-weight: bold;"/>
+                    <TextArea fx:id="descriptionArea" prefHeight="80" editable="false"/>
+
+                    <Label text="Supporting Documents:" style="-fx-font-weight: bold;"/>
+                    <ListView fx:id="documentsList" prefHeight="80"/>
+
+                    <Separator/>
+
+                    <GridPane hgap="15" vgap="10">
+                        <Label text="Approved Amount (M):" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="approvedAmountField" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="150"/>
+
+                        <Label text="Rejection Reason:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextArea fx:id="rejectionReasonArea" GridPane.rowIndex="1" GridPane.columnIndex="1" prefHeight="60"/>
+                    </GridPane>
+
+                    <HBox spacing="10">
+                        <Button fx:id="approveButton" text="Approve Claim" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
+                            <effect>
+                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                            </effect>
+                        </Button>
+                        <Button fx:id="rejectButton" text="Reject Claim" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                        <Button fx:id="requestInfoButton" text="Request Info" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                    </HBox>
+
+                    <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+                </VBox>
+            </SplitPane>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
+            <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;"/>
+        </HBox>
+        <fx:include source="FooterComponent.fxml"/>
+    </bottom>
+</BorderPane>

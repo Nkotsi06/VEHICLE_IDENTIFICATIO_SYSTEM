@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.VehicleRegistrationController">
+
+    <top>
+        <VBox>
+            <fx:include source="MenuBarComponent.fxml"/>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="20" style="-fx-padding: 20;">
+            <Label text="Vehicle Registration" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+
+            <GridPane hgap="15" vgap="10">
+                <Label text="Registration Number:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <TextField fx:id="registrationNumberField" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250"/>
+
+                <Label text="Make:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextField fx:id="makeField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <Label text="Model:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <TextField fx:id="modelField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                <Label text="Year:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                <TextField fx:id="yearField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                <Label text="Color:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                <TextField fx:id="colorField" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                <Label text="Engine Number:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                <TextField fx:id="engineNumberField" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+                <Label text="Chassis Number:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                <TextField fx:id="chassisNumberField" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+
+                <Label text="Owner:" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+                <ComboBox fx:id="ownerComboBox" GridPane.rowIndex="7" GridPane.columnIndex="1" prefWidth="250"/>
+
+                <Label text="Initial Status:" GridPane.rowIndex="8" GridPane.columnIndex="0"/>
+                <ComboBox fx:id="statusComboBox" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
+            </GridPane>
+
+            <HBox spacing="10" alignment="CENTER">
+                <Button fx:id="registerButton" text="Register Vehicle" style="-fx-background-color: #27ae60; -fx-text-fill: white;"/>
+                <Button fx:id="clearButton" text="Clear"/>
+                <Button fx:id="backButton" text="Cancel"/>
+            </HBox>
+
+            <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d;"/>
+        </VBox>
+    </center>
+
+    <bottom>
+        <fx:include source="FooterComponent.fxml"/>
+    </bottom>
+</BorderPane>

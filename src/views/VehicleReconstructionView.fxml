@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.VehicleReconstructionController">
+
+    <top>
+        <VBox>
+            <fx:include source="MenuBarComponent.fxml"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+            <VBox spacing="20" style="-fx-padding: 20;">
+
+                <Label text="Vehicle Movement Reconstruction" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                <Label text="Reconstruct vehicle movement and detect suspicious patterns" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+
+                <Separator/>
+
+                <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
+
+                <TitledPane text="Reconstruction Parameters" expanded="true" style="-fx-font-weight: bold;">
+                    <GridPane hgap="15" vgap="15" style="-fx-padding: 15;">
+                        <Label text="Select Vehicle:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <ComboBox fx:id="vehicleComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="300" promptText="Select vehicle"/>
+
+                        <Label text="Start Date:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <DatePicker fx:id="startDatePicker" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="200"/>
+
+                        <Label text="End Date:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <DatePicker fx:id="endDatePicker" GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="200"/>
+
+                        <Button fx:id="fadeButton" text="Animate" GridPane.rowIndex="0" GridPane.columnIndex="2" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
+                            <effect>
+                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                            </effect>
+                        </Button>
+                    </GridPane>
+                </TitledPane>
+
+                <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+
+                <HBox spacing="15">
+                    <Button fx:id="reconstructButton" text="Reconstruct Movement" style="-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 160;">
+                        <effect>
+                            <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                        </effect>
+                    </Button>
+                    <Button fx:id="exportButton" text="Export Report" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 120;"/>
+                    <Button fx:id="clearButton" text="Clear" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 100;"/>
+                </HBox>
+
+                <Separator/>
+
+                <TitledPane text="Analysis Results" expanded="true" style="-fx-font-weight: bold;">
+                    <GridPane hgap="20" vgap="10" style="-fx-padding: 15; -fx-background-color: #f8f9fa; -fx-border-radius: 8;">
+                        <Label text="Total Distance:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <Label fx:id="totalDistanceLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+
+                        <Label text="Average Speed:" GridPane.rowIndex="0" GridPane.columnIndex="2" style="-fx-font-weight: bold;"/>
+                        <Label fx:id="averageSpeedLabel" GridPane.rowIndex="0" GridPane.columnIndex="3" style="-fx-text-fill: #2c3e50;"/>
+
+                        <Label text="Sightings Count:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <Label fx:id="sightingCountLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+
+                        <Label text="Suspicious Score:" GridPane.rowIndex="1" GridPane.columnIndex="2" style="-fx-font-weight: bold;"/>
+                        <Label fx:id="suspiciousScoreLabel" GridPane.rowIndex="1" GridPane.columnIndex="3" style="-fx-text-fill: #e74c3c; -fx-font-weight: bold;"/>
+
+                        <Label text="Suspicious Level:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <Label fx:id="suspiciousLevelLabel" GridPane.rowIndex="2" GridPane.columnIndex="1" style="-fx-text-fill: #e74c3c; -fx-font-weight: bold;"/>
+
+                        <Label text="Confidence:" GridPane.rowIndex="2" GridPane.columnIndex="2" style="-fx-font-weight: bold;"/>
+                        <ProgressBar fx:id="confidenceProgress" prefWidth="150" progress="0"/>
+                    </GridPane>
+                </TitledPane>
+
+                <TitledPane text="Movement Path" expanded="true" style="-fx-font-weight: bold;">
+                    <TableView fx:id="movementTable" prefHeight="250">
+                        <columns>
+                            <TableColumn fx:id="timestampCol" text="Timestamp" prefWidth="180"/>
+                            <TableColumn fx:id="locationCol" text="Location" prefWidth="200"/>
+                            <TableColumn fx:id="sourceCol" text="Source" prefWidth="120"/>
+                            <TableColumn fx:id="confidenceCol" text="Confidence" prefWidth="100"/>
+                        </columns>
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
+                        <placeholder>
+                            <Label text="No movement data available" style="-fx-text-fill: #7f8c8d;"/>
+                        </placeholder>
+                    </TableView>
+                    <Pagination fx:id="movementPagination" pageCount="1" maxPageIndicatorCount="5"/>
+                </TitledPane>
+
+                <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
+            <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;"/>
+        </HBox>
+        <fx:include source="FooterComponent.fxml"/>
+    </bottom>
+</BorderPane>

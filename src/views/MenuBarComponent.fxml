@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+
+<MenuBar xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MenuBarComponentController"
+         styleClass="main-menu-bar">
+
+    <!-- ========== FILE MENU ========== -->
+    <Menu text="File">
+        <MenuItem fx:id="exitMenuItem" text="Exit"/>
+    </Menu>
+
+    <!-- ========== MODULES MENU ========== -->
+    <Menu text="Modules">
+
+        <!-- Admin Submenu -->
+        <Menu fx:id="adminModuleMenu" text="Admin" visible="false">
+            <MenuItem fx:id="adminDashboardMenuItem" text="Dashboard"/>
+            <SeparatorMenuItem/>
+            <MenuItem fx:id="adminProfileMenuItem" text="My Profile"/>
+            <SeparatorMenuItem/>
+            <MenuItem fx:id="userManagementMenuItem" text="User Management"/>
+            <MenuItem fx:id="auditLogsMenuItem" text="Audit Logs"/>
+            <MenuItem fx:id="systemHealthMenuItem" text="System Health"/>
+            <MenuItem fx:id="roleManagementMenuItem" text="Role Management"/>
+            <MenuItem fx:id="bulkOperationsMenuItem" text="Bulk Operations"/>
+            <MenuItem fx:id="reportScheduleMenuItem" text="Schedule Reports"/>
+            <SeparatorMenuItem/>
+            <MenuItem fx:id="workshopApprovalMenuItem" text="Approve Workshops"/>
+            <SeparatorMenuItem/>
+            <MenuItem fx:id="settingsMenuItem" text="Settings"/>
+            <SeparatorMenuItem/>
+            <MenuItem fx:id="backupMenuItem" text="Backup Database"/>
+        </Menu>
+
+        <!-- Police Submenu -->
+        <Menu fx:id="policeModuleMenu" text="Police" visible="false">
+            <MenuItem fx:id="policeDashboardMenuItem" text="Dashboard"/>
+            <SeparatorMenuItem/>
+            <MenuItem fx:id="stolenVehiclesMenuItem" text="Stolen Vehicles"/>
+            <MenuItem fx:id="violationsMenuItem" text="Violations"/>
+            <MenuItem fx:id="warrantsMenuItem" text="Warrants"/>
+            <MenuItem fx:id="boloAlertsMenuItem" text="BOLO Alerts"/>
+            <MenuItem fx:id="geofencingMenuItem" text="Geofencing"/>
+            <MenuItem fx:id="vehicleTrackingMenuItem" text="Vehicle Tracking"/>
+            <MenuItem fx:id="reconstructMovementMenuItem" text="Reconstruct Movement"/>
+            <MenuItem fx:id="expiredDocsMenuItem" text="Expired Documents"/>
+            <SeparatorMenuItem/>
+            <MenuItem fx:id="globalSearchMenuItem" text="Global Search"/>
+        </Menu>
+
+        <!-- Insurance Submenu -->
+        <Menu fx:id="insuranceModuleMenu" text="Insurance" visible="false">
+            <MenuItem fx:id="insuranceDashboardMenuItem" text="Dashboard"/>
+            <SeparatorMenuItem/>
+            <MenuItem fx:id="policiesMenuItem" text="Policies"/>
+            <MenuItem fx:id="claimsMenuItem" text="Claims"/>
+            <MenuItem fx:id="verifyInsuranceMenuItem" text="Verify Insurance"/>
+            <MenuItem fx:id="renewalMenuItem" text="Renewals"/>
+            <MenuItem fx:id="providersMenuItem" text="Providers"/>
+            <MenuItem fx:id="compareProvidersMenuItem" text="Compare Providers"/>
+            <MenuItem fx:id="noClaimBonusMenuItem" text="No Claim Bonus"/>
+            <SeparatorMenuItem/>
+            <MenuItem fx:id="insuranceProfileMenuItem" text="Profile"/>
+            <MenuItem fx:id="insuranceReportsMenuItem" text="Reports"/>
+            <SeparatorMenuItem/>
+            <MenuItem fx:id="insuranceNotificationsMenuItem" text="Notifications"/>
+        </Menu>
+
+        <!-- Workshop Submenu -->
+        <Menu fx:id="workshopModuleMenu" text="Workshop" visible="false">
+            <MenuItem fx:id="workshopDashboardMenuItem" text="Dashboard"/>
+            <SeparatorMenuItem/>
+            <MenuItem fx:id="workshopProfileMenuItem" text="Profile"/>
+            <SeparatorMenuItem/>
+            <MenuItem fx:id="mechanicsMenuItem" text="Mechanics"/>
+            <MenuItem fx:id="serviceRecordsMenuItem" text="Service Records"/>
+            <MenuItem fx:id="inventoryMenuItem" text="Parts Inventory"/>
+            <SeparatorMenuItem/>
+            <MenuItem fx:id="registerVehicleMenuItem" text="Register Vehicle"/>
+            <MenuItem fx:id="qrCheckinMenuItem" text="QR Check-in"/>
+            <MenuItem fx:id="digitalInspectionMenuItem" text="Digital Inspection"/>
+            <SeparatorMenuItem/>
+            <MenuItem fx:id="workshopRevenueMenuItem" text="Revenue Report"/>
+            <MenuItem fx:id="workshopAnalyticsMenuItem" text="Service Analytics"/>
+            <SeparatorMenuItem/>
+            <MenuItem fx:id="workshopReportsMenuItem" text="Reports"/>
+        </Menu>
+
+        <!-- Customer Submenu -->
+        <Menu fx:id="customerModuleMenu" text="Customer" visible="false">
+            <MenuItem fx:id="customerDashboardMenuItem" text="Dashboard"/>
+            <SeparatorMenuItem/>
+            <MenuItem fx:id="customerProfileMenuItem" text="Profile"/>
+            <MenuItem fx:id="myVehiclesMenuItem" text="My Vehicles"/>
+            <MenuItem fx:id="myQueriesMenuItem" text="My Queries"/>
+            <MenuItem fx:id="myComplaintsMenuItem" text="My Complaints"/>
+            <MenuItem fx:id="myReviewsMenuItem" text="My Reviews"/>
+            <MenuItem fx:id="myWalletMenuItem" text="My Wallet"/>
+            <MenuItem fx:id="myInsuranceMenuItem" text="My Insurance"/>
+            <SeparatorMenuItem/>
+            <MenuItem fx:id="serviceHistoryMenuItem" text="Service History"/>
+            <MenuItem fx:id="serviceRemindersMenuItem" text="Service Reminders"/>
+            <SeparatorMenuItem/>
+            <MenuItem fx:id="customerNotificationsMenuItem" text="Notifications"/>
+        </Menu>
+
+    </Menu>
+
+    <!-- ========== REPORTS MENU ========== -->
+    <Menu text="Reports">
+        <MenuItem fx:id="reportsMenuItem" text="Generate Reports"/>
+        <MenuItem fx:id="exportMenuItem" text="Export Data"/>
+    </Menu>
+
+    <!-- ========== TOOLS MENU ========== -->
+    <Menu fx:id="toolsMenu" text="Tools" visible="true">
+        <MenuItem fx:id="searchMenuItem" text="Global Search"/>
+    </Menu>
+
+    <!-- ========== HELP MENU ========== -->
+    <Menu text="Help">
+        <MenuItem fx:id="helpMenuItem" text="Help Guide"/>
+        <MenuItem fx:id="aboutMenuItem" text="About"/>
+    </Menu>
+
+    <!-- ========== ACCOUNT MENU ========== -->
+    <Menu text="Account">
+        <MenuItem fx:id="profileMenuItem" text="My Profile"/>
+        <MenuItem fx:id="changePasswordMenuItem" text="Change Password"/>
+        <SeparatorMenuItem/>
+        <MenuItem fx:id="settingsMenuItemGlobal" text="Settings"/>
+        <SeparatorMenuItem/>
+        <MenuItem fx:id="accountNotificationsMenuItem" text="Notifications"/>
+        <SeparatorMenuItem/>
+        <MenuItem fx:id="logoutMenuItem" text="Logout"/>
+    </Menu>
+
+</MenuBar>

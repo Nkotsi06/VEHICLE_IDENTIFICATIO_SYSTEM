@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/17"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="controllers.LoginController">
+
+    <!-- Background Image -->
+    <VBox style="-fx-background-image: url('../images/background.jpg');
+                 -fx-background-size: cover;
+                 -fx-background-position: center;
+                 -fx-background-repeat: no-repeat;"/>
+
+    <!-- Semi-transparent Overlay -->
+    <VBox style="-fx-background-color: rgba(0, 0, 0, 0.48);"/>
+
+    <!-- Main Content -->
+    <BorderPane>
+        <center>
+            <VBox alignment="CENTER" spacing="40">
+                <padding>
+                    <Insets top="90" right="50" bottom="90" left="50"/>
+                </padding>
+
+                <!-- Login Card -->
+                <VBox alignment="CENTER" spacing="28"
+                      style="-fx-background-color: rgba(255, 255, 255, 0.98);
+                             -fx-background-radius: 20;
+                             -fx-padding: 50;
+                             -fx-border-radius: 20;"
+                      maxWidth="450">
+                    <effect>
+                        <DropShadow radius="28" spread="0.18" color="rgba(0,0,0,0.38)"/>
+                    </effect>
+
+                    <!-- Centered Title -->
+                    <VBox alignment="CENTER" spacing="6">
+                        <Label text="Vehicle Identification System"
+                               style="-fx-font-size: 28px;
+                                      -fx-font-weight: bold;
+                                      -fx-text-fill: #2c3e50;
+                                      -fx-text-alignment: center;"/>
+                        <Label text="Login to your account"
+                               style="-fx-font-size: 15px; -fx-text-fill: #555555;"/>
+                    </VBox>
+
+                    <!-- Username -->
+                    <VBox spacing="8" maxWidth="370">
+                        <Label text="Username" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                        <TextField fx:id="usernameField" promptText="Enter username"
+                                   prefHeight="52" style="-fx-background-radius: 12;"/>
+                    </VBox>
+
+                    <!-- Password with Eye -->
+                    <VBox spacing="8" maxWidth="370">
+                        <Label text="Password" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                        <HBox alignment="CENTER_RIGHT" spacing="12">
+                            <PasswordField fx:id="passwordField" promptText="Enter password"
+                                           prefHeight="52" HBox.hgrow="ALWAYS"
+                                           style="-fx-background-radius: 12;"/>
+
+                            <TextField fx:id="visiblePasswordField" promptText="Enter password"
+                                       prefHeight="52" HBox.hgrow="ALWAYS"
+                                       visible="false" managed="false"
+                                       style="-fx-background-radius: 12;"/>
+
+                            <Button fx:id="togglePasswordButton" text="👁"
+                                    style="-fx-font-size: 22px; -fx-min-width: 55; -fx-min-height: 55;
+                                           -fx-background-color: #f8f9fa; -fx-background-radius: 12;
+                                           -fx-border-color: #e0e0e0; -fx-cursor: hand;"/>
+                        </HBox>
+                    </VBox>
+
+                    <!-- Login Button -->
+                    <StackPane>
+                        <Button fx:id="loginButton" text="LOGIN"
+                                prefHeight="54" maxWidth="370"
+                                style="-fx-background-color: #006400;
+                                       -fx-text-fill: white;
+                                       -fx-font-size: 17px;
+                                       -fx-font-weight: bold;
+                                       -fx-background-radius: 12;"/>
+                        <ProgressIndicator fx:id="loginProgress" visible="false"
+                                           prefWidth="36" prefHeight="36"/>
+                    </StackPane>
+
+                    <Hyperlink fx:id="forgotPasswordLink" text="Forgot Password?"
+                               style="-fx-font-size: 14.5px; -fx-text-fill: #006400;"/>
+                </VBox>
+            </VBox>
+        </center>
+
+        <bottom>
+            <fx:include source="FooterComponent.fxml"/>
+        </bottom>
+    </BorderPane>
+
+</StackPane>

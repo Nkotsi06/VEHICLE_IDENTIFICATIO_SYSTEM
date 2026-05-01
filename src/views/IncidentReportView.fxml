@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.IncidentReportController">
+
+    <top>
+        <VBox>
+            <fx:include source="MenuBarComponent.fxml"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+            <SplitPane dividerPositions="0.5">
+
+                <VBox spacing="10" style="-fx-padding: 15;">
+                    <Label text="Incident Reports" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                    <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="30"/>
+
+                    <TableView fx:id="reportsTable" prefHeight="400">
+                        <columns>
+                            <TableColumn fx:id="caseNumberColumn" text="Case Number" prefWidth="150"/>
+                            <TableColumn fx:id="vehicleColumn" text="Vehicle" prefWidth="120"/>
+                            <TableColumn fx:id="reportTypeColumn" text="Type" prefWidth="100"/>
+                            <TableColumn fx:id="reportDateColumn" text="Date" prefWidth="100"/>
+                            <TableColumn fx:id="officerColumn" text="Officer" prefWidth="150"/>
+                            <TableColumn fx:id="incidentStatusColumn" text="Status" prefWidth="100"/>
+                        </columns>
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
+                        <placeholder>
+                            <Label text="No incident reports" style="-fx-text-fill: #7f8c8d;"/>
+                        </placeholder>
+                    </TableView>
+
+                    <Pagination fx:id="reportsPagination" pageCount="1" maxPageIndicatorCount="5"/>
+
+                    <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+
+                    <HBox spacing="10">
+                        <Button fx:id="refreshButton" text="Refresh" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                        <Button fx:id="fadeButton" text="Animate" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
+                            <effect>
+                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                            </effect>
+                        </Button>
+                    </HBox>
+                </VBox>
+
+                <VBox spacing="15" style="-fx-padding: 15;">
+                    <Label text="Create Incident Report" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                    <GridPane hgap="10" vgap="10">
+                        <Label text="Vehicle:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <ComboBox fx:id="vehicleComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250" promptText="Select vehicle"/>
+
+                        <Label text="Report Type:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <ComboBox fx:id="reportTypeComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="200" promptText="Select type">
+                            <items>
+                                <FXCollections fx:factory="observableArrayList">
+                                    <String fx:value="Accident"/>
+                                    <String fx:value="Theft"/>
+                                    <String fx:value="Vandalism"/>
+                                    <String fx:value="Hit and Run"/>
+                                    <String fx:value="Suspicious Activity"/>
+                                </FXCollections>
+                            </items>
+                        </ComboBox>
+
+                        <Label text="Case Number:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="caseNumberField" GridPane.rowIndex="2" GridPane.columnIndex="1" promptText="Enter case number"/>
+
+                        <Label text="Report Date:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <DatePicker fx:id="reportDatePicker" GridPane.rowIndex="3" GridPane.columnIndex="1" prefWidth="200"/>
+
+                        <Label text="Location:" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <TextField fx:id="locationField" GridPane.rowIndex="4" GridPane.columnIndex="1" promptText="Enter location"/>
+
+                        <Label text="Status:" GridPane.rowIndex="5" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <ComboBox fx:id="statusComboBox" GridPane.rowIndex="5" GridPane.columnIndex="1" prefWidth="200">
+                            <items>
+                                <FXCollections fx:factory="observableArrayList">
+                                    <String fx:value="OPEN"/>
+                                    <String fx:value="INVESTIGATING"/>
+                                    <String fx:value="CLOSED"/>
+                                    <String fx:value="UNRESOLVED"/>
+                                </FXCollections>
+                            </items>
+                        </ComboBox>
+                    </GridPane>
+
+                    <Label text="Description:" style="-fx-font-weight: bold;"/>
+                    <TextArea fx:id="descriptionArea" prefHeight="100" promptText="Enter incident description..."/>
+
+                    <Label text="Witnesses:" style="-fx-font-weight: bold;"/>
+                    <TextArea fx:id="witnessesArea" prefHeight="60" promptText="Enter witness information..."/>
+
+                    <HBox spacing="10">
+                        <Button fx:id="createButton" text="Create Report" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 120;">
+                            <effect>
+                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                            </effect>
+                        </Button>
+                        <Button fx:id="updateButton" text="Update" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 90;"/>
+                        <Button fx:id="deleteButton" text="Delete" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 90;"/>
+                        <Button fx:id="clearButton" text="Clear" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 90;"/>
+                    </HBox>
+
+                    <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+                </VBox>
+            </SplitPane>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
+            <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;"/>
+        </HBox>
+        <fx:include source="FooterComponent.fxml"/>
+    </bottom>
+</BorderPane>

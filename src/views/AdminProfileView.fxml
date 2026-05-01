@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.AdminProfileController"
+            stylesheets="@../css/application.css">
+
+    <top>
+        <VBox>
+            <fx:include source="MenuBarComponent.fxml"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+            <VBox spacing="20" style="-fx-padding: 20;">
+
+                <!-- Title -->
+                <Label text="Administrator Profile" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                <Label text="Manage your administrator account" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+
+                <Separator/>
+
+                <!-- Progress Indicator -->
+                <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
+
+                <HBox spacing="30">
+
+                    <!-- Left Panel - Profile Photo -->
+                    <VBox spacing="15" styleClass="card" HBox.hgrow="NEVER" prefWidth="300">
+                        <ImageView fx:id="profileImageView" fitHeight="150" fitWidth="150">
+                            <effect>
+                                <DropShadow radius="10" color="rgba(0,0,0,0.2)"/>
+                            </effect>
+                        </ImageView>
+                        <Button fx:id="uploadPhotoButton" text="Upload Photo" styleClass="button-primary"/>
+
+                        <Separator/>
+
+                        <Label text="Account Information" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                        <GridPane hgap="10" vgap="8">
+                            <Label text="Username:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="usernameLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+
+                            <Label text="Role:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="roleLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-text-fill: #006400; -fx-font-weight: bold;"/>
+
+                            <Label text="Last Login:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="lastLoginLabel" GridPane.rowIndex="2" GridPane.columnIndex="1" style="-fx-text-fill: #7f8c8d;"/>
+                        </GridPane>
+                    </VBox>
+
+                    <!-- Right Panel - Editable Information -->
+                    <VBox spacing="15" styleClass="card" HBox.hgrow="ALWAYS">
+                        <Label text="Personal Information" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                        <GridPane hgap="15" vgap="12">
+                            <Label text="Full Name:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="fullNameField" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="300"/>
+
+                            <Label text="Email:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="emailField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                            <Label text="Phone:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="phoneField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                            <Label text="Department:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="departmentField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                        </GridPane>
+
+                        <Separator/>
+
+                        <Label text="Security" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                        <Button fx:id="changePasswordButton" text="Change Password" styleClass="button-warning" prefWidth="150"/>
+
+                        <Separator/>
+
+                        <!-- Action Buttons -->
+                        <HBox spacing="15" alignment="CENTER_RIGHT">
+                            <Button fx:id="saveButton" text="Save Changes" styleClass="button-success" prefWidth="120"/>
+                            <Button fx:id="cancelButton" text="Cancel" styleClass="button-secondary" prefWidth="100"/>
+                            <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-primary" prefWidth="150"/>
+                        </HBox>
+                    </VBox>
+                </HBox>
+
+                <!-- Progress Bar -->
+                <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+
+                <!-- Status Label -->
+                <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <fx:include source="FooterComponent.fxml"/>
+    </bottom>
+</BorderPane>

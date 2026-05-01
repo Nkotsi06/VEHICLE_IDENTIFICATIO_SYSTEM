@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.BackupController">
+
+    <top>
+        <VBox>
+            <fx:include source="MenuBarComponent.fxml"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+            <VBox spacing="15" style="-fx-padding: 20;">
+
+                <Label text="Backup Management" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40" style="-fx-padding: 5;"/>
+
+                <TitledPane text="Backup Configuration" expanded="true" style="-fx-font-weight: bold;">
+                    <VBox spacing="10">
+                        <GridPane hgap="10" vgap="10">
+                            <Label text="Backup Type:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="backupTypeComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="200"/>
+
+                            <Label text="Schedule:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="scheduleComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="200"/>
+                            <DatePicker fx:id="scheduleDatePicker" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+
+                            <Label text="Location:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <HBox spacing="10" GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.columnSpan="2">
+                                <Label fx:id="backupLocationLabel" style="-fx-text-fill: #7f8c8d;" HBox.hgrow="ALWAYS"/>
+                                <Button fx:id="chooseLocationButton" text="Change Location" style="-fx-cursor: hand;"/>
+                            </HBox>
+                        </GridPane>
+
+                        <HBox spacing="10">
+                            <Button fx:id="createBackupButton" text="Create Backup Now" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
+                                <effect>
+                                    <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                                </effect>
+                            </Button>
+                            <Button fx:id="scheduleBackupButton" text="Schedule Backup" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                            <Button fx:id="fadeButton" text="Animate" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
+                                <effect>
+                                    <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                                </effect>
+                            </Button>
+                        </HBox>
+                    </VBox>
+                </TitledPane>
+
+                <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false" style="-fx-padding: 5;"/>
+                <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+
+                <Separator/>
+
+                <TitledPane text="Backup Statistics" expanded="true" style="-fx-font-weight: bold;">
+                    <GridPane hgap="20" vgap="10" style="-fx-background-color: #f8f9fa; -fx-padding: 15; -fx-border-radius: 5;">
+                        <Label text="Last Backup:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <Label fx:id="lastBackupLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+
+                        <Label text="Backup Size:" GridPane.rowIndex="0" GridPane.columnIndex="2" style="-fx-font-weight: bold;"/>
+                        <Label fx:id="backupSizeLabel" GridPane.rowIndex="0" GridPane.columnIndex="3" style="-fx-text-fill: #2c3e50;"/>
+
+                        <Label text="Total Backups:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <Label fx:id="backupCountLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+                    </GridPane>
+                </TitledPane>
+
+                <TitledPane text="Available Backups" expanded="true" style="-fx-font-weight: bold;">
+                    <VBox spacing="10">
+                        <ListView fx:id="backupsList" prefHeight="200" style="-fx-padding: 5;"/>
+                        <HBox spacing="10">
+                            <Button fx:id="restoreButton" text="Restore Selected" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                            <Button fx:id="refreshButton" text="Refresh" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                            <Button fx:id="deleteBackupButton" text="Delete Selected" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                        </HBox>
+                    </VBox>
+                </TitledPane>
+
+                <HBox spacing="10" alignment="CENTER_RIGHT">
+                    <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;"/>
+                </HBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <fx:include source="FooterComponent.fxml"/>
+    </bottom>
+</BorderPane>

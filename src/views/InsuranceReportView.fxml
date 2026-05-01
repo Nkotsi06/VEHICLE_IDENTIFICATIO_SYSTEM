@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.InsuranceReportController">
+
+    <top>
+        <VBox>
+            <fx:include source="MenuBarComponent.fxml"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+            <VBox spacing="20" style="-fx-padding: 20;">
+
+                <!-- Title -->
+                <Label text="Insurance Reports" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                <Label text="Generate insurance-specific reports" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+
+                <Separator/>
+
+                <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
+
+                <!-- Report Configuration -->
+                <TitledPane text="Report Configuration" expanded="true" style="-fx-font-weight: bold;">
+                    <GridPane hgap="15" vgap="15" style="-fx-padding: 15;">
+                        <Label text="Report Type:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <ComboBox fx:id="reportTypeComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="300" promptText="Select report type"/>
+
+                        <Label text="Start Date:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <DatePicker fx:id="startDatePicker" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="200"/>
+
+                        <Label text="End Date:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <DatePicker fx:id="endDatePicker" GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="200"/>
+
+                        <Button fx:id="fadeButton" text="Animate" GridPane.rowIndex="0" GridPane.columnIndex="2" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                    </GridPane>
+                </TitledPane>
+
+                <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+
+                <!-- Action Buttons -->
+                <HBox spacing="15">
+                    <Button fx:id="generateButton" text="Generate Report" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;"/>
+                    <Button fx:id="exportButton" text="Export CSV" disable="true" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 120;"/>
+                    <Button fx:id="printButton" text="Print" disable="true" style="-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 100;"/>
+                    <Button fx:id="clearButton" text="Clear" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 100;"/>
+                </HBox>
+
+                <Separator/>
+
+                <!-- Report Results Table -->
+                <TitledPane text="Report Results" expanded="true" style="-fx-font-weight: bold;">
+                    <VBox spacing="10" style="-fx-padding: 10;">
+                        <TableView fx:id="reportTable" prefHeight="350">
+                            <columnResizePolicy>
+                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                            </columnResizePolicy>
+                            <placeholder>
+                                <Label text="Select a report type and click Generate" style="-fx-text-fill: #7f8c8d;"/>
+                            </placeholder>
+                        </TableView>
+                        <Label fx:id="recordCountLabel" style="-fx-text-fill: #7f8c8d;"/>
+                    </VBox>
+                </TitledPane>
+
+                <!-- Report Summary -->
+                <TitledPane text="Report Summary" expanded="true" style="-fx-font-weight: bold;">
+                    <TextArea fx:id="reportSummaryArea" prefHeight="120" wrapText="true"
+                              style="-fx-font-family: monospace; -fx-font-size: 12px;"
+                              promptText="Report summary will appear here..."/>
+                </TitledPane>
+
+                <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+
+                <!-- Navigation -->
+                <HBox spacing="10" alignment="CENTER_RIGHT">
+                    <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;"/>
+                </HBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <fx:include source="FooterComponent.fxml"/>
+    </bottom>
+
+</BorderPane>

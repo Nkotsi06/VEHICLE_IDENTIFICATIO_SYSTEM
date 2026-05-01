@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.SettingsController">
+
+    <top>
+        <VBox>
+            <fx:include source="MenuBarComponent.fxml"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+            <VBox spacing="20" style="-fx-padding: 20;">
+
+                <Label text="System Settings" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                <Label text="Configure application preferences" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+
+                <Separator/>
+
+                <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
+
+                <TabPane fx:id="settingsTabPane">
+                    <!-- General Tab -->
+                    <Tab text="General" closable="false">
+                        <VBox spacing="15" style="-fx-padding: 20;">
+                            <Label text="General Settings" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                            <GridPane hgap="15" vgap="12">
+                                <Label text="Theme:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <ComboBox fx:id="themeComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="200"/>
+
+                                <Label text="Language:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <ComboBox fx:id="languageComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="200"/>
+
+                                <Label text="Currency:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <ComboBox fx:id="currencyComboBox" GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="200"/>
+                            </GridPane>
+
+                            <Separator/>
+
+                            <CheckBox fx:id="notificationsCheckBox" text="Enable System Notifications"/>
+                            <CheckBox fx:id="emailAlertsCheckBox" text="Enable Email Alerts"/>
+                            <CheckBox fx:id="autoSaveCheckBox" text="Enable Auto-Save"/>
+
+                            <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+
+                            <HBox spacing="15">
+                                <Button fx:id="saveGeneralButton" text="Save General Settings" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 160;">
+                                    <effect>
+                                        <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
+                                    </effect>
+                                </Button>
+                                <Button fx:id="resetGeneralButton" text="Reset" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 100;"/>
+                            </HBox>
+                        </VBox>
+                    </Tab>
+
+                    <!-- Database Tab -->
+                    <Tab text="Database" closable="false">
+                        <VBox spacing="15" style="-fx-padding: 20;">
+                            <Label text="Database Configuration" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                            <GridPane hgap="15" vgap="12">
+                                <Label text="Host:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <TextField fx:id="dbHostField" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250"/>
+
+                                <Label text="Port:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <TextField fx:id="dbPortField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                                <Label text="Database Name:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <TextField fx:id="dbNameField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                                <Label text="Username:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <TextField fx:id="dbUsernameField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                                <Label text="Password:" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <PasswordField fx:id="dbPasswordField" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                            </GridPane>
+
+                            <HBox spacing="10">
+                                <Button fx:id="testConnectionButton" text="Test Connection" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                                <Button fx:id="saveDatabaseButton" text="Save Database Settings" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                            </HBox>
+
+                            <Label fx:id="dbStatusLabel" style="-fx-text-fill: #7f8c8d;"/>
+                        </VBox>
+                    </Tab>
+
+                    <!-- Security Tab -->
+                    <Tab text="Security" closable="false">
+                        <VBox spacing="15" style="-fx-padding: 20;">
+                            <Label text="Security Settings" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                            <CheckBox fx:id="twoFactorCheckBox" text="Enable Two-Factor Authentication"/>
+                            <CheckBox fx:id="sessionTimeoutCheckBox" text="Enable Session Timeout"/>
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Label text="Session Timeout:" style="-fx-font-weight: bold;"/>
+                                <TextField fx:id="sessionTimeoutField" promptText="Minutes" prefWidth="100"/>
+                                <Label text="minutes"/>
+                            </HBox>
+                            <CheckBox fx:id="ipWhitelistCheckBox" text="Enable IP Whitelist"/>
+                            <TextField fx:id="ipWhitelistField" promptText="IP addresses (comma separated)" prefWidth="400"/>
+
+                            <HBox spacing="15">
+                                <Button fx:id="saveSecurityButton" text="Save Security Settings" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 160;"/>
+                            </HBox>
+                        </VBox>
+                    </Tab>
+
+                    <!-- Notifications Tab -->
+                    <Tab text="Notifications" closable="false">
+                        <VBox spacing="15" style="-fx-padding: 20;">
+                            <Label text="Email Notification Settings" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                            <CheckBox fx:id="emailNotificationsCheckBox" text="Enable Email Notifications"/>
+
+                            <GridPane hgap="15" vgap="12">
+                                <Label text="SMTP Host:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <TextField fx:id="smtpHostField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                                <Label text="SMTP Port:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <TextField fx:id="smtpPortField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                                <Label text="Sender Email:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <TextField fx:id="senderEmailField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                                <Label text="SMTP Password:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <PasswordField fx:id="smtpPasswordField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                            </GridPane>
+
+                            <HBox spacing="10">
+                                <Button fx:id="testEmailButton" text="Send Test Email" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                                <Button fx:id="saveNotificationButton" text="Save Notification Settings" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                            </HBox>
+
+                            <Label fx:id="notificationStatusLabel" style="-fx-text-fill: #7f8c8d;"/>
+                        </VBox>
+                    </Tab>
+                </TabPane>
+
+                <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
+            <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;"/>
+        </HBox>
+        <fx:include source="FooterComponent.fxml"/>
+    </bottom>
+</BorderPane>
