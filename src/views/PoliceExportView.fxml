@@ -27,31 +27,10 @@
                 <TitledPane text="Export Configuration" expanded="true" style="-fx-font-weight: bold;">
                     <GridPane hgap="15" vgap="15" style="-fx-padding: 15;">
                         <Label text="Export Type:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <ComboBox fx:id="exportTypeComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250" promptText="Select data to export">
-                            <items>
-                                <FXCollections fx:factory="observableArrayList">
-                                    <String fx:value="Stolen Vehicles"/>
-                                    <String fx:value="Violations"/>
-                                    <String fx:value="Warrants"/>
-                                    <String fx:value="BOLO Alerts"/>
-                                    <String fx:value="Incident Reports"/>
-                                    <String fx:value="Officer Activity Logs"/>
-                                    <String fx:value="All Police Data"/>
-                                </FXCollections>
-                            </items>
-                        </ComboBox>
+                        <ComboBox fx:id="exportTypeComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250" promptText="Select data to export"/>
 
                         <Label text="Format:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <ComboBox fx:id="formatComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="150">
-                            <items>
-                                <FXCollections fx:factory="observableArrayList">
-                                    <String fx:value="CSV"/>
-                                    <String fx:value="Excel"/>
-                                    <String fx:value="PDF"/>
-                                    <String fx:value="JSON"/>
-                                </FXCollections>
-                            </items>
-                        </ComboBox>
+                        <ComboBox fx:id="formatComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="150"/>
 
                         <Label text="Start Date:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
                         <DatePicker fx:id="startDatePicker" GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="200"/>

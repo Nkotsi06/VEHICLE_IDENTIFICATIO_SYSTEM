@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.AdminProfileController"
-            stylesheets="@../css/application.css">
+            stylesheets="@../css/application.css" styleClass="border-pane">
 
     <top>
         <VBox>
@@ -16,34 +16,30 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="true">
-            <VBox spacing="20" style="-fx-padding: 20;">
+        <ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" styleClass="dashboard-container" alignment="TOP_CENTER">
 
                 <!-- Title -->
-                <Label text="Administrator Profile" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-                <Label text="Manage your administrator account" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+                <Label text="Administrator Profile" styleClass="label-title"/>
+                <Label text="Manage your administrator account" styleClass="label-subtitle"/>
 
                 <Separator/>
 
                 <!-- Progress Indicator -->
                 <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
 
-                <HBox spacing="30">
+                <HBox spacing="30" alignment="CENTER">
 
                     <!-- Left Panel - Profile Photo -->
-                    <VBox spacing="15" styleClass="card" HBox.hgrow="NEVER" prefWidth="300">
-                        <ImageView fx:id="profileImageView" fitHeight="150" fitWidth="150">
-                            <effect>
-                                <DropShadow radius="10" color="rgba(0,0,0,0.2)"/>
-                            </effect>
-                        </ImageView>
-                        <Button fx:id="uploadPhotoButton" text="Upload Photo" styleClass="button-primary"/>
+                    <VBox spacing="15" styleClass="profile-card" HBox.hgrow="NEVER" prefWidth="300" alignment="CENTER">
+                        <ImageView fx:id="profileImageView" fitHeight="150" fitWidth="150" styleClass="profile-image-circle"/>
+                        <Button fx:id="uploadPhotoButton" text="Upload Photo" styleClass="button-info" maxWidth="160"/>
 
                         <Separator/>
 
-                        <Label text="Account Information" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                        <Label text="Account Information" styleClass="section-title"/>
 
-                        <GridPane hgap="10" vgap="8">
+                        <GridPane hgap="10" vgap="8" alignment="CENTER">
                             <Label text="Username:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
                             <Label fx:id="usernameLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
 
@@ -56,26 +52,26 @@
                     </VBox>
 
                     <!-- Right Panel - Editable Information -->
-                    <VBox spacing="15" styleClass="card" HBox.hgrow="ALWAYS">
-                        <Label text="Personal Information" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                    <VBox spacing="15" styleClass="profile-edit-card" HBox.hgrow="ALWAYS">
+                        <Label text="Personal Information" styleClass="section-title"/>
 
-                        <GridPane hgap="15" vgap="12">
+                        <GridPane hgap="15" vgap="12" alignment="CENTER">
                             <Label text="Full Name:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <TextField fx:id="fullNameField" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="300"/>
+                            <TextField fx:id="fullNameField" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="300" styleClass="form-field"/>
 
                             <Label text="Email:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <TextField fx:id="emailField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                            <TextField fx:id="emailField" GridPane.rowIndex="1" GridPane.columnIndex="1" styleClass="form-field"/>
 
                             <Label text="Phone:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <TextField fx:id="phoneField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                            <TextField fx:id="phoneField" GridPane.rowIndex="2" GridPane.columnIndex="1" styleClass="form-field"/>
 
                             <Label text="Department:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <TextField fx:id="departmentField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                            <TextField fx:id="departmentField" GridPane.rowIndex="3" GridPane.columnIndex="1" styleClass="form-field"/>
                         </GridPane>
 
                         <Separator/>
 
-                        <Label text="Security" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                        <Label text="Security" styleClass="section-title"/>
 
                         <Button fx:id="changePasswordButton" text="Change Password" styleClass="button-warning" prefWidth="150"/>
 
@@ -94,7 +90,7 @@
                 <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
                 <!-- Status Label -->
-                <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+                <Label fx:id="statusLabel" styleClass="status-text"/>
 
             </VBox>
         </ScrollPane>

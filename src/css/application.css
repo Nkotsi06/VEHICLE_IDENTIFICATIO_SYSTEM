@@ -10,193 +10,180 @@
 }
 
 /* ============================================
-   COLOR VARIABLES - Consistent Palette
-   ============================================ */
-* {
-    -primary-color: #006400;
-    -primary-hover: #008000;
-    -primary-dark: #004d00;
-    -secondary-color: #2c3e50;
-    -accent-red: #E31E2C;
-    -success-green: #27ae60;
-    -warning-amber: #f1c40f;
-    -info-blue: #3498db;
-    -purple: #9b59b6;
-    -teal: #008080;
-    -pink: #e84393;
-    -light-bg: #F8F9FA;
-    -text-dark: #2c3e50;
-    -text-light: #7f8c8d;
-    -border-gray: #dddddd;
-    -white: #ffffff;
-    -overlay: rgba(0, 0, 0, 0.45);
-}
-
-/* ============================================
-   BACKGROUND
+   BACKGROUND IMAGE - VISIBLE ACROSS ALL SYSTEM
    ============================================ */
 
-.root, .border-pane, .vbox, .hbox, .grid-pane, .anchor-pane, .stack-pane, .titled-pane, .tab-pane, .scroll-pane {
-    -fx-background-color: #f0f2f5;
+/* Main stage/root background */
+.root {
+    -fx-background-image: url('../images/background.jpg');
+    -fx-background-size: cover;
+    -fx-background-position: center;
+    -fx-background-repeat: no-repeat;
+    -fx-background-color: #2c3e50;
 }
 
-.scroll-pane > .viewport {
-    -fx-background-color: #f0f2f5;
-}
-
-/* ============================================
-   MENU BAR STYLES
-   ============================================ */
-.menu-bar, .main-menu-bar {
-    -fx-background-color: #2c3e50 !important;
-    -fx-padding: 0 !important;
-    -fx-spacing: 0 !important;
-    -fx-border-color: #1a252f;
-    -fx-border-width: 0 0 1 0;
-}
-
-.menu-bar .menu {
-    -fx-padding: 8 16 8 16;
+/* BorderPane background - transparent */
+.border-pane {
     -fx-background-color: transparent;
 }
 
-.menu-bar .menu .label {
-    -fx-text-fill: #ffffff !important;
-    -fx-font-size: 13px;
-    -fx-font-weight: 500;
+/* All panes transparent */
+.vbox, .hbox, .grid-pane, .anchor-pane, .stack-pane, .split-pane {
+    -fx-background-color: transparent;
 }
 
-.menu-bar .menu:hover {
-    -fx-background-color: #34495e;
+/* ScrollPane transparent */
+.scroll-pane {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
 }
 
-.menu-bar .menu:showing {
-    -fx-background-color: #006400;
-}
-
-.context-menu {
-    -fx-background-color: #F8F9FA;
-    -fx-background-radius: 8px;
-    -fx-border-color: #dddddd;
-    -fx-border-radius: 8px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 4);
-}
-
-.menu-item {
-    -fx-background-color: #F8F9FA;
-    -fx-padding: 8 20 8 20;
-}
-
-.menu-item .label {
-    -fx-text-fill: #2c3e50 !important;
-    -fx-font-size: 13px;
-}
-
-.menu-item:hover {
-    -fx-background-color: #006400;
-}
-
-.menu-item:hover .label {
-    -fx-text-fill: #ffffff !important;
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
 }
 
 /* ============================================
-   DASHBOARD CARDS - COMPLETE STYLING SYSTEM
+   DASHBOARD CONTAINER
    ============================================ */
+.dashboard-container {
+    -fx-background-color: transparent;
+    -fx-padding: 20;
+    -fx-alignment: TOP_CENTER;
+    -fx-spacing: 20;
+}
 
-/* Base Card Style */
+/* ============================================
+   TITLED PANE - SEMI-TRANSPARENT
+   ============================================ */
+.titled-pane {
+    -fx-background-color: transparent;
+}
+
+.titled-pane > .title {
+    -fx-background-color: rgba(44, 62, 80, 0.95);
+    -fx-background-radius: 8 8 0 0;
+    -fx-padding: 10 15;
+}
+
+.titled-pane > .title .text {
+    -fx-fill: white;
+    -fx-font-weight: bold;
+}
+
+.titled-pane > .content {
+    -fx-background-color: rgba(255, 255, 255, 0.95);
+    -fx-background-radius: 0 0 8 8;
+    -fx-padding: 15;
+}
+
+/* ============================================
+   TAB PANE - CENTERED TABS
+   ============================================ */
+.tab-pane {
+    -fx-background-color: transparent;
+}
+
+.tab-pane .tab-header-area {
+    -fx-background-color: transparent;
+    -fx-alignment: CENTER;
+}
+
+.tab-pane .tab-header-area .headers-region {
+    -fx-alignment: CENTER;
+}
+
+.tab-pane .tab {
+    -fx-background-color: rgba(248, 249, 250, 0.9);
+    -fx-border-color: #dddddd;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 8 25;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: #006400;
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.tab-pane .tab .tab-label {
+    -fx-text-fill: #2c3e50;
+    -fx-font-size: 13px;
+}
+
+.tab-pane .tab-content-area {
+    -fx-background-color: rgba(255, 255, 255, 0.95);
+    -fx-background-radius: 0 8 8 8;
+    -fx-padding: 15;
+}
+
+/* ============================================
+   CENTERED TAB PANE
+   ============================================ */
+.centered-tab-pane .tab-header-area {
+    -fx-alignment: CENTER;
+}
+
+/* ============================================
+   DASHBOARD CARDS
+   ============================================ */
 .dashboard-card {
+    -fx-background-color: rgba(255, 255, 255, 0.97);
     -fx-background-radius: 12px;
     -fx-padding: 20 15;
     -fx-spacing: 8;
     -fx-alignment: CENTER;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 8, 0, 0, 4);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 4);
+    -fx-border-color: #006400;
+    -fx-border-width: 0 0 0 4;
+    -fx-border-radius: 12px;
 }
 
-/* Card Title */
 .card-title {
     -fx-font-size: 13px;
     -fx-font-weight: normal;
-    -fx-opacity: 0.9;
-}
-
-/* Card Value */
-.card-value {
-    -fx-font-size: 28px;
-    -fx-font-weight: bold;
-}
-
-/* Card Color Variants */
-.card-primary {
-    -fx-background-color: linear-gradient(to bottom, #006400, #004d00);
-}
-.card-primary .card-title,
-.card-primary .card-value {
-    -fx-text-fill: white;
-}
-
-.card-success {
-    -fx-background-color: linear-gradient(to bottom, #27ae60, #1e8449);
-}
-.card-success .card-title,
-.card-success .card-value {
-    -fx-text-fill: white;
-}
-
-.card-danger {
-    -fx-background-color: linear-gradient(to bottom, #E31E2C, #b00020);
-}
-.card-danger .card-title,
-.card-danger .card-value {
-    -fx-text-fill: white;
-}
-
-.card-info {
-    -fx-background-color: linear-gradient(to bottom, #3498db, #2980b9);
-}
-.card-info .card-title,
-.card-info .card-value {
-    -fx-text-fill: white;
-}
-
-.card-warning {
-    -fx-background-color: linear-gradient(to bottom, #f1c40f, #d4ac0d);
-}
-.card-warning .card-title,
-.card-warning .card-value {
+    -fx-opacity: 0.8;
     -fx-text-fill: #2c3e50;
 }
 
-.card-purple {
-    -fx-background-color: linear-gradient(to bottom, #9b59b6, #8e44ad);
-}
-.card-purple .card-title,
-.card-purple .card-value {
-    -fx-text-fill: white;
+.card-value {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #006400;
 }
 
-.card-teal {
-    -fx-background-color: linear-gradient(to bottom, #008080, #006666);
-}
-.card-teal .card-title,
-.card-teal .card-value {
-    -fx-text-fill: white;
-}
-
-.card-pink {
-    -fx-background-color: linear-gradient(to bottom, #e84393, #c0397a);
-}
-.card-pink .card-title,
-.card-pink .card-value {
-    -fx-text-fill: white;
+/* ============================================
+   PROFILE CARDS
+   ============================================ */
+.profile-card {
+    -fx-background-color: rgba(255, 255, 255, 0.97);
+    -fx-background-radius: 16px;
+    -fx-padding: 25 20;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 5);
+    -fx-border-color: #dddddd;
+    -fx-border-width: 1;
+    -fx-border-radius: 16px;
+    -fx-alignment: TOP_CENTER;
 }
 
-.card-secondary {
-    -fx-background-color: linear-gradient(to bottom, #2c3e50, #1a252f);
+.profile-edit-card {
+    -fx-background-color: rgba(255, 255, 255, 0.97);
+    -fx-background-radius: 16px;
+    -fx-padding: 25;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 8, 0, 0, 4);
+    -fx-border-color: #dddddd;
+    -fx-border-width: 1;
+    -fx-border-radius: 16px;
 }
-.card-secondary .card-title,
-.card-secondary .card-value {
-    -fx-text-fill: white;
+
+.section-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #006400;
+    -fx-padding: 5 0 10 0;
 }
 
 /* ============================================
@@ -223,6 +210,30 @@
     -fx-background-color: #008000;
 }
 
+.button-primary:pressed {
+    -fx-background-color: #004d00;
+}
+
+.button-success {
+    -fx-background-color: #27ae60;
+    -fx-text-fill: white;
+    -fx-border-color: #27ae60;
+}
+
+.button-success:hover {
+    -fx-background-color: #2ecc71;
+}
+
+.button-danger {
+    -fx-background-color: #E31E2C;
+    -fx-text-fill: white;
+    -fx-border-color: #E31E2C;
+}
+
+.button-danger:hover {
+    -fx-background-color: #c0392b;
+}
+
 .button-warning {
     -fx-background-color: #f1c40f;
     -fx-text-fill: #2c3e50;
@@ -243,6 +254,20 @@
     -fx-background-color: #7f8c8d;
 }
 
+.button-info {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-cursor: hand;
+    -fx-padding: 8 16;
+}
+
+.button-info:hover {
+    -fx-background-color: #2980b9;
+}
+
 /* ============================================
    TABLE VIEW STYLES
    ============================================ */
@@ -261,7 +286,7 @@
     -fx-background-color: #f8f9fa;
     -fx-border-color: #dddddd;
     -fx-border-width: 0 0 1 0;
-    -fx-padding: 10 0;
+    -fx-padding: 12 0;
 }
 
 .table-view .column-header .label {
@@ -316,34 +341,22 @@
 }
 
 /* ============================================
-   TAB PANE STYLES
+   TEXT FIELDS & INPUTS
    ============================================ */
-.tab-pane {
-    -fx-background-color: transparent;
-}
-
-.tab-pane .tab-header-area {
-    -fx-background-color: transparent;
-}
-
-.tab-pane .tab {
-    -fx-background-color: #f8f9fa;
-    -fx-border-color: #dddddd;
-    -fx-border-width: 0 0 1 0;
-    -fx-padding: 8 20;
-}
-
-.tab-pane .tab:selected {
-    -fx-background-color: #006400;
-}
-
-.tab-pane .tab:selected .tab-label {
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-}
-
-.tab-pane .tab .tab-label {
+.text-field, .password-field, .text-area {
+    -fx-background-color: white;
     -fx-text-fill: #2c3e50;
+    -fx-prompt-text-fill: #95a5a6;
+    -fx-border-color: #dddddd;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 10 12;
+}
+
+.text-field:focused, .password-field:focused, .text-area:focused {
+    -fx-border-color: #006400;
+    -fx-border-width: 2px;
 }
 
 /* ============================================
@@ -358,14 +371,6 @@
 }
 
 /* ============================================
-   SEPARATOR
-   ============================================ */
-.separator .line {
-    -fx-border-color: #dddddd;
-    -fx-border-width: 1;
-}
-
-/* ============================================
    PAGINATION
    ============================================ */
 .pagination {
@@ -376,11 +381,21 @@
     -fx-background-color: #f8f9fa;
     -fx-border-color: #dddddd;
     -fx-text-fill: #2c3e50;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
 }
 
 .pagination .page:hover {
     -fx-background-color: #006400;
     -fx-text-fill: white;
+}
+
+/* ============================================
+   SEPARATOR
+   ============================================ */
+.separator .line {
+    -fx-border-color: #dddddd;
+    -fx-border-width: 1;
 }
 
 /* ============================================
@@ -393,4 +408,66 @@
 
 .footer .label {
     -fx-text-fill: #ecf0f1;
+}
+
+/* ============================================
+   MENU BAR STYLES
+   ============================================ */
+.menu-bar, .main-menu-bar {
+    -fx-background-color: #2c3e50 !important;
+    -fx-padding: 0 !important;
+    -fx-spacing: 0 !important;
+    -fx-border-color: #1a252f;
+    -fx-border-width: 0 0 1 0;
+}
+
+.menu-bar .menu {
+    -fx-padding: 8 16 8 16;
+    -fx-background-color: transparent;
+}
+
+.menu-bar .menu .label {
+    -fx-text-fill: #ffffff !important;
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+}
+
+.menu-bar .menu:hover {
+    -fx-background-color: #34495e;
+}
+
+.menu-bar .menu:showing {
+    -fx-background-color: #006400;
+}
+
+.context-menu {
+    -fx-background-color: rgba(248, 249, 250, 0.98);
+    -fx-background-radius: 8px;
+    -fx-border-color: #dddddd;
+    -fx-border-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 4);
+}
+
+.menu-item {
+    -fx-background-color: transparent;
+    -fx-padding: 8 20 8 20;
+}
+
+.menu-item .label {
+    -fx-text-fill: #2c3e50 !important;
+    -fx-font-size: 13px;
+}
+
+.menu-item:hover {
+    -fx-background-color: #006400;
+}
+
+.menu-item:hover .label {
+    -fx-text-fill: #ffffff !important;
+}
+
+.profile-image-circle {
+    -fx-background-color: #006400;
+    -fx-background-radius: 80;
+    -fx-padding: 5;
 }

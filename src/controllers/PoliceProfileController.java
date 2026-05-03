@@ -2,7 +2,6 @@ package controllers;
 
 import javafx.animation.PauseTransition;
 import javafx.collections.FXCollections;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
@@ -18,17 +17,23 @@ import utils.ValidationUtil;
 import dao.PoliceOfficerDAO;
 import dao.OfficerActivityLogDAO;
 import dao.RankChangeRequestDAO;
+import dao.UserDAO;
 import models.PoliceOfficer;
 import models.OfficerActivityLog;
 import models.RankChangeRequest;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
 
 public class PoliceProfileController {
 
@@ -58,7 +63,7 @@ public class PoliceProfileController {
     @FXML private Button cancelButton;
     @FXML private Button backButton;
     @FXML private Button uploadPhotoButton;
-    @FXML private Button changePasswordButton;
+    @FXML private Button changePasswordButton;  // Added
     @FXML private Button requestRankChangeButton;
     @FXML private Button refreshActivityButton;
 
@@ -69,25 +74,47 @@ public class PoliceProfileController {
     @FXML private TableColumn<OfficerActivityLog, String> activityTargetColumn;
 
     @FXML private ProgressIndicator loadProgress;
+    @FXML private ProgressBar operationProgress;
+    @FXML private Pagination activityPagination;
 
     private PoliceOfficerDAO policeOfficerDAO;
     private OfficerActivityLogDAO activityLogDAO;
     private RankChangeRequestDAO rankChangeRequestDAO;
+    private UserDAO userDAO;
     private PoliceOfficer currentOfficer;
+    private List<OfficerActivityLog> fullActivityList;
+    private int currentPage = 0;
+    private int pageSize = 20;
     private boolean isEditing = false;
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private String profileImageDirectory = "uploads/police_profiles/";
 
     @FXML
     public void initialize() {
         policeOfficerDAO = new PoliceOfficerDAO();
         activityLogDAO = new OfficerActivityLogDAO();
         rankChangeRequestDAO = new RankChangeRequestDAO();
+        userDAO = new UserDAO();
 
+        createImageDirectory();
         setupTableColumns();
         setupComboBoxes();
         setupButtonHandlers();
+        setupPagination();
         applyVisualEffects();
         loadPoliceProfile();
+        statusLabel.setText("Ready");
+    }
+
+    private void createImageDirectory() {
+        try {
+            Path path = Paths.get(profileImageDirectory);
+            if (!Files.exists(path)) {
+                Files.createDirectories(path);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void setupTableColumns() {
@@ -101,6 +128,24 @@ public class PoliceProfileController {
         activityActionColumn.setStyle("-fx-alignment: CENTER-LEFT;");
         activityDescriptionColumn.setStyle("-fx-alignment: CENTER-LEFT;");
         activityTargetColumn.setStyle("-fx-alignment: CENTER;");
+    }
+
+    private void setupPagination() {
+        if (activityPagination != null) {
+            activityPagination.currentPageIndexProperty().addListener((obs, old, newPage) -> {
+                currentPage = newPage.intValue();
+                updateTablePage();
+            });
+        }
+    }
+
+    private void updateTablePage() {
+        if (fullActivityList == null || fullActivityList.isEmpty()) return;
+        int start = currentPage * pageSize;
+        int end = Math.min(start + pageSize, fullActivityList.size());
+        if (start < fullActivityList.size()) {
+            activityTable.getItems().setAll(fullActivityList.subList(start, end));
+        }
     }
 
     private void setupComboBoxes() {
@@ -120,7 +165,7 @@ public class PoliceProfileController {
         cancelButton.setOnAction(event -> handleCancel());
         backButton.setOnAction(event -> handleBack());
         uploadPhotoButton.setOnAction(event -> handleUploadPhoto());
-        changePasswordButton.setOnAction(event -> handleChangePassword());
+        changePasswordButton.setOnAction(event -> handleChangePassword());  // Added
         requestRankChangeButton.setOnAction(event -> handleRequestRankChange());
         refreshActivityButton.setOnAction(event -> loadActivityLog());
     }
@@ -136,7 +181,7 @@ public class PoliceProfileController {
         cancelButton.setEffect(dropShadow);
         backButton.setEffect(dropShadow);
         uploadPhotoButton.setEffect(dropShadow);
-        changePasswordButton.setEffect(dropShadow);
+        changePasswordButton.setEffect(dropShadow);  // Added
         requestRankChangeButton.setEffect(dropShadow);
     }
 
@@ -166,7 +211,6 @@ public class PoliceProfileController {
     }
 
     private void displayProfileData() {
-        // Display labels (non-editable)
         badgeNumberLabel.setText(currentOfficer.getBadgeNumber());
         rankDisplayLabel.setText(currentOfficer.getRank());
         departmentDisplayLabel.setText(currentOfficer.getDepartment());
@@ -181,7 +225,6 @@ public class PoliceProfileController {
         accountStatusLabel.setText(currentOfficer.isActive() ? "ACTIVE" : "INACTIVE");
         accountStatusLabel.setTextFill(currentOfficer.isActive() ? Color.GREEN : Color.RED);
 
-        // Editable fields
         fullNameField.setText(currentOfficer.getFullName());
         emailField.setText(currentOfficer.getEmail());
         phoneField.setText(currentOfficer.getPhone());
@@ -189,25 +232,37 @@ public class PoliceProfileController {
         stationField.setText(currentOfficer.getStationAssigned());
         supervisorField.setText(currentOfficer.getSupervisorName());
 
-        // ComboBoxes
         rankComboBox.setValue(currentOfficer.getRank());
         departmentComboBox.setValue(currentOfficer.getDepartment());
 
-        // Profile image
+        loadProfileImage();
+
+        setEditMode(false);
+    }
+
+    private void loadProfileImage() {
         if (currentOfficer.getProfileImage() != null && !currentOfficer.getProfileImage().isEmpty()) {
             try {
                 File imageFile = new File(currentOfficer.getProfileImage());
                 if (imageFile.exists()) {
                     Image image = new Image(imageFile.toURI().toString());
                     profileImageView.setImage(image);
+                    return;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+        setDefaultProfileImage();
+    }
 
-        // Set edit mode off initially
-        setEditMode(false);
+    private void setDefaultProfileImage() {
+        try {
+            profileImageView.setImage(null);
+            profileImageView.setStyle("-fx-background-color: #006400; -fx-background-radius: 80; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 15, 0, 0, 5);");
+        } catch (Exception e) {
+            profileImageView.setImage(null);
+        }
     }
 
     private void setEditMode(boolean edit) {
@@ -224,7 +279,6 @@ public class PoliceProfileController {
         cancelButton.setDisable(!edit);
 
         if (!edit) {
-            // Reset values if cancelled
             fullNameField.setText(currentOfficer.getFullName());
             emailField.setText(currentOfficer.getEmail());
             phoneField.setText(currentOfficer.getPhone());
@@ -236,15 +290,12 @@ public class PoliceProfileController {
     }
 
     private void handleSave() {
-        if (!validateInputs()) {
-            return;
-        }
+        if (!validateInputs()) return;
 
         showProgress(true);
         statusLabel.setText("Saving profile...");
 
         try {
-            // Update officer object
             currentOfficer.setFullName(fullNameField.getText().trim());
             currentOfficer.setEmail(emailField.getText().trim());
             currentOfficer.setPhone(phoneField.getText().trim());
@@ -257,27 +308,21 @@ public class PoliceProfileController {
             currentOfficer.setRank(newRank);
             currentOfficer.setDepartment(departmentComboBox.getValue());
 
-            // Get rank level for the new rank
-            updateRankLevel();
-
             boolean success = policeOfficerDAO.update(currentOfficer);
 
             if (success) {
-                // Log the activity
                 logActivity("PROFILE_UPDATE", "Updated profile information");
 
-                // If rank changed, create rank change record
                 if (!oldRank.equals(newRank)) {
                     logActivity("RANK_CHANGE", "Rank changed from " + oldRank + " to " + newRank);
                 }
 
-                // Update session
                 SessionManager.getInstance().setFullName(currentOfficer.getFullName());
 
                 AlertUtil.showSuccess("Success", "Profile updated successfully!");
                 statusLabel.setText("Profile saved successfully");
                 setEditMode(false);
-                displayProfileData(); // Refresh display
+                displayProfileData();
             } else {
                 AlertUtil.showError("Save Failed", "Could not update profile.");
                 statusLabel.setText("Save failed");
@@ -288,22 +333,6 @@ public class PoliceProfileController {
             statusLabel.setText("Error saving profile");
         } finally {
             hideProgressAfterDelay();
-        }
-    }
-
-    private void updateRankLevel() {
-        String rank = rankComboBox.getValue();
-        List<String> ranks;
-        try {
-            ranks = policeOfficerDAO.getAllRanks();
-            for (int i = 0; i < ranks.size(); i++) {
-                if (ranks.get(i).equals(rank)) {
-                    currentOfficer.setRankLevel(i + 1);
-                    break;
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -320,48 +349,114 @@ public class PoliceProfileController {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select Profile Picture");
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
+                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp")
         );
 
         File selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
+            showProgress(true);
+            statusLabel.setText("Uploading photo...");
+
             try {
-                Image image = new Image(selectedFile.toURI().toString());
-                profileImageView.setImage(image);
+                // Generate unique filename
+                String fileExtension = getFileExtension(selectedFile.getName());
+                String newFileName = "police_" + currentOfficer.getId() + "_" + System.currentTimeMillis() + fileExtension;
+                String destinationPath = profileImageDirectory + newFileName;
+                File destinationFile = new File(destinationPath);
 
-                // Save image path to database
-                String imagePath = selectedFile.getAbsolutePath();
-                // In a real implementation, you'd copy the image to a designated folder
-                // and save the relative path
+                // Copy file
+                try (FileInputStream in = new FileInputStream(selectedFile)) {
+                    Files.copy(selectedFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                }
 
-                statusLabel.setText("Photo uploaded successfully");
-                logActivity("PHOTO_UPDATE", "Updated profile picture");
+                // Update database with image path
+                boolean success = policeOfficerDAO.updateProfileImage(currentOfficer.getId(), destinationPath);
+
+                if (success) {
+                    currentOfficer.setProfileImage(destinationPath);
+                    Image image = new Image(destinationFile.toURI().toString());
+                    profileImageView.setImage(image);
+                    profileImageView.setStyle("");
+                    logActivity("PHOTO_UPDATE", "Updated profile picture");
+                    statusLabel.setText("Photo uploaded successfully");
+                    AlertUtil.showSuccess("Photo Uploaded", "Profile picture updated successfully.");
+                } else {
+                    AlertUtil.showError("Upload Failed", "Could not save image path to database.");
+                    statusLabel.setText("Upload failed");
+                }
+
             } catch (Exception e) {
                 e.printStackTrace();
-                AlertUtil.showError("Upload Failed", "Could not load image: " + e.getMessage());
+                AlertUtil.showError("Upload Failed", "Could not upload image: " + e.getMessage());
+                statusLabel.setText("Upload error");
+            } finally {
+                hideProgressAfterDelay();
             }
         }
     }
 
+    private String getFileExtension(String fileName) {
+        int lastDot = fileName.lastIndexOf(".");
+        if (lastDot > 0) {
+            return fileName.substring(lastDot);
+        }
+        return ".jpg";
+    }
+
+    /**
+     * ADDED: Change Password functionality
+     */
     private void handleChangePassword() {
         TextInputDialog dialog = new TextInputDialog();
         dialog.setTitle("Change Password");
-        dialog.setHeaderText("Enter your new password");
-        dialog.setContentText("New Password:");
+        dialog.setHeaderText("Change Your Password");
+        dialog.setContentText("Enter new password:");
 
         dialog.showAndWait().ifPresent(newPassword -> {
-            if (newPassword != null && newPassword.length() >= 6) {
-                try {
-                    // Call password update method
-                    AlertUtil.showSuccess("Password Changed", "Your password has been updated successfully.");
-                    logActivity("PASSWORD_CHANGE", "Changed account password");
-                    statusLabel.setText("Password changed successfully");
-                } catch (Exception e) {
-                    AlertUtil.showError("Error", "Failed to change password: " + e.getMessage());
-                }
-            } else {
-                AlertUtil.showWarning("Invalid Password", "Password must be at least 6 characters.");
+            if (newPassword == null || newPassword.trim().isEmpty()) {
+                AlertUtil.showWarning("Invalid Input", "Password cannot be empty.");
+                return;
             }
+
+            if (newPassword.length() < 6) {
+                AlertUtil.showWarning("Invalid Input", "Password must be at least 6 characters.");
+                return;
+            }
+
+            // Confirm password
+            TextInputDialog confirmDialog = new TextInputDialog();
+            confirmDialog.setTitle("Confirm Password");
+            confirmDialog.setHeaderText("Confirm New Password");
+            confirmDialog.setContentText("Re-enter new password:");
+
+            confirmDialog.showAndWait().ifPresent(confirmedPassword -> {
+                if (!newPassword.equals(confirmedPassword)) {
+                    AlertUtil.showWarning("Password Mismatch", "Passwords do not match. Please try again.");
+                    return;
+                }
+
+                showProgress(true);
+                statusLabel.setText("Changing password...");
+
+                try {
+                    boolean success = userDAO.updatePassword(currentOfficer.getUserId(), newPassword);
+
+                    if (success) {
+                        logActivity("PASSWORD_CHANGE", "Changed account password");
+                        AlertUtil.showSuccess("Password Changed", "Your password has been updated successfully.");
+                        statusLabel.setText("Password changed successfully");
+                    } else {
+                        AlertUtil.showError("Change Failed", "Failed to change password.");
+                        statusLabel.setText("Password change failed");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    AlertUtil.showError("Error", "Failed to change password: " + e.getMessage());
+                    statusLabel.setText("Error changing password");
+                } finally {
+                    hideProgressAfterDelay();
+                }
+            });
         });
     }
 
@@ -374,7 +469,6 @@ public class PoliceProfileController {
             return;
         }
 
-        // Check if this rank requires approval
         try {
             boolean requiresApproval = policeOfficerDAO.requiresApprovalForRank(newRank);
 
@@ -402,7 +496,6 @@ public class PoliceProfileController {
                                         "Your promotion request has been submitted for admin approval.\n" +
                                                 "You will be notified once reviewed.");
                             } else {
-                                // Auto-approve for lower ranks
                                 AlertUtil.showInfo("Promotion Approved",
                                         "Your promotion to " + newRank + " has been auto-approved!\n" +
                                                 "Please click Save to update your profile.");
@@ -425,13 +518,20 @@ public class PoliceProfileController {
     }
 
     private void loadActivityLog() {
+        showProgress(true);
+        statusLabel.setText("Loading activity log...");
+
         try {
-            List<OfficerActivityLog> activities = activityLogDAO.findByOfficerId(currentOfficer.getId());
-            activityTable.getItems().setAll(activities);
-            statusLabel.setText("Loaded " + activities.size() + " activity records");
+            fullActivityList = activityLogDAO.findByOfficerId(currentOfficer.getId());
+            int totalPages = (int) Math.ceil((double) fullActivityList.size() / pageSize);
+            if (activityPagination != null) activityPagination.setPageCount(Math.max(1, totalPages));
+            updateTablePage();
+            statusLabel.setText("Loaded " + fullActivityList.size() + " activity records");
         } catch (Exception e) {
             e.printStackTrace();
             statusLabel.setText("Error loading activity log");
+        } finally {
+            hideProgressAfterDelay();
         }
     }
 
@@ -456,29 +556,24 @@ public class PoliceProfileController {
             fullNameField.requestFocus();
             return false;
         }
-
         if (!ValidationUtil.isValidEmail(emailField.getText())) {
             AlertUtil.showWarning("Validation Error", "Please enter a valid email address.");
             emailField.requestFocus();
             return false;
         }
-
         if (!ValidationUtil.isNotEmpty(phoneField.getText())) {
             AlertUtil.showWarning("Validation Error", "Phone number is required.");
             phoneField.requestFocus();
             return false;
         }
-
         if (rankComboBox.getValue() == null) {
             AlertUtil.showWarning("Validation Error", "Please select a rank.");
             return false;
         }
-
         if (departmentComboBox.getValue() == null) {
             AlertUtil.showWarning("Validation Error", "Please select a department.");
             return false;
         }
-
         return true;
     }
 
@@ -488,16 +583,20 @@ public class PoliceProfileController {
     }
 
     private void showProgress(boolean show) {
-        if (loadProgress != null) {
-            loadProgress.setVisible(show);
+        if (loadProgress != null) loadProgress.setVisible(show);
+        if (operationProgress != null) {
+            operationProgress.setVisible(show);
+            operationProgress.setProgress(0);
         }
     }
 
     private void hideProgressAfterDelay() {
         PauseTransition delay = new PauseTransition(Duration.seconds(1));
         delay.setOnFinished(event -> {
-            if (loadProgress != null) {
-                loadProgress.setVisible(false);
+            if (loadProgress != null) loadProgress.setVisible(false);
+            if (operationProgress != null) {
+                operationProgress.setVisible(false);
+                operationProgress.setProgress(0);
             }
         });
         delay.play();

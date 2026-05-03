@@ -5,7 +5,8 @@
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.BulkOperationsController">
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.BulkOperationsController"
+            stylesheets="@../css/application.css" styleClass="border-pane">
 
     <top>
         <VBox>
@@ -14,21 +15,19 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="true" style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;"
-                    hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
-            <VBox spacing="20" style="-fx-padding: 20; -fx-background-color: #f0f2f5;"
-                  maxHeight="Infinity" maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity">
+        <ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" styleClass="dashboard-container" alignment="TOP_CENTER">
 
-                <Label text="Bulk Operations" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-                <Label text="Import, export, update, or delete records in bulk" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+                <Label text="Bulk Operations" styleClass="label-title"/>
+                <Label text="Import, export, update, or delete records in bulk" styleClass="label-subtitle"/>
 
                 <Separator/>
 
-                <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40" style="-fx-padding: 5;" VBox.vgrow="NEVER"/>
+                <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
 
                 <!-- Operation Configuration Section -->
-                <TitledPane text="Operation Configuration" expanded="true" style="-fx-font-weight: bold;" VBox.vgrow="NEVER">
-                    <GridPane hgap="15" vgap="15" style="-fx-padding: 15;" maxWidth="Infinity">
+                <TitledPane text="Operation Configuration" expanded="true" style="-fx-font-weight: bold;">
+                    <GridPane hgap="15" vgap="15" style="-fx-padding: 15;" alignment="CENTER">
                         <columnConstraints>
                             <ColumnConstraints minWidth="100" maxWidth="150"/>
                             <ColumnConstraints minWidth="200" maxWidth="400"/>
@@ -36,101 +35,75 @@
                         </columnConstraints>
 
                         <Label text="Operation Type:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <ComboBox fx:id="operationTypeComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="200" promptText="Select operation" maxWidth="300"/>
+                        <ComboBox fx:id="operationTypeComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="200" promptText="Select operation"/>
 
                         <Label text="Entity Type:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <ComboBox fx:id="entityTypeComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="200" promptText="Select entity type" maxWidth="300"/>
+                        <ComboBox fx:id="entityTypeComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="200" promptText="Select entity type"/>
 
                         <Button fx:id="fadeButton" text="Animate" GridPane.rowIndex="0" GridPane.columnIndex="2"
-                                style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 100; -fx-padding: 8 15;">
-                            <effect>
-                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                            </effect>
-                        </Button>
+                                styleClass="button-warning" prefWidth="100"/>
                     </GridPane>
                 </TitledPane>
 
-                <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false" style="-fx-padding: 5;" VBox.vgrow="NEVER"/>
+                <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
                 <!-- File Selection Section -->
-                <TitledPane text="File Selection" expanded="true" style="-fx-font-weight: bold;" VBox.vgrow="NEVER">
-                    <VBox spacing="10" style="-fx-padding: 15;">
+                <TitledPane text="File Selection" expanded="true" style="-fx-font-weight: bold;">
+                    <VBox spacing="10">
                         <HBox spacing="10" alignment="CENTER_LEFT">
-                            <Button fx:id="loadFileButton" text="Load File"
-                                    style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 15;">
-                                <effect>
-                                    <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                                </effect>
-                            </Button>
-                            <Label fx:id="filePathLabel" text="No file selected" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+                            <Button fx:id="loadFileButton" text="Load File" styleClass="button-info"/>
+                            <Label fx:id="filePathLabel" text="No file selected" styleClass="status-text"/>
                         </HBox>
                     </VBox>
                 </TitledPane>
 
-                <!-- Data (JSON Format) Section - Fixed height text area -->
-                <TitledPane text="Data (JSON Format)" expanded="true" style="-fx-font-weight: bold;" VBox.vgrow="NEVER">
-                    <VBox spacing="10" style="-fx-padding: 15;">
-                        <TextArea fx:id="jsonDataArea" prefHeight="200" minHeight="150" maxHeight="300"
-                                  promptText='[
+                <!-- Data (JSON Format) Section -->
+                <TitledPane text="Data (JSON Format)" expanded="true" style="-fx-font-weight: bold;">
+                    <TextArea fx:id="jsonDataArea" prefHeight="200" minHeight="150" maxHeight="300"
+                              promptText='[
   {
-    "username": "john_doe",
+    "username": "nkone",
     "password": "pass123",
-    "full_name": "John Doe",
-    "email": "john@example.com",
-    "address": "123 Main St",
-    "phone": "+266 1234 5678"
+    "full_name": "Nkone Nkone",
+    "email": "nkone@example.com",
+    "address": "123 Ha Leponesa , Mafeteng",
+    "phone": "+266 5432 5678"
   }
 ]'/>
-                    </VBox>
                 </TitledPane>
 
-                <!-- Preview Table for Data - THIS SHOULD EXPAND -->
-                <TitledPane text="Data Preview" expanded="false" style="-fx-font-weight: bold;"
-                            VBox.vgrow="ALWAYS" maxHeight="1.7976931348623157E308">
-                    <VBox spacing="10" style="-fx-padding: 10; -fx-background-color: white;"
-                          VBox.vgrow="ALWAYS" maxHeight="Infinity">
-                        <TableView fx:id="previewTable" VBox.vgrow="ALWAYS"
-                                   prefHeight="300" minHeight="200" maxHeight="1.7976931348623157E308">
+                <!-- Preview Table for Data -->
+                <TitledPane text="Data Preview" expanded="false" style="-fx-font-weight: bold;" VBox.vgrow="ALWAYS">
+                    <VBox spacing="10" VBox.vgrow="ALWAYS">
+                        <TableView fx:id="previewTable" VBox.vgrow="ALWAYS" prefHeight="300" minHeight="200">
                             <columnResizePolicy>
                                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
                             </columnResizePolicy>
                             <placeholder>
-                                <Label text="Load data to preview" style="-fx-text-fill: #7f8c8d; -fx-font-size: 14px;"/>
+                                <Label text="Load data to preview" styleClass="status-text"/>
                             </placeholder>
                         </TableView>
                     </VBox>
                 </TitledPane>
 
                 <!-- Actions Section -->
-                <TitledPane text="Actions" expanded="true" style="-fx-font-weight: bold;" VBox.vgrow="NEVER">
-                    <VBox spacing="15" style="-fx-padding: 15;">
-                        <HBox spacing="15">
-                            <Button fx:id="validateButton" text="Validate Data"
-                                    style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 130; -fx-padding: 8 15;">
-                                <effect>
-                                    <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                                </effect>
-                            </Button>
-                            <Button fx:id="executeButton" text="Execute"
-                                    style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 130; -fx-padding: 8 15;"/>
-                            <Button fx:id="refreshButton" text="Clear Form"
-                                    style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 130; -fx-padding: 8 15;"/>
+                <TitledPane text="Actions" expanded="true" style="-fx-font-weight: bold;">
+                    <VBox spacing="15">
+                        <HBox spacing="15" alignment="CENTER">
+                            <Button fx:id="validateButton" text="Validate Data" styleClass="button-warning" prefWidth="130"/>
+                            <Button fx:id="executeButton" text="Execute" styleClass="button-success" prefWidth="130"/>
+                            <Button fx:id="refreshButton" text="Clear Form" styleClass="button-secondary" prefWidth="130"/>
                         </HBox>
 
                         <Separator/>
 
-                        <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+                        <Label fx:id="statusLabel" styleClass="status-text"/>
                     </VBox>
                 </TitledPane>
 
                 <!-- Back Button -->
-                <HBox spacing="10" alignment="CENTER_RIGHT" VBox.vgrow="NEVER">
-                    <Button fx:id="backButton" text="Back to Dashboard"
-                            style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150; -fx-padding: 8 15;">
-                        <effect>
-                            <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                        </effect>
-                    </Button>
+                <HBox spacing="10" alignment="CENTER_RIGHT">
+                    <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-secondary" prefWidth="150"/>
                 </HBox>
 
             </VBox>
@@ -140,5 +113,4 @@
     <bottom>
         <fx:include source="FooterComponent.fxml"/>
     </bottom>
-
 </BorderPane>

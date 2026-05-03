@@ -5,7 +5,8 @@
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.RoleManagementController">
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.RoleManagementController"
+            stylesheets="@../css/application.css" styleClass="border-pane">
 
     <top>
         <VBox>
@@ -14,42 +15,34 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="false" vbarPolicy="AS_NEEDED" hbarPolicy="NEVER"
-                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
-            <VBox spacing="20" style="-fx-padding: 25; -fx-background-color: #f0f2f5;">
+        <ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" styleClass="dashboard-container" alignment="TOP_CENTER">
 
-                <Label text="Role Based Access Control (RBAC)" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-                <Label text="Manage user roles and their permissions" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+                <Label text="Role Based Access Control (RBAC)" styleClass="label-title"/>
+                <Label text="Manage user roles and their permissions" styleClass="label-subtitle"/>
 
                 <Separator/>
 
                 <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
 
+                <!-- Role Selection Section -->
                 <TitledPane text="Role Selection" expanded="true" style="-fx-font-weight: bold;">
-                    <GridPane hgap="10" vgap="10" style="-fx-padding: 10;">
-                        <Label text="Select Role:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <ComboBox fx:id="roleComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="200" promptText="Choose a role"/>
-                        <Button fx:id="refreshButton" text="Load Permissions" GridPane.rowIndex="0" GridPane.columnIndex="2" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
-                            <effect>
-                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                            </effect>
-                        </Button>
-                        <Button fx:id="fadeButton" text="Animate" GridPane.rowIndex="0" GridPane.columnIndex="3" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
-                            <effect>
-                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                            </effect>
-                        </Button>
-                    </GridPane>
+                    <HBox spacing="15" alignment="CENTER" style="-fx-padding: 15;">
+                        <Label text="Select Role:" style="-fx-font-weight: bold;"/>
+                        <ComboBox fx:id="roleComboBox" prefWidth="200" promptText="Choose a role"/>
+                        <Button fx:id="refreshButton" text="Load Permissions" styleClass="button-primary"/>
+                        <Button fx:id="fadeButton" text="Animate" styleClass="button-warning"/>
+                    </HBox>
                 </TitledPane>
 
                 <Separator/>
 
                 <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
-                <TitledPane text="Permissions" expanded="true" style="-fx-font-weight: bold; -fx-background-color: white;">
-                    <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 10;">
-                        <TableView fx:id="permissionsTable" prefHeight="450" minHeight="300" VBox.vgrow="ALWAYS"
-                                   style="-fx-background-color: white; -fx-border-color: #dddddd; -fx-border-width: 1; -fx-border-radius: 5;">
+                <!-- Permissions Table Section -->
+                <TitledPane text="Permissions" expanded="true" style="-fx-font-weight: bold;">
+                    <VBox spacing="10">
+                        <TableView fx:id="permissionsTable" VBox.vgrow="ALWAYS" prefHeight="450" minHeight="300">
                             <columns>
                                 <TableColumn fx:id="permissionKeyColumn" text="Permission" minWidth="400"/>
                                 <TableColumn fx:id="permissionValueColumn" text="Granted" minWidth="100" maxWidth="150"/>
@@ -58,19 +51,20 @@
                                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
                             </columnResizePolicy>
                             <placeholder>
-                                <Label text="No permissions found for selected role" style="-fx-text-fill: #7f8c8d; -fx-font-size: 14px;"/>
+                                <Label text="No permissions found for selected role" styleClass="status-text"/>
                             </placeholder>
                         </TableView>
 
-                        <Label fx:id="permissionCountLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+                        <Label fx:id="permissionCountLabel" styleClass="status-text"/>
                     </VBox>
                 </TitledPane>
 
                 <Separator/>
 
-                <TitledPane text="Manage Permission" expanded="true" style="-fx-font-weight: bold; -fx-background-color: white;">
-                    <VBox spacing="15" style="-fx-padding: 10; -fx-background-color: white;">
-                        <GridPane hgap="10" vgap="10">
+                <!-- Manage Permission Section -->
+                <TitledPane text="Manage Permission" expanded="true" style="-fx-font-weight: bold;">
+                    <VBox spacing="15">
+                        <GridPane hgap="15" vgap="10" alignment="CENTER">
                             <Label text="Permission:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
                             <ComboBox fx:id="permissionComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="350" promptText="Select a permission"/>
 
@@ -78,26 +72,16 @@
                             <CheckBox fx:id="grantCheckBox" text="Grant Permission" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-font-weight: bold;"/>
 
                             <HBox spacing="10" GridPane.rowIndex="2" GridPane.columnIndex="1">
-                                <Button fx:id="applyButton" text="Apply Changes" prefWidth="150"
-                                        style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
-                                    <effect>
-                                        <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                                    </effect>
-                                </Button>
+                                <Button fx:id="applyButton" text="Apply Changes" prefWidth="150" styleClass="button-success"/>
                             </HBox>
                         </GridPane>
                     </VBox>
                 </TitledPane>
 
-                <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+                <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER"/>
 
                 <HBox spacing="10" alignment="CENTER_RIGHT">
-                    <Button fx:id="backButton" text="Back to Dashboard" prefWidth="160"
-                            style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
-                        <effect>
-                            <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                        </effect>
-                    </Button>
+                    <Button fx:id="backButton" text="Back to Dashboard" prefWidth="160" styleClass="button-secondary"/>
                 </HBox>
 
             </VBox>
@@ -107,5 +91,4 @@
     <bottom>
         <fx:include source="FooterComponent.fxml"/>
     </bottom>
-
 </BorderPane>

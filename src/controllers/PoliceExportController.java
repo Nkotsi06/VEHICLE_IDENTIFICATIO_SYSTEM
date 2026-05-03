@@ -2,6 +2,7 @@ package controllers;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
@@ -19,15 +20,19 @@ import java.util.Map;
 public class PoliceExportController {
 
     @FXML private ComboBox<String> exportTypeComboBox;
+    @FXML private ComboBox<String> formatComboBox;
     @FXML private DatePicker startDatePicker;
     @FXML private DatePicker endDatePicker;
     @FXML private TextField fileNameField;
     @FXML private Button exportButton;
+    @FXML private Button previewButton;
+    @FXML private Button clearButton;
     @FXML private Button backButton;
     @FXML private Button fadeButton;
     @FXML private Label statusLabel;
     @FXML private ProgressIndicator loadProgress;
     @FXML private ProgressBar operationProgress;
+    @FXML private TableView<Map<String, Object>> previewTable;
 
     private ReportGeneratorDAO reportDAO;
 
@@ -47,6 +52,10 @@ public class PoliceExportController {
         );
         exportTypeComboBox.setValue("Stolen Vehicles Report");
 
+        // Format options
+        formatComboBox.getItems().addAll("CSV", "Excel", "PDF", "JSON");
+        formatComboBox.setValue("CSV");
+
         startDatePicker.setValue(LocalDate.now().minusMonths(1));
         endDatePicker.setValue(LocalDate.now());
         fileNameField.setText("police_export");
@@ -58,42 +67,105 @@ public class PoliceExportController {
 
     private void setupButtonHandlers() {
         exportButton.setOnAction(event -> handleExport());
+        previewButton.setOnAction(event -> handlePreview());
+        clearButton.setOnAction(event -> handleClear());
         backButton.setOnAction(event -> SceneManager.getInstance().switchToPoliceView());
         if (fadeButton != null) {
             fadeButton.setOnAction(event -> showFadeAnimation());
         }
     }
 
-    private void applyVisualEffects() {
-        DropShadow dropShadow = new DropShadow();
-        dropShadow.setRadius(5.0);
-        dropShadow.setOffsetX(2.0);
-        dropShadow.setOffsetY(2.0);
-        dropShadow.setColor(Color.rgb(0, 0, 0, 0.3));
+    private void handlePreview() {
+        String exportType = exportTypeComboBox.getValue();
+        LocalDate startDate = startDatePicker.getValue();
+        LocalDate endDate = endDatePicker.getValue();
 
-        exportButton.setEffect(dropShadow);
-        backButton.setEffect(dropShadow);
-        if (fadeButton != null) fadeButton.setEffect(dropShadow);
+        showProgress(true);
+        statusLabel.setText("Loading preview...");
+
+        try {
+            List<Map<String, Object>> data = null;
+
+            switch (exportType) {
+                case "Stolen Vehicles Report":
+                    data = reportDAO.generateStolenVehicleReport();
+                    break;
+                case "Violations Report":
+                    if (startDate != null && endDate != null) {
+                        data = reportDAO.generateViolationReport(startDate, endDate);
+                    } else {
+                        data = reportDAO.generateViolationReport(LocalDate.now().minusMonths(1), LocalDate.now());
+                    }
+                    break;
+                case "Warrants Report":
+                    data = reportDAO.generateWarrantsReport();
+                    break;
+                case "BOLO Alerts Report":
+                    data = reportDAO.generateBOLOAlertsReport();
+                    break;
+                case "Expired Documents Report":
+                    data = reportDAO.generateExpiredDocumentsReport();
+                    break;
+                case "Geofence Alerts Report":
+                    data = reportDAO.generateGeofenceAlertsReport();
+                    break;
+                case "Officer Activity Report":
+                    data = reportDAO.generateOfficerActivityReport();
+                    break;
+                default:
+                    break;
+            }
+
+            if (data != null && !data.isEmpty()) {
+                previewTable.getColumns().clear();
+                updatePreviewTable(data);
+                statusLabel.setText("Preview loaded: " + data.size() + " records");
+            } else {
+                previewTable.getColumns().clear();
+                previewTable.setPlaceholder(new Label("No data found for selected criteria"));
+                statusLabel.setText("No data to preview");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            statusLabel.setText("Preview failed: " + e.getMessage());
+            AlertUtil.showError("Preview Failed", "An error occurred during preview.");
+        } finally {
+            hideProgress();
+        }
     }
 
-    private void showFadeAnimation() {
-        if (fadeButton != null) {
-            FadeTransition fadeTransition = new FadeTransition(Duration.seconds(1.5), fadeButton);
-            fadeTransition.setFromValue(1.0);
-            fadeTransition.setToValue(0.2);
-            fadeTransition.setCycleCount(4);
-            fadeTransition.setAutoReverse(true);
-            fadeTransition.play();
-            statusLabel.setText("Animation played!");
+    private void updatePreviewTable(List<Map<String, Object>> data) {
+        if (data == null || data.isEmpty()) return;
 
-            PauseTransition reset = new PauseTransition(Duration.seconds(2));
-            reset.setOnFinished(e -> statusLabel.setText("Ready"));
-            reset.play();
+        Map<String, Object> firstRow = data.get(0);
+        for (String key : firstRow.keySet()) {
+            TableColumn<Map<String, Object>, String> column = new TableColumn<>(key);
+            column.setCellValueFactory(cellData ->
+                    new javafx.beans.property.SimpleStringProperty(
+                            cellData.getValue().get(key) != null ? cellData.getValue().get(key).toString() : ""
+                    )
+            );
+            previewTable.getColumns().add(column);
         }
+        previewTable.getItems().setAll(data);
+    }
+
+    private void handleClear() {
+        exportTypeComboBox.setValue("Stolen Vehicles Report");
+        formatComboBox.setValue("CSV");
+        startDatePicker.setValue(LocalDate.now().minusMonths(1));
+        endDatePicker.setValue(LocalDate.now());
+        fileNameField.setText("police_export");
+        previewTable.getColumns().clear();
+        previewTable.getItems().clear();
+        statusLabel.setText("Form cleared");
+        AlertUtil.showSuccess("Form Cleared", "All selections have been reset.");
     }
 
     private void handleExport() {
         String exportType = exportTypeComboBox.getValue();
+        String format = formatComboBox.getValue();
         LocalDate startDate = startDatePicker.getValue();
         LocalDate endDate = endDatePicker.getValue();
         String fileName = fileNameField.getText().trim();
@@ -159,7 +231,11 @@ public class PoliceExportController {
             }
 
             if (data != null && !data.isEmpty()) {
-                ExportUtil.exportToCSV(data, fileName, headers, fields);
+                if ("CSV".equals(format)) {
+                    ExportUtil.exportToCSV(data, fileName, headers, fields);
+                } else {
+                    AlertUtil.showInfo("Export", format + " export will be implemented soon.");
+                }
                 statusLabel.setText("Export completed successfully!");
                 AlertUtil.showSuccess("Export Complete", "File exported successfully.");
             } else {
@@ -173,6 +249,36 @@ public class PoliceExportController {
             AlertUtil.showError("Export Failed", "An error occurred during export.");
         } finally {
             hideProgress();
+        }
+    }
+
+    private void applyVisualEffects() {
+        DropShadow dropShadow = new DropShadow();
+        dropShadow.setRadius(5.0);
+        dropShadow.setOffsetX(2.0);
+        dropShadow.setOffsetY(2.0);
+        dropShadow.setColor(Color.rgb(0, 0, 0, 0.3));
+
+        exportButton.setEffect(dropShadow);
+        previewButton.setEffect(dropShadow);
+        clearButton.setEffect(dropShadow);
+        backButton.setEffect(dropShadow);
+        if (fadeButton != null) fadeButton.setEffect(dropShadow);
+    }
+
+    private void showFadeAnimation() {
+        if (fadeButton != null) {
+            FadeTransition fadeTransition = new FadeTransition(Duration.seconds(1.5), fadeButton);
+            fadeTransition.setFromValue(1.0);
+            fadeTransition.setToValue(0.2);
+            fadeTransition.setCycleCount(4);
+            fadeTransition.setAutoReverse(true);
+            fadeTransition.play();
+            statusLabel.setText("Animation played!");
+
+            PauseTransition reset = new PauseTransition(Duration.seconds(2));
+            reset.setOnFinished(e -> statusLabel.setText("Ready"));
+            reset.play();
         }
     }
 

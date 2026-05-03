@@ -19,7 +19,9 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 
 public class WorkshopApprovalController {
 
@@ -58,12 +60,19 @@ public class WorkshopApprovalController {
 
     @FXML private ProgressIndicator loadProgress;
     @FXML private ProgressBar operationProgress;
+    @FXML private Pagination pendingPagination;
+    @FXML private Pagination approvedPagination;
 
     private ObservableList<Map<String, Object>> pendingList;
     private ObservableList<Map<String, Object>> approvedList;
+    private List<Map<String, Object>> fullPendingData;
+    private List<Map<String, Object>> fullApprovedData;
     private Map<String, Object> selectedWorkshop;
     private AuditDAO auditDAO;
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private int currentPendingPage = 0;
+    private int currentApprovedPage = 0;
+    private int pageSize = 20;
 
     @FXML
     public void initialize() {
@@ -73,6 +82,7 @@ public class WorkshopApprovalController {
 
         setupTableColumns();
         setupButtonHandlers();
+        setupPagination();
         applyVisualEffects();
         loadData();
 
@@ -114,6 +124,39 @@ public class WorkshopApprovalController {
                 new javafx.beans.property.SimpleStringProperty(getStringValue(cellData.getValue(), "approved_date")));
     }
 
+    private void setupPagination() {
+        if (pendingPagination != null) {
+            pendingPagination.currentPageIndexProperty().addListener((obs, old, newPage) -> {
+                currentPendingPage = newPage.intValue();
+                updatePendingPage();
+            });
+        }
+        if (approvedPagination != null) {
+            approvedPagination.currentPageIndexProperty().addListener((obs, old, newPage) -> {
+                currentApprovedPage = newPage.intValue();
+                updateApprovedPage();
+            });
+        }
+    }
+
+    private void updatePendingPage() {
+        if (fullPendingData == null || fullPendingData.isEmpty()) return;
+        int start = currentPendingPage * pageSize;
+        int end = Math.min(start + pageSize, fullPendingData.size());
+        if (start < fullPendingData.size()) {
+            pendingList.setAll(fullPendingData.subList(start, end));
+        }
+    }
+
+    private void updateApprovedPage() {
+        if (fullApprovedData == null || fullApprovedData.isEmpty()) return;
+        int start = currentApprovedPage * pageSize;
+        int end = Math.min(start + pageSize, fullApprovedData.size());
+        if (start < fullApprovedData.size()) {
+            approvedList.setAll(fullApprovedData.subList(start, end));
+        }
+    }
+
     private String getStringValue(Map<String, Object> map, String key) {
         Object value = map.get(key);
         return value != null ? value.toString() : "";
@@ -122,7 +165,13 @@ public class WorkshopApprovalController {
     private void setupButtonHandlers() {
         approveButton.setOnAction(event -> handleApprove());
         rejectButton.setOnAction(event -> handleReject());
-        refreshButton.setOnAction(event -> loadData());
+        refreshButton.setOnAction(event -> {
+            loadData();
+            statusLabel.setText("Data refreshed");
+            PauseTransition reset = new PauseTransition(Duration.seconds(2));
+            reset.setOnFinished(e -> statusLabel.setText("Ready"));
+            reset.play();
+        });
         backButton.setOnAction(event -> SceneManager.getInstance().switchToAdminView());
         if (fadeButton != null) fadeButton.setOnAction(event -> showFadeAnimation());
     }
@@ -175,11 +224,12 @@ public class WorkshopApprovalController {
 
     private void loadPendingWorkshops() {
         pendingList.clear();
+        fullPendingData = new ArrayList<>();
         String sql = "SELECT w.id, w.workshop_name, w.license_number, w.phone, w.email, w.address, w.created_at, " +
                 "u.full_name as owner_name " +
                 "FROM workshops w " +
                 "JOIN users u ON w.user_id = u.id " +
-                "WHERE w.is_approved = false " +
+                "WHERE w.is_approved = false OR w.is_approved IS NULL " +
                 "ORDER BY w.created_at ASC";
 
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
@@ -189,30 +239,40 @@ public class WorkshopApprovalController {
             while (rs.next()) {
                 Map<String, Object> row = new HashMap<>();
                 row.put("id", rs.getInt("id"));
-                row.put("workshop_name", rs.getString("workshop_name"));
-                row.put("owner_name", rs.getString("owner_name"));
-                row.put("license_number", rs.getString("license_number"));
-                row.put("phone", rs.getString("phone"));
-                row.put("email", rs.getString("email"));
-                row.put("address", rs.getString("address"));
+                row.put("workshop_name", rs.getString("workshop_name") != null ? rs.getString("workshop_name") : "N/A");
+                row.put("owner_name", rs.getString("owner_name") != null ? rs.getString("owner_name") : "N/A");
+                row.put("license_number", rs.getString("license_number") != null ? rs.getString("license_number") : "N/A");
+                row.put("phone", rs.getString("phone") != null ? rs.getString("phone") : "N/A");
+                row.put("email", rs.getString("email") != null ? rs.getString("email") : "N/A");
+                row.put("address", rs.getString("address") != null ? rs.getString("address") : "N/A");
                 row.put("registered_date", rs.getTimestamp("created_at") != null ?
-                        rs.getTimestamp("created_at").toLocalDateTime().format(formatter) : "");
-                pendingList.add(row);
+                        rs.getTimestamp("created_at").toLocalDateTime().format(formatter) : "N/A");
+                fullPendingData.add(row);
             }
+
+            int totalPages = (int) Math.ceil((double) fullPendingData.size() / pageSize);
+            if (pendingPagination != null) pendingPagination.setPageCount(Math.max(1, totalPages));
+            updatePendingPage();
+
+            if (fullPendingData.isEmpty()) {
+                pendingWorkshopsTable.setPlaceholder(new Label("No pending workshops found"));
+            }
+
         } catch (SQLException e) {
             e.printStackTrace();
+            statusLabel.setText("Error loading pending workshops: " + e.getMessage());
         }
     }
 
     private void loadApprovedWorkshops() {
         approvedList.clear();
+        fullApprovedData = new ArrayList<>();
         String sql = "SELECT w.id, w.workshop_name, w.license_number, w.phone, w.email, w.updated_at as approved_date, " +
                 "u.full_name as owner_name " +
                 "FROM workshops w " +
                 "JOIN users u ON w.user_id = u.id " +
                 "WHERE w.is_approved = true " +
-                "ORDER BY w.updated_at DESC " +
-                "LIMIT 50";
+                "ORDER BY w.updated_at DESC";
 
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -220,17 +280,27 @@ public class WorkshopApprovalController {
 
             while (rs.next()) {
                 Map<String, Object> row = new HashMap<>();
-                row.put("workshop_name", rs.getString("workshop_name"));
-                row.put("owner_name", rs.getString("owner_name"));
-                row.put("license_number", rs.getString("license_number"));
-                row.put("phone", rs.getString("phone"));
-                row.put("email", rs.getString("email"));
+                row.put("workshop_name", rs.getString("workshop_name") != null ? rs.getString("workshop_name") : "N/A");
+                row.put("owner_name", rs.getString("owner_name") != null ? rs.getString("owner_name") : "N/A");
+                row.put("license_number", rs.getString("license_number") != null ? rs.getString("license_number") : "N/A");
+                row.put("phone", rs.getString("phone") != null ? rs.getString("phone") : "N/A");
+                row.put("email", rs.getString("email") != null ? rs.getString("email") : "N/A");
                 row.put("approved_date", rs.getTimestamp("approved_date") != null ?
-                        rs.getTimestamp("approved_date").toLocalDateTime().format(formatter) : "");
-                approvedList.add(row);
+                        rs.getTimestamp("approved_date").toLocalDateTime().format(formatter) : "N/A");
+                fullApprovedData.add(row);
             }
+
+            int totalPages = (int) Math.ceil((double) fullApprovedData.size() / pageSize);
+            if (approvedPagination != null) approvedPagination.setPageCount(Math.max(1, totalPages));
+            updateApprovedPage();
+
+            if (fullApprovedData.isEmpty()) {
+                approvedWorkshopsTable.setPlaceholder(new Label("No approved workshops found"));
+            }
+
         } catch (SQLException e) {
             e.printStackTrace();
+            statusLabel.setText("Error loading approved workshops: " + e.getMessage());
         }
     }
 
@@ -250,13 +320,12 @@ public class WorkshopApprovalController {
             return;
         }
 
-        int workshopId = (int) selectedWorkshop.get("id");
+        int workshopId = (Integer) selectedWorkshop.get("id");
         String workshopName = getStringValue(selectedWorkshop, "workshop_name");
         String notes = notesArea.getText().trim();
 
         boolean confirmed = AlertUtil.showConfirmation("Approve Workshop",
-                "Approve workshop '" + workshopName + "'?\n\n" +
-                        "This will allow the workshop to access the system.");
+                "Approve workshop '" + workshopName + "'?\n\nThis will allow the workshop to access the system.");
 
         if (confirmed) {
             showProgress(true);
@@ -274,13 +343,10 @@ public class WorkshopApprovalController {
                     if (result > 0) {
                         updateProgress(1.0);
 
-                        // Log workshop approval
                         int currentUserId = SessionManager.getInstance().getUserId();
                         auditDAO.logAction(currentUserId, "APPROVE_WORKSHOP: " + workshopName + " (ID: " + workshopId + ")", "127.0.0.1");
 
-                        AlertUtil.showSuccess("Workshop Approved",
-                                "Workshop '" + workshopName + "' has been approved.\n" +
-                                        "The workshop owner has been notified.");
+                        AlertUtil.showSuccess("Workshop Approved", "Workshop '" + workshopName + "' has been approved.");
                         statusLabel.setText("Workshop approved successfully");
                         loadData();
                         clearDetails();
@@ -305,7 +371,7 @@ public class WorkshopApprovalController {
             return;
         }
 
-        int workshopId = (int) selectedWorkshop.get("id");
+        int workshopId = (Integer) selectedWorkshop.get("id");
         String workshopName = getStringValue(selectedWorkshop, "workshop_name");
         String notes = notesArea.getText().trim();
 
@@ -316,8 +382,7 @@ public class WorkshopApprovalController {
         }
 
         boolean confirmed = AlertUtil.showConfirmation("Reject Workshop",
-                "Reject workshop '" + workshopName + "'?\n\n" +
-                        "This will delete the workshop registration.");
+                "Reject workshop '" + workshopName + "'?\n\nThis will delete the workshop registration.");
 
         if (confirmed) {
             showProgress(true);
@@ -355,13 +420,10 @@ public class WorkshopApprovalController {
                 updateProgress(0.8);
                 updateProgress(1.0);
 
-                // Log workshop rejection
                 int currentUserId = SessionManager.getInstance().getUserId();
                 auditDAO.logAction(currentUserId, "REJECT_WORKSHOP: " + workshopName + " (ID: " + workshopId + ") - Reason: " + notes, "127.0.0.1");
 
-                AlertUtil.showSuccess("Workshop Rejected",
-                        "Workshop '" + workshopName + "' has been rejected.\n" +
-                                "The registration has been removed.");
+                AlertUtil.showSuccess("Workshop Rejected", "Workshop '" + workshopName + "' has been rejected.");
                 statusLabel.setText("Workshop rejected");
                 loadData();
                 clearDetails();

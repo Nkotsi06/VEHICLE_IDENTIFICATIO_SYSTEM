@@ -11,8 +11,8 @@ import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import utils.AlertUtil;
 import utils.SceneManager;
-import utils.ExportUtil;
 import utils.SessionManager;
+import utils.ExportUtil;
 import dao.ReportGeneratorDAO;
 
 import java.time.LocalDate;
@@ -20,7 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
-public class ReportController {
+public class PoliceReportController {
 
     @FXML private ComboBox<String> reportTypeComboBox;
     @FXML private DatePicker startDatePicker;
@@ -42,14 +42,21 @@ public class ReportController {
 
     private ReportGeneratorDAO reportDAO;
     private ObservableList<Map<String, Object>> reportData;
-    private List<Map<String, Object>> fullReportData;
     private String currentReportType;
+    private List<Map<String, Object>> fullReportData;
     private int currentPage = 0;
     private int pageSize = 20;
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @FXML
     public void initialize() {
+        // Check if user is POLICE
+        if (!"POLICE".equals(SessionManager.getInstance().getUserRole())) {
+            AlertUtil.showError("Access Denied", "Only police officers can access this report section.");
+            SceneManager.getInstance().switchToDashboard();
+            return;
+        }
+
         reportDAO = new ReportGeneratorDAO();
         reportData = FXCollections.observableArrayList();
 
@@ -59,21 +66,21 @@ public class ReportController {
         setupPagination();
         applyVisualEffects();
 
-        statusLabel.setText("Ready");
+        statusLabel.setText("Ready - Police Reports");
         reportTable.setItems(reportData);
     }
 
     private void setupReportTypes() {
         reportTypeComboBox.getItems().addAll(
-                "Vehicle Report",
-                "Violation Report",
-                "Financial Report",
-                "Stolen Vehicle Report",
-                "Expired Documents Report",
-                "Workshop Performance Report",
-                "Summary Statistics"
+                "Stolen Vehicles Report",
+                "Violations Report",
+                "Warrants Report",
+                "BOLO Alerts Report",
+                "Geofence Alerts Report",
+                "Officer Activity Report",
+                "Expired Documents Report"
         );
-        reportTypeComboBox.setValue("Vehicle Report");
+        reportTypeComboBox.setValue("Stolen Vehicles Report");
     }
 
     private void setupDatePickers() {
@@ -93,7 +100,6 @@ public class ReportController {
     private void updateTablePage() {
         if (fullReportData == null || fullReportData.isEmpty()) {
             reportData.clear();
-            if (recordCountLabel != null) recordCountLabel.setText("Total Records: 0");
             return;
         }
         int start = currentPage * pageSize;
@@ -107,7 +113,7 @@ public class ReportController {
         generateButton.setOnAction(event -> handleGenerate());
         exportButton.setOnAction(event -> handleExport());
         printButton.setOnAction(event -> handlePrint());
-        backButton.setOnAction(event -> handleBack());
+        backButton.setOnAction(event -> SceneManager.getInstance().switchToPoliceView());
 
         if (clearButton != null) {
             clearButton.setOnAction(event -> clearForm());
@@ -123,8 +129,7 @@ public class ReportController {
         LocalDate startDate = startDatePicker.getValue();
         LocalDate endDate = endDatePicker.getValue();
 
-        // Validate dates for reports that need them
-        if (!"Summary Statistics".equals(currentReportType)) {
+        if ("Violations Report".equals(currentReportType)) {
             if (startDate == null || endDate == null) {
                 AlertUtil.showWarning("Date Required", "Please select both start and end dates.");
                 return;
@@ -144,38 +149,34 @@ public class ReportController {
             List<Map<String, Object>> data = null;
 
             switch (currentReportType) {
-                case "Vehicle Report":
-                    data = reportDAO.generateVehicleReport(startDate, endDate);
-                    displayVehicleReport();
-                    break;
-                case "Violation Report":
-                    data = reportDAO.generateViolationReport(startDate, endDate);
-                    displayViolationReport();
-                    break;
-                case "Financial Report":
-                    data = reportDAO.generateFinancialReport(startDate, endDate);
-                    displayFinancialReport();
-                    break;
-                case "Stolen Vehicle Report":
+                case "Stolen Vehicles Report":
                     data = reportDAO.generateStolenVehicleReport();
-                    displayStolenVehicleReport();
+                    displayStolenVehicleReport(data);
+                    break;
+                case "Violations Report":
+                    data = reportDAO.generateViolationReport(startDate, endDate);
+                    displayViolationReport(data);
+                    break;
+                case "Warrants Report":
+                    data = reportDAO.generateWarrantsReport();
+                    displayWarrantsReport(data);
+                    break;
+                case "BOLO Alerts Report":
+                    data = reportDAO.generateBOLOAlertsReport();
+                    displayBOLOAlertsReport(data);
+                    break;
+                case "Geofence Alerts Report":
+                    data = reportDAO.generateGeofenceAlertsReport();
+                    displayGeofenceAlertsReport(data);
+                    break;
+                case "Officer Activity Report":
+                    data = reportDAO.generateOfficerActivityReport();
+                    displayOfficerActivityReport(data);
                     break;
                 case "Expired Documents Report":
                     data = reportDAO.generateExpiredDocumentsReport();
-                    displayExpiredDocumentsReport();
+                    displayExpiredDocumentsReport(data);
                     break;
-                case "Workshop Performance Report":
-                    data = reportDAO.generateWorkshopPerformanceReport();
-                    displayWorkshopPerformanceReport();
-                    break;
-                case "Summary Statistics":
-                    updateProgress(0.6);
-                    Map<String, Object> stats = reportDAO.generateSummaryStatistics();
-                    displaySummaryStatistics(stats);
-                    updateProgress(1.0);
-                    statusLabel.setText("Summary statistics generated");
-                    hideProgressAfterDelay();
-                    return;
                 default:
                     AlertUtil.showWarning("Not Implemented", "This report type is coming soon.");
                     hideProgressAfterDelay();
@@ -218,51 +219,45 @@ public class ReportController {
         }
     }
 
-    private void displayVehicleReport() {
-        setupTableColumns(new String[]{"registration_number", "make", "model", "year", "owner_name", "status_name", "service_count", "total_service_cost"},
-                new String[]{"Registration", "Make", "Model", "Year", "Owner", "Status", "Services", "Total Cost (M)"});
-        centerTableColumns();
-    }
-
-    private void displayViolationReport() {
-        setupTableColumns(new String[]{"registration_number", "make", "model", "violation_type", "violation_date", "fine_amount", "payment_status", "officer_name"},
-                new String[]{"Registration", "Make", "Model", "Violation", "Date", "Fine (M)", "Status", "Officer"});
-        centerTableColumns();
-    }
-
-    private void displayFinancialReport() {
-        setupTableColumns(new String[]{"type", "date", "amount", "reference"},
-                new String[]{"Transaction Type", "Date", "Amount (M)", "Reference"});
-        centerTableColumns();
-
-        // Calculate total for financial report
-        if (fullReportData != null) {
-            double total = 0;
-            for (Map<String, Object> row : fullReportData) {
-                Object amount = row.get("amount");
-                if (amount instanceof Number) {
-                    total += ((Number) amount).doubleValue();
-                }
-            }
-            reportSummaryArea.appendText("\n\nTotal Amount: M " + String.format("%,.2f", total));
-        }
-    }
-
-    private void displayStolenVehicleReport() {
+    private void displayStolenVehicleReport(List<Map<String, Object>> data) {
         setupTableColumns(new String[]{"registration_number", "make", "model", "reported_date", "case_number", "assigned_officer", "status"},
                 new String[]{"Registration", "Make", "Model", "Reported Date", "Case Number", "Officer", "Status"});
         centerTableColumns();
     }
 
-    private void displayExpiredDocumentsReport() {
-        setupTableColumns(new String[]{"registration_number", "document_type", "expiry_date", "days_remaining", "expiry_status"},
-                new String[]{"Registration", "Document Type", "Expiry Date", "Days Remaining", "Status"});
+    private void displayViolationReport(List<Map<String, Object>> data) {
+        setupTableColumns(new String[]{"registration_number", "make", "model", "violation_type", "violation_date", "fine_amount", "payment_status", "officer_name"},
+                new String[]{"Registration", "Make", "Model", "Violation", "Date", "Fine (M)", "Status", "Officer"});
         centerTableColumns();
     }
 
-    private void displayWorkshopPerformanceReport() {
-        setupTableColumns(new String[]{"workshop_name", "service_count", "total_revenue", "average_service_cost", "avg_rating"},
-                new String[]{"Workshop", "Services", "Total Revenue (M)", "Avg Cost (M)", "Rating"});
+    private void displayWarrantsReport(List<Map<String, Object>> data) {
+        setupTableColumns(new String[]{"registration_number", "violation_type", "issue_date", "expiry_date", "judge_name", "status"},
+                new String[]{"Registration", "Violation", "Issue Date", "Expiry Date", "Judge", "Status"});
+        centerTableColumns();
+    }
+
+    private void displayBOLOAlertsReport(List<Map<String, Object>> data) {
+        setupTableColumns(new String[]{"registration_number", "message", "priority", "alert_date", "expiry_date", "status"},
+                new String[]{"Registration", "BOLO Message", "Priority", "Alert Date", "Expiry Date", "Status"});
+        centerTableColumns();
+    }
+
+    private void displayGeofenceAlertsReport(List<Map<String, Object>> data) {
+        setupTableColumns(new String[]{"zone_name", "registration_number", "alert_type", "alert_timestamp", "is_notified"},
+                new String[]{"Zone", "Vehicle", "Alert Type", "Timestamp", "Notified"});
+        centerTableColumns();
+    }
+
+    private void displayOfficerActivityReport(List<Map<String, Object>> data) {
+        setupTableColumns(new String[]{"officer_name", "action", "registration_number", "timestamp"},
+                new String[]{"Officer", "Action", "Vehicle", "Timestamp"});
+        centerTableColumns();
+    }
+
+    private void displayExpiredDocumentsReport(List<Map<String, Object>> data) {
+        setupTableColumns(new String[]{"registration_number", "document_type", "expiry_date", "days_remaining", "expiry_status"},
+                new String[]{"Registration", "Document Type", "Expiry Date", "Days Remaining", "Status"});
         centerTableColumns();
     }
 
@@ -292,7 +287,7 @@ public class ReportController {
     private String formatCellValue(Object value, String key) {
         if (value == null) return "";
         if (value instanceof Number) {
-            if (key.contains("amount") || key.contains("cost") || key.contains("fine") || key.contains("revenue")) {
+            if (key.contains("amount") || key.contains("fine")) {
                 return String.format("M %,.2f", ((Number) value).doubleValue());
             }
             return value.toString();
@@ -300,39 +295,20 @@ public class ReportController {
         if (value instanceof LocalDate) {
             return ((LocalDate) value).format(formatter);
         }
+        if (value instanceof java.time.LocalDateTime) {
+            return ((java.time.LocalDateTime) value).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        }
         return value.toString();
-    }
-
-    private void displaySummaryStatistics(Map<String, Object> stats) {
-        reportTable.getColumns().clear();
-        reportData.clear();
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("═══════════════════════════════════════════════════════════════════\n");
-        sb.append("                    SYSTEM SUMMARY STATISTICS                      \n");
-        sb.append("═══════════════════════════════════════════════════════════════════\n\n");
-        sb.append("  📊 Total Vehicles:          ").append(stats.getOrDefault("total_vehicles", 0)).append("\n");
-        sb.append("  👥 Total Customers:         ").append(stats.getOrDefault("total_customers", 0)).append("\n");
-        sb.append("  🚗 Active Stolen Vehicles:  ").append(stats.getOrDefault("stolen_count", 0)).append("\n");
-        sb.append("  📄 Active Insurance:        ").append(stats.getOrDefault("active_insurance", 0)).append("\n");
-        sb.append("  💰 Unpaid Fines:            M ").append(String.format("%,.2f", stats.getOrDefault("unpaid_fines", 0.0))).append("\n");
-        sb.append("  ❓ Pending Queries:         ").append(stats.getOrDefault("pending_queries", 0)).append("\n");
-        sb.append("  🔧 Pending Workshops:       ").append(stats.getOrDefault("pending_workshops", 0)).append("\n");
-        sb.append("  📋 Pending Claims:          ").append(stats.getOrDefault("pending_claims", 0)).append("\n");
-
-        reportSummaryArea.setText(sb.toString());
-        recordCountLabel.setText("Summary Statistics");
-        exportButton.setDisable(true);
-        printButton.setDisable(false);
-        statusLabel.setText("Summary statistics generated");
     }
 
     private String generateSummaryText(String reportType, LocalDate startDate, LocalDate endDate, int rowCount) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Report generated successfully.\n");
+        sb.append("Police Report Generated Successfully\n");
         sb.append("━".repeat(40)).append("\n");
         sb.append("Report Type:    ").append(reportType).append("\n");
-        sb.append("Date Range:     ").append(startDate.format(formatter)).append(" to ").append(endDate.format(formatter)).append("\n");
+        if (startDate != null && endDate != null && "Violations Report".equals(reportType)) {
+            sb.append("Date Range:     ").append(startDate.format(formatter)).append(" to ").append(endDate.format(formatter)).append("\n");
+        }
         sb.append("Generated By:   ").append(SessionManager.getInstance().getFullName()).append("\n");
         sb.append("Generated:      ").append(LocalDate.now().format(formatter)).append("\n");
         sb.append("Total Records:  ").append(rowCount).append("\n");
@@ -351,22 +327,18 @@ public class ReportController {
         updateProgress(0.3);
 
         try {
-            String fileName = currentReportType.toLowerCase().replace(" ", "_");
+            String fileName = "police_" + currentReportType.toLowerCase().replace(" ", "_");
             updateProgress(0.6);
-
-            // Get headers from table columns
-            String[] headers = reportTable.getColumns().stream()
-                    .map(c -> c.getText())
-                    .toArray(String[]::new);
-
-            ExportUtil.exportToCSV(fullReportData, fileName, headers, null);
+            ExportUtil.exportToCSV(fullReportData, fileName,
+                    reportTable.getColumns().stream().map(c -> c.getText()).toArray(String[]::new),
+                    null);
             updateProgress(1.0);
             statusLabel.setText("Report exported successfully");
-            AlertUtil.showSuccess("Export Completed", "Report exported successfully to reports directory.");
+            AlertUtil.showSuccess("Export completed successfully.");
         } catch (Exception e) {
             e.printStackTrace();
             statusLabel.setText("Export failed: " + e.getMessage());
-            AlertUtil.showError("Export Failed", "Failed to export report: " + e.getMessage());
+            AlertUtil.showError("Export Failed", "Failed to export report.");
         } finally {
             hideProgressAfterDelay();
         }
@@ -383,7 +355,7 @@ public class ReportController {
     }
 
     private void clearForm() {
-        reportTypeComboBox.setValue("Vehicle Report");
+        reportTypeComboBox.setValue("Stolen Vehicles Report");
         startDatePicker.setValue(LocalDate.now().minusMonths(1));
         endDatePicker.setValue(LocalDate.now());
         fullReportData = null;
@@ -396,21 +368,6 @@ public class ReportController {
         printButton.setDisable(true);
         if (reportPagination != null) reportPagination.setPageCount(1);
         AlertUtil.showSuccess("Form cleared successfully.");
-    }
-
-    private void handleBack() {
-        String role = SessionManager.getInstance().getUserRole();
-        if ("ADMIN".equals(role)) {
-            SceneManager.getInstance().switchToAdminView();
-        } else if ("POLICE".equals(role)) {
-            SceneManager.getInstance().switchToPoliceView();
-        } else if ("WORKSHOP".equals(role)) {
-            SceneManager.getInstance().switchToWorkshopProfileView();
-        } else if ("INSURANCE".equals(role)) {
-            SceneManager.getInstance().switchToInsurancePolicyView();
-        } else {
-            SceneManager.getInstance().switchToDashboard();
-        }
     }
 
     private void applyVisualEffects() {

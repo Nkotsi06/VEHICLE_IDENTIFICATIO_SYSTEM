@@ -50,6 +50,7 @@ public class MenuBarComponentController {
     @FXML private MenuItem backupMenuItem;
     @FXML private MenuItem workshopApprovalMenuItem;
     @FXML private MenuItem settingsMenuItem;
+    @FXML private MenuItem dummyDataMenuItem;
 
     // Insurance Module Items
     @FXML private MenuItem insuranceDashboardMenuItem;
@@ -103,7 +104,6 @@ public class MenuBarComponentController {
 
     // Account Menu Items
     @FXML private MenuItem profileMenuItem;
-    @FXML private MenuItem changePasswordMenuItem;
     @FXML private MenuItem settingsMenuItemGlobal;
     @FXML private MenuItem accountNotificationsMenuItem;
     @FXML private MenuItem logoutMenuItem;
@@ -132,18 +132,30 @@ public class MenuBarComponentController {
             case "ADMIN":
                 showAdminMenu();
                 showAllRoleMenusForAdmin();
+                // Settings only visible to ADMIN
+                if (settingsMenuItem != null) settingsMenuItem.setVisible(true);
+                if (settingsMenuItemGlobal != null) settingsMenuItemGlobal.setVisible(true);
                 break;
             case "POLICE":
                 showPoliceMenu();
+                // Hide settings for non-admin roles
+                if (settingsMenuItem != null) settingsMenuItem.setVisible(false);
+                if (settingsMenuItemGlobal != null) settingsMenuItemGlobal.setVisible(false);
                 break;
             case "INSURANCE":
                 showInsuranceMenu();
+                if (settingsMenuItem != null) settingsMenuItem.setVisible(false);
+                if (settingsMenuItemGlobal != null) settingsMenuItemGlobal.setVisible(false);
                 break;
             case "WORKSHOP":
                 showWorkshopMenu();
+                if (settingsMenuItem != null) settingsMenuItem.setVisible(false);
+                if (settingsMenuItemGlobal != null) settingsMenuItemGlobal.setVisible(false);
                 break;
             case "CUSTOMER":
                 showCustomerMenu();
+                if (settingsMenuItem != null) settingsMenuItem.setVisible(false);
+                if (settingsMenuItemGlobal != null) settingsMenuItemGlobal.setVisible(false);
                 break;
             default:
                 break;
@@ -235,6 +247,9 @@ public class MenuBarComponentController {
         }
         if (settingsMenuItem != null) {
             settingsMenuItem.setOnAction(event -> SceneManager.getInstance().switchToSettingsView());
+        }
+        if (dummyDataMenuItem != null) {
+            dummyDataMenuItem.setOnAction(event -> SceneManager.getInstance().switchToDummyDataView());
         }
 
         // ========== POLICE MODULE EVENT HANDLERS ==========
@@ -344,7 +359,7 @@ public class MenuBarComponentController {
             customerDashboardMenuItem.setOnAction(event -> SceneManager.getInstance().switchToCustomerView());
         }
         if (customerProfileMenuItem != null) {
-            customerProfileMenuItem.setOnAction(event -> SceneManager.getInstance().switchToCustomerProfileView());
+            customerProfileMenuItem.setOnAction(event -> handleProfile());
         }
         if (myVehiclesMenuItem != null) {
             myVehiclesMenuItem.setOnAction(event -> SceneManager.getInstance().switchToCustomerVehicleView());
@@ -376,7 +391,18 @@ public class MenuBarComponentController {
 
         // ========== REPORTS MENU EVENT HANDLERS ==========
         if (reportsMenuItem != null) {
-            reportsMenuItem.setOnAction(event -> SceneManager.getInstance().switchToReportView());
+            reportsMenuItem.setOnAction(event -> {
+                String role = SessionManager.getInstance().getUserRole();
+                if ("POLICE".equals(role)) {
+                    SceneManager.getInstance().switchToPoliceReportView();
+                } else if ("INSURANCE".equals(role)) {
+                    SceneManager.getInstance().switchToInsuranceReportView();
+                } else if ("WORKSHOP".equals(role)) {
+                    SceneManager.getInstance().switchToWorkshopReportView();
+                } else {
+                    SceneManager.getInstance().switchToReportView();
+                }
+            });
         }
         if (exportMenuItem != null) {
             exportMenuItem.setOnAction(event -> switchToRoleBasedExport());
@@ -398,9 +424,6 @@ public class MenuBarComponentController {
         // ========== ACCOUNT MENU EVENT HANDLERS ==========
         if (profileMenuItem != null) {
             profileMenuItem.setOnAction(event -> handleProfile());
-        }
-        if (changePasswordMenuItem != null) {
-            changePasswordMenuItem.setOnAction(event -> handleChangePassword());
         }
         if (settingsMenuItemGlobal != null) {
             settingsMenuItemGlobal.setOnAction(event -> SceneManager.getInstance().switchToSettingsView());
@@ -486,10 +509,6 @@ public class MenuBarComponentController {
                 AlertUtil.showInfo("Profile", "Profile: " + SessionManager.getInstance().getFullName());
                 break;
         }
-    }
-
-    private void handleChangePassword() {
-        AlertUtil.showInfo("Change Password", "Please use the Change Password option in your profile settings.");
     }
 
     private void showHelpDialog() {

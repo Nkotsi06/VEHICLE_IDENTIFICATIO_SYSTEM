@@ -34,6 +34,8 @@
             <MenuItem fx:id="settingsMenuItem" text="Settings"/>
             <SeparatorMenuItem/>
             <MenuItem fx:id="backupMenuItem" text="Backup Database"/>
+            <SeparatorMenuItem/>
+            <MenuItem fx:id="dummyDataMenuItem" text="Dummy Data"/>
         </Menu>
 
         <!-- Police Submenu -->
@@ -127,10 +129,9 @@
         <MenuItem fx:id="aboutMenuItem" text="About"/>
     </Menu>
 
-    <!-- ========== ACCOUNT MENU ========== -->
+    <!-- ========== ACCOUNT MENU (NO CHANGE PASSWORD) ========== -->
     <Menu text="Account">
         <MenuItem fx:id="profileMenuItem" text="My Profile"/>
-        <MenuItem fx:id="changePasswordMenuItem" text="Change Password"/>
         <SeparatorMenuItem/>
         <MenuItem fx:id="settingsMenuItemGlobal" text="Settings"/>
         <SeparatorMenuItem/>

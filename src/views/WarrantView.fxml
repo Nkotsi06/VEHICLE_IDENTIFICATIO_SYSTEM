@@ -59,7 +59,7 @@
                     <Label text="Issue New Warrant" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
 
                     <GridPane hgap="10" vgap="10">
-                        <Label text="Violation:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                        <Label text="Violation ID:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
                         <ComboBox fx:id="violationComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="300" promptText="Select violation"/>
 
                         <Label text="Judge Name:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
@@ -91,10 +91,12 @@
     </center>
 
     <bottom>
-        <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
-            <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-        </HBox>
-        <fx:include source="FooterComponent.fxml"/>
+        <VBox spacing="0">
+            <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
+                <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+            </HBox>
+            <fx:include source="FooterComponent.fxml"/>
+        </VBox>
     </bottom>
 
 </BorderPane>

@@ -1,11 +1,12 @@
 package controllers;
 
 import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import utils.AlertUtil;
 import utils.SceneManager;
@@ -29,22 +30,14 @@ public class LoginController {
     private AuditDAO auditDAO;
     private boolean passwordVisible = false;
 
-    private static final String LOGIN_BUTTON_STYLE = "-fx-background-color: #006400; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 8;";
-    private static final String LOGIN_BUTTON_HOVER_STYLE = "-fx-background-color: #008000; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 8;";
-    private static final String LOGIN_BUTTON_PRESSED_STYLE = "-fx-background-color: #004d00; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 8;";
-    private static final String TOGGLE_BUTTON_STYLE = "-fx-font-size: 18px; -fx-min-width: 48; -fx-min-height: 48; -fx-background-color: #f8f9fa; -fx-background-radius: 8; -fx-border-color: #ddd; -fx-border-radius: 8; -fx-border-width: 1px; -fx-cursor: hand;";
-    private static final String TOGGLE_BUTTON_HOVER_STYLE = "-fx-font-size: 18px; -fx-min-width: 48; -fx-min-height: 48; -fx-background-color: #e8e8e8; -fx-background-radius: 8; -fx-border-color: #bbb; -fx-border-radius: 8; -fx-border-width: 1px; -fx-cursor: hand;";
-
     @FXML
     public void initialize() {
         userDAO = new UserDAO();
         auditDAO = new AuditDAO();
         setupEventHandlers();
-        addVisualEffects();
+        setupFocusEffects();
+        setupButtonEffects();
         setupPasswordToggle();
-
-        loginButton.setStyle(LOGIN_BUTTON_STYLE);
-        togglePasswordButton.setStyle(TOGGLE_BUTTON_STYLE);
     }
 
     private void setupPasswordToggle() {
@@ -53,6 +46,7 @@ public class LoginController {
         passwordField.setVisible(true);
         passwordField.setManaged(true);
         visiblePasswordField.textProperty().bindBidirectional(passwordField.textProperty());
+        togglePasswordButton.setText("Show Password");
     }
 
     private void setupEventHandlers() {
@@ -65,64 +59,58 @@ public class LoginController {
         visiblePasswordField.setOnKeyPressed(this::handleKeyPress);
     }
 
-    private void addVisualEffects() {
-        loginButton.setOnMouseEntered(e -> loginButton.setStyle(LOGIN_BUTTON_HOVER_STYLE));
-        loginButton.setOnMouseExited(e -> loginButton.setStyle(LOGIN_BUTTON_STYLE));
-        loginButton.setOnMousePressed(e -> loginButton.setStyle(LOGIN_BUTTON_PRESSED_STYLE));
-        loginButton.setOnMouseReleased(e -> loginButton.setStyle(LOGIN_BUTTON_HOVER_STYLE));
-
-        togglePasswordButton.setOnMouseEntered(e -> togglePasswordButton.setStyle(TOGGLE_BUTTON_HOVER_STYLE));
-        togglePasswordButton.setOnMouseExited(e -> togglePasswordButton.setStyle(TOGGLE_BUTTON_STYLE));
-
-        forgotPasswordLink.setOnMouseEntered(e -> forgotPasswordLink.setStyle("-fx-text-fill: #006400; -fx-underline: true;"));
-        forgotPasswordLink.setOnMouseExited(e -> forgotPasswordLink.setStyle("-fx-text-fill: #2980b9; -fx-underline: true;"));
-
+    private void setupFocusEffects() {
         usernameField.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal) {
-                usernameField.setStyle("-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #006400; -fx-border-width: 2px; -fx-padding: 0 15;");
+                usernameField.setStyle("-fx-border-color: #006400; -fx-border-width: 2px; -fx-border-radius: 24;");
             } else {
-                usernameField.setStyle("-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #ddd; -fx-border-width: 1px; -fx-padding: 0 15;");
+                usernameField.setStyle("-fx-border-color: #dddddd; -fx-border-width: 1px; -fx-border-radius: 24;");
             }
         });
 
         passwordField.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal) {
-                passwordField.setStyle("-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #006400; -fx-border-width: 2px; -fx-padding: 0 15;");
+                passwordField.setStyle("-fx-border-color: #006400; -fx-border-width: 2px; -fx-border-radius: 24;");
             } else {
-                passwordField.setStyle("-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #ddd; -fx-border-width: 1px; -fx-padding: 0 15;");
+                passwordField.setStyle("-fx-border-color: #dddddd; -fx-border-width: 1px; -fx-border-radius: 24;");
             }
         });
 
         visiblePasswordField.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal) {
-                visiblePasswordField.setStyle("-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #006400; -fx-border-width: 2px; -fx-padding: 0 15;");
+                visiblePasswordField.setStyle("-fx-border-color: #006400; -fx-border-width: 2px; -fx-border-radius: 24;");
             } else {
-                visiblePasswordField.setStyle("-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #ddd; -fx-border-width: 1px; -fx-padding: 0 15;");
+                visiblePasswordField.setStyle("-fx-border-color: #dddddd; -fx-border-width: 1px; -fx-border-radius: 24;");
             }
         });
+    }
+
+    private void setupButtonEffects() {
+        loginButton.setOnMouseEntered(e -> loginButton.setStyle("-fx-background-color: #008000; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 26; -fx-cursor: hand;"));
+        loginButton.setOnMouseExited(e -> loginButton.setStyle("-fx-background-color: #006400; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 26; -fx-cursor: hand;"));
+        loginButton.setOnMousePressed(e -> loginButton.setStyle("-fx-background-color: #004d00; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 26; -fx-cursor: hand;"));
+
+        togglePasswordButton.setOnMouseEntered(e -> togglePasswordButton.setStyle("-fx-background-color: #e8e8e8; -fx-text-fill: #2c3e50; -fx-font-size: 12px; -fx-font-weight: bold; -fx-border-color: #cccccc; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;"));
+        togglePasswordButton.setOnMouseExited(e -> togglePasswordButton.setStyle("-fx-background-color: #f8f9fa; -fx-text-fill: #2c3e50; -fx-font-size: 12px; -fx-font-weight: bold; -fx-border-color: #dddddd; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;"));
     }
 
     private void togglePasswordVisibility() {
         passwordVisible = !passwordVisible;
 
         if (passwordVisible) {
-            visiblePasswordField.setText(passwordField.getText());
-            passwordField.setVisible(false);
-            passwordField.setManaged(false);
             visiblePasswordField.setVisible(true);
             visiblePasswordField.setManaged(true);
+            passwordField.setVisible(false);
+            passwordField.setManaged(false);
+            togglePasswordButton.setText("Hide Password");
             visiblePasswordField.requestFocus();
-            visiblePasswordField.positionCaret(visiblePasswordField.getText().length());
-            togglePasswordButton.setText("🙈");
         } else {
-            passwordField.setText(visiblePasswordField.getText());
-            visiblePasswordField.setVisible(false);
-            visiblePasswordField.setManaged(false);
             passwordField.setVisible(true);
             passwordField.setManaged(true);
+            visiblePasswordField.setVisible(false);
+            visiblePasswordField.setManaged(false);
+            togglePasswordButton.setText("Show Password");
             passwordField.requestFocus();
-            passwordField.positionCaret(passwordField.getText().length());
-            togglePasswordButton.setText("👁");
         }
     }
 
@@ -140,17 +128,12 @@ public class LoginController {
 
         loginButton.setDisable(true);
         loginProgress.setVisible(true);
-
-        FadeTransition ft = new FadeTransition(Duration.millis(300), loginButton);
-        ft.setFromValue(1.0);
-        ft.setToValue(0.5);
-        ft.play();
+        loginButton.setText("LOGGING IN...");
 
         try {
             User user = userDAO.login(username, password);
 
             if (user != null && user.isActive()) {
-                // Log successful login
                 auditDAO.logAction(user.getId(), "LOGIN_SUCCESS", "127.0.0.1");
 
                 SessionManager.getInstance().createSession(user.getId(), user.getUsername(),
@@ -158,83 +141,71 @@ public class LoginController {
 
                 loadRoleSpecificIds(user.getRole(), user.getId());
 
+                showSuccessAnimation();
                 AlertUtil.showInfo("Login Successful", "Welcome " + user.getFullName());
-
-                ft.stop();
-                loginButton.setOpacity(1.0);
                 clearForm();
                 SceneManager.getInstance().switchToDashboard();
             } else {
-                // Log failed login attempt
-                auditDAO.logAction(0, "LOGIN_FAILED - Username: " + username, "127.0.0.1");
+                auditDAO.logAction(0, "LOGIN_FAILED - " + username, "127.0.0.1");
+                showErrorAnimation();
                 AlertUtil.showError("Login Failed", "Invalid username or password.");
                 passwordField.clear();
-                if (visiblePasswordField != null) {
-                    visiblePasswordField.clear();
-                }
-                if (passwordVisible && visiblePasswordField != null) {
-                    visiblePasswordField.requestFocus();
-                } else {
-                    passwordField.requestFocus();
-                }
+                if (visiblePasswordField != null) visiblePasswordField.clear();
+                loginButton.setText("LOGIN");
             }
         } catch (Exception e) {
             e.printStackTrace();
             AlertUtil.showError("Error", "Login failed. Please try again.");
+            loginButton.setText("LOGIN");
         } finally {
-            ft.stop();
-            loginButton.setOpacity(1.0);
             loginButton.setDisable(false);
             loginProgress.setVisible(false);
         }
     }
 
-    private void clearForm() {
-        usernameField.clear();
-        passwordField.clear();
-        if (visiblePasswordField != null) {
-            visiblePasswordField.clear();
-        }
-        if (passwordVisible) {
-            passwordVisible = false;
-            passwordField.setVisible(true);
-            passwordField.setManaged(true);
-            visiblePasswordField.setVisible(false);
-            visiblePasswordField.setManaged(false);
-            togglePasswordButton.setText("👁");
-        }
-        usernameField.setStyle("");
-        passwordField.setStyle("");
-        if (visiblePasswordField != null) {
-            visiblePasswordField.setStyle("");
-        }
+    private void showSuccessAnimation() {
+        FadeTransition fadeTransition = new FadeTransition(Duration.seconds(0.5), loginButton);
+        fadeTransition.setFromValue(1.0);
+        fadeTransition.setToValue(0.7);
+        fadeTransition.setAutoReverse(true);
+        fadeTransition.setCycleCount(2);
+        fadeTransition.play();
+    }
+
+    private void showErrorAnimation() {
+        loginButton.setStyle("-fx-background-color: #E31E2C; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 26;");
+        PauseTransition pause = new PauseTransition(Duration.seconds(1));
+        pause.setOnFinished(e -> loginButton.setStyle("-fx-background-color: #006400; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 26;"));
+        pause.play();
     }
 
     private void loadRoleSpecificIds(String role, int userId) {
         try {
             if ("CUSTOMER".equals(role)) {
                 dao.CustomerDAO customerDAO = new dao.CustomerDAO();
-                var customer = customerDAO.findByUserId(userId);
+                models.Customer customer = customerDAO.findByUserId(userId);
                 if (customer != null) {
                     SessionManager.getInstance().setCustomerId(customer.getId());
                 }
             } else if ("WORKSHOP".equals(role)) {
                 dao.WorkshopDAO workshopDAO = new dao.WorkshopDAO();
-                var workshop = workshopDAO.findByUserId(userId);
+                models.Workshop workshop = workshopDAO.findByUserId(userId);
                 if (workshop != null) {
                     SessionManager.getInstance().setWorkshopId(workshop.getId());
                 }
             } else if ("INSURANCE".equals(role)) {
                 dao.InsuranceProviderDAO providerDAO = new dao.InsuranceProviderDAO();
-                var provider = providerDAO.findByUserId(userId);
+                models.InsuranceProvider provider = providerDAO.findByUserId(userId);
                 if (provider != null) {
                     SessionManager.getInstance().setInsuranceProviderId(provider.getId());
                 }
             } else if ("POLICE".equals(role)) {
-                dao.PoliceOfficerDAO policeDAO = new dao.PoliceOfficerDAO();
-                var officer = policeDAO.findByUserId(userId);
+                dao.PoliceOfficerDAO officerDAO = new dao.PoliceOfficerDAO();
+                models.PoliceOfficer officer = officerDAO.findByUserId(userId);
                 if (officer != null) {
                     SessionManager.getInstance().setPoliceOfficerId(officer.getId());
+                    SessionManager.getInstance().setBadgeNumber(officer.getBadgeNumber());
+                    SessionManager.getInstance().setRank(officer.getRank());
                 }
             }
         } catch (Exception e) {
@@ -243,21 +214,23 @@ public class LoginController {
     }
 
     private boolean validateInputs(String username, String password) {
-        if (!ValidationUtil.isNotEmpty(username)) {
+        if (username.isEmpty()) {
             AlertUtil.showWarning("Validation Error", "Please enter username");
             usernameField.requestFocus();
             return false;
         }
-        if (!ValidationUtil.isNotEmpty(password)) {
+        if (password.isEmpty()) {
             AlertUtil.showWarning("Validation Error", "Please enter password");
-            if (passwordVisible && visiblePasswordField != null) {
-                visiblePasswordField.requestFocus();
-            } else {
-                passwordField.requestFocus();
-            }
+            (passwordVisible ? visiblePasswordField : passwordField).requestFocus();
             return false;
         }
         return true;
+    }
+
+    private void clearForm() {
+        usernameField.clear();
+        passwordField.clear();
+        if (visiblePasswordField != null) visiblePasswordField.clear();
     }
 
     private void handleForgotPassword() {

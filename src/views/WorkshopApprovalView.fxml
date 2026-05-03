@@ -5,7 +5,8 @@
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.WorkshopApprovalController">
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.WorkshopApprovalController"
+            stylesheets="@../css/application.css" styleClass="border-pane">
 
     <top>
         <VBox>
@@ -14,77 +15,71 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="true" style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;"
-                    hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
-            <VBox spacing="20" style="-fx-padding: 20; -fx-background-color: #f0f2f5;"
-                  maxHeight="Infinity" maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity">
+        <ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" styleClass="dashboard-container" alignment="TOP_CENTER">
 
                 <!-- Title Section -->
-                <VBox spacing="5" VBox.vgrow="NEVER">
-                    <Label text="Workshop Approval Management" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-                    <Label text="Review and approve pending workshop registrations" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+                <VBox spacing="5" alignment="CENTER">
+                    <Label text="Workshop Approval Management" styleClass="label-title"/>
+                    <Label text="Review and approve pending workshop registrations" styleClass="label-subtitle"/>
                 </VBox>
 
-                <Separator VBox.vgrow="NEVER"/>
+                <Separator/>
 
-                <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40" VBox.vgrow="NEVER"/>
+                <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
 
-                <!-- Pending Workshops Section - EXPANDS to take available space -->
-                <TitledPane text="Pending Workshops (Awaiting Approval)" expanded="true" style="-fx-font-weight: bold;"
-                            VBox.vgrow="ALWAYS" maxHeight="1.7976931348623157E308">
-                    <VBox spacing="10" style="-fx-padding: 10; -fx-background-color: white;"
-                          VBox.vgrow="ALWAYS" maxHeight="Infinity">
-                        <TableView fx:id="pendingWorkshopsTable" VBox.vgrow="ALWAYS"
-                                   prefHeight="300" minHeight="200" maxHeight="1.7976931348623157E308">
+                <!-- Pending Workshops Section -->
+                <TitledPane text="Pending Workshops (Awaiting Approval)" expanded="true" VBox.vgrow="ALWAYS">
+                    <VBox spacing="10" VBox.vgrow="ALWAYS">
+                        <TableView fx:id="pendingWorkshopsTable" VBox.vgrow="ALWAYS" prefHeight="350" minHeight="250">
                             <columns>
-                                <TableColumn fx:id="workshopNameColumn" text="Workshop Name" prefWidth="180"/>
-                                <TableColumn fx:id="ownerNameColumn" text="Owner Name" prefWidth="150"/>
+                                <TableColumn fx:id="workshopNameColumn" text="Workshop Name" prefWidth="200"/>
+                                <TableColumn fx:id="ownerNameColumn" text="Owner Name" prefWidth="180"/>
                                 <TableColumn fx:id="licenseColumn" text="License Number" prefWidth="150"/>
                                 <TableColumn fx:id="phoneColumn" text="Phone" prefWidth="120"/>
-                                <TableColumn fx:id="emailColumn" text="Email" prefWidth="180"/>
+                                <TableColumn fx:id="emailColumn" text="Email" prefWidth="200"/>
                                 <TableColumn fx:id="registeredDateColumn" text="Registered Date" prefWidth="150"/>
-                                <TableColumn fx:id="actionColumn" text="Action" prefWidth="100"/>
                             </columns>
                             <columnResizePolicy>
                                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
                             </columnResizePolicy>
                             <placeholder>
-                                <Label text="No pending workshops" style="-fx-text-fill: #7f8c8d; -fx-font-size: 14px;"/>
+                                <Label text="No pending workshops found" styleClass="status-text" style="-fx-font-size: 14px;"/>
                             </placeholder>
                         </TableView>
                         <Pagination fx:id="pendingPagination" pageCount="1" maxPageIndicatorCount="5" VBox.vgrow="NEVER"/>
                     </VBox>
                 </TitledPane>
 
-                <!-- Workshop Details Panel - Fixed height -->
-                <TitledPane text="Workshop Details" expanded="true" style="-fx-font-weight: bold;" VBox.vgrow="NEVER">
-                    <VBox spacing="10" style="-fx-padding: 10; -fx-background-color: white;">
-                        <GridPane hgap="15" vgap="12" maxWidth="Infinity">
+                <!-- Workshop Details Panel -->
+                <TitledPane text="Workshop Details" expanded="true" VBox.vgrow="NEVER">
+                    <VBox spacing="12">
+                        <GridPane hgap="15" vgap="12" alignment="CENTER">
                             <columnConstraints>
                                 <ColumnConstraints minWidth="120" maxWidth="150"/>
                                 <ColumnConstraints minWidth="200" maxWidth="Infinity" hgrow="ALWAYS"/>
                             </columnConstraints>
 
                             <Label text="Workshop Name:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <Label fx:id="detailWorkshopName" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;" wrapText="true"/>
+                            <Label fx:id="detailWorkshopName" GridPane.rowIndex="0" GridPane.columnIndex="1" wrapText="true"/>
 
                             <Label text="Owner Name:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <Label fx:id="detailOwnerName" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+                            <Label fx:id="detailOwnerName" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
                             <Label text="License Number:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <Label fx:id="detailLicenseNumber" GridPane.rowIndex="2" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+                            <Label fx:id="detailLicenseNumber" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
                             <Label text="Phone:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <Label fx:id="detailPhone" GridPane.rowIndex="3" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+                            <Label fx:id="detailPhone" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
 
                             <Label text="Email:" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <Label fx:id="detailEmail" GridPane.rowIndex="4" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;" wrapText="true"/>
+                            <Label fx:id="detailEmail" GridPane.rowIndex="4" GridPane.columnIndex="1" wrapText="true"/>
 
                             <Label text="Address:" GridPane.rowIndex="5" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <Label fx:id="detailAddress" GridPane.rowIndex="5" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;" wrapText="true"/>
+                            <Label fx:id="detailAddress" GridPane.rowIndex="5" GridPane.columnIndex="1" wrapText="true"/>
 
                             <Label text="Registered Date:" GridPane.rowIndex="6" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <Label fx:id="detailRegisteredDate" GridPane.rowIndex="6" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+                            <Label fx:id="detailRegisteredDate" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
                         </GridPane>
 
                         <Separator/>
@@ -94,35 +89,20 @@
                                   promptText="Enter any notes for the workshop owner..."/>
 
                         <HBox spacing="15" alignment="CENTER">
-                            <Button fx:id="approveButton" text="Approve Workshop"
-                                    style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150; -fx-padding: 8 15;">
-                                <effect>
-                                    <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                                </effect>
-                            </Button>
-                            <Button fx:id="rejectButton" text="Reject Workshop"
-                                    style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150; -fx-padding: 8 15;">
-                                <effect>
-                                    <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                                </effect>
-                            </Button>
-                            <Button fx:id="fadeButton" text="Animate"
-                                    style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 100; -fx-padding: 8 15;">
-                                <effect>
-                                    <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                                </effect>
-                            </Button>
+                            <Button fx:id="approveButton" text="Approve Workshop" styleClass="button-success" prefWidth="150"/>
+                            <Button fx:id="rejectButton" text="Reject Workshop" styleClass="button-danger" prefWidth="150"/>
+                            <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100"/>
                         </HBox>
                     </VBox>
                 </TitledPane>
 
-                <!-- Approved Workshops Section - Collapsible, fixed height when expanded -->
-                <TitledPane text="Approved Workshops" expanded="false" style="-fx-font-weight: bold;" VBox.vgrow="NEVER">
-                    <VBox spacing="10" style="-fx-padding: 10; -fx-background-color: white;">
-                        <TableView fx:id="approvedWorkshopsTable" prefHeight="200" minHeight="150" maxHeight="300">
+                <!-- Approved Workshops Section -->
+                <TitledPane text="Approved Workshops" expanded="false" VBox.vgrow="NEVER">
+                    <VBox spacing="10">
+                        <TableView fx:id="approvedWorkshopsTable" prefHeight="200" minHeight="150">
                             <columns>
-                                <TableColumn fx:id="approvedNameColumn" text="Workshop Name" prefWidth="180"/>
-                                <TableColumn fx:id="approvedOwnerColumn" text="Owner" prefWidth="150"/>
+                                <TableColumn fx:id="approvedNameColumn" text="Workshop Name" prefWidth="200"/>
+                                <TableColumn fx:id="approvedOwnerColumn" text="Owner" prefWidth="180"/>
                                 <TableColumn fx:id="approvedLicenseColumn" text="License Number" prefWidth="150"/>
                                 <TableColumn fx:id="approvedPhoneColumn" text="Phone" prefWidth="120"/>
                                 <TableColumn fx:id="approvedDateColumn" text="Approved Date" prefWidth="150"/>
@@ -131,32 +111,22 @@
                                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
                             </columnResizePolicy>
                             <placeholder>
-                                <Label text="No approved workshops" style="-fx-text-fill: #7f8c8d; -fx-font-size: 14px;"/>
+                                <Label text="No approved workshops found" styleClass="status-text"/>
                             </placeholder>
                         </TableView>
                         <Pagination fx:id="approvedPagination" pageCount="1" maxPageIndicatorCount="5" VBox.vgrow="NEVER"/>
                     </VBox>
                 </TitledPane>
 
-                <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false" VBox.vgrow="NEVER"/>
+                <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
                 <!-- Action Buttons -->
-                <HBox spacing="10" VBox.vgrow="NEVER">
-                    <Button fx:id="refreshButton" text="Refresh"
-                            style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 15; -fx-pref-width: 100;">
-                        <effect>
-                            <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                        </effect>
-                    </Button>
-                    <Button fx:id="backButton" text="Back to Dashboard"
-                            style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 15; -fx-pref-width: 150;">
-                        <effect>
-                            <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                        </effect>
-                    </Button>
+                <HBox spacing="10" alignment="CENTER_RIGHT">
+                    <Button fx:id="refreshButton" text="Refresh" styleClass="button-info" prefWidth="100"/>
+                    <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-secondary" prefWidth="150"/>
                 </HBox>
 
-                <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;" VBox.vgrow="NEVER"/>
+                <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER"/>
 
             </VBox>
         </ScrollPane>
@@ -165,5 +135,4 @@
     <bottom>
         <fx:include source="FooterComponent.fxml"/>
     </bottom>
-
 </BorderPane>

@@ -63,15 +63,7 @@
                         <ComboBox fx:id="vehicleComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250" promptText="Select vehicle"/>
 
                         <Label text="Priority:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <ComboBox fx:id="priorityComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="150">
-                            <items>
-                                <FXCollections fx:factory="observableArrayList">
-                                    <String fx:value="HIGH"/>
-                                    <String fx:value="MEDIUM"/>
-                                    <String fx:value="LOW"/>
-                                </FXCollections>
-                            </items>
-                        </ComboBox>
+                        <ComboBox fx:id="priorityComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="150"/>
 
                         <Label text="Expiry Date:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
                         <DatePicker fx:id="expiryDatePicker" GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="200"/>
@@ -99,10 +91,12 @@
     </center>
 
     <bottom>
-        <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
-            <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-        </HBox>
-        <fx:include source="FooterComponent.fxml"/>
+        <VBox spacing="0">
+            <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
+                <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+            </HBox>
+            <fx:include source="FooterComponent.fxml"/>
+        </VBox>
     </bottom>
 
 </BorderPane>

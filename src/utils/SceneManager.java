@@ -150,6 +150,14 @@ public class SceneManager {
     }
 
     // ============================================
+    // POLICE REPORT VIEW
+    // ============================================
+
+    public void switchToPoliceReportView() {
+        rootManager.setRoot("PoliceReportView.fxml", "Police Reports");
+    }
+
+    // ============================================
     // CUSTOMER MODULE VIEWS
     // ============================================
 
@@ -326,13 +334,21 @@ public class SceneManager {
     }
 
     // ============================================
+    // DUMMY DATA VIEW
+    // ============================================
+
+    public void switchToDummyDataView() {
+        rootManager.setRoot("DummyDataView.fxml", "Dummy Data");
+    }
+
+    // ============================================
     // REPORTS AND EXPORT VIEWS
     // ============================================
 
     public void switchToReportView() {
         String role = SessionManager.getInstance().getUserRole();
         if ("POLICE".equals(role)) {
-            switchToPoliceExportView();
+            switchToPoliceReportView();
         } else if ("INSURANCE".equals(role)) {
             switchToInsuranceReportView();
         } else if ("WORKSHOP".equals(role)) {

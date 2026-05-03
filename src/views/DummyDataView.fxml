@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.DummyDataController"
+            stylesheets="@../css/application.css" styleClass="border-pane">
+
+    <top>
+        <VBox>
+            <fx:include source="MenuBarComponent.fxml"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" styleClass="dashboard-container" alignment="TOP_CENTER" maxWidth="1400">
+
+                <!-- Header Section -->
+                <VBox spacing="5" alignment="CENTER">
+                    <Label text="Dummy Data Management" styleClass="label-title"/>
+                    <Label text="View real data from database tables (Read-only mode)" styleClass="label-subtitle"/>
+                    <Label text="⚠️ ADMIN ONLY - This data is read directly from your PostgreSQL database"
+                           styleClass="status-text" style="-fx-text-fill: #f39c12; -fx-font-weight: bold;"/>
+                </VBox>
+
+                <Separator/>
+
+                <!-- Progress Indicators -->
+                <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
+                <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+
+                <!-- Refresh Controls -->
+                <HBox spacing="15" alignment="CENTER_RIGHT">
+                    <Label fx:id="lastUpdatedLabel" styleClass="status-text"/>
+                    <Button fx:id="refreshAllButton" text="Refresh All Data" styleClass="button-primary"/>
+                    <Button fx:id="fadeButton" text="Animate" styleClass="button-warning"/>
+                </HBox>
+
+                <!-- USERS TABLE SECTION -->
+                <TitledPane text="Users Table" expanded="true">
+                    <VBox spacing="10">
+                        <Label text="System Users" styleClass="section-title"/>
+                        <TableView fx:id="usersTable" prefHeight="300" minHeight="200">
+                            <columns>
+                                <TableColumn fx:id="userIdColumn" text="ID" prefWidth="50"/>
+                                <TableColumn fx:id="userUsernameColumn" text="Username" prefWidth="120"/>
+                                <TableColumn fx:id="userFullNameColumn" text="Full Name" prefWidth="150"/>
+                                <TableColumn fx:id="userEmailColumn" text="Email" prefWidth="200"/>
+                                <TableColumn fx:id="userRoleColumn" text="Role" prefWidth="100"/>
+                                <TableColumn fx:id="userActiveColumn" text="Active" prefWidth="80"/>
+                                <TableColumn fx:id="userCreatedAtColumn" text="Created At" prefWidth="150"/>
+                            </columns>
+                            <columnResizePolicy>
+                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                            </columnResizePolicy>
+                            <placeholder>
+                                <Label text="No users found" styleClass="status-text"/>
+                            </placeholder>
+                        </TableView>
+                        <HBox spacing="10" alignment="CENTER_RIGHT">
+                            <Label fx:id="usersCountLabel" styleClass="status-text"/>
+                            <Pagination fx:id="usersPagination" pageCount="1" maxPageIndicatorCount="5"/>
+                        </HBox>
+                    </VBox>
+                </TitledPane>
+
+                <!-- VEHICLES TABLE SECTION -->
+                <TitledPane text="Vehicles Table" expanded="true">
+                    <VBox spacing="10">
+                        <Label text="Registered Vehicles" styleClass="section-title"/>
+                        <TableView fx:id="vehiclesTable" prefHeight="300" minHeight="200">
+                            <columns>
+                                <TableColumn fx:id="vehicleIdColumn" text="ID" prefWidth="50"/>
+                                <TableColumn fx:id="vehicleRegColumn" text="Registration" prefWidth="120"/>
+                                <TableColumn fx:id="vehicleMakeColumn" text="Make" prefWidth="100"/>
+                                <TableColumn fx:id="vehicleModelColumn" text="Model" prefWidth="100"/>
+                                <TableColumn fx:id="vehicleYearColumn" text="Year" prefWidth="80"/>
+                                <TableColumn fx:id="vehicleOwnerColumn" text="Owner" prefWidth="150"/>
+                                <TableColumn fx:id="vehicleStatusColumn" text="Status" prefWidth="100"/>
+                                <TableColumn fx:id="vehicleCreatedAtColumn" text="Created At" prefWidth="150"/>
+                            </columns>
+                            <columnResizePolicy>
+                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                            </columnResizePolicy>
+                            <placeholder>
+                                <Label text="No vehicles found" styleClass="status-text"/>
+                            </placeholder>
+                        </TableView>
+                        <HBox spacing="10" alignment="CENTER_RIGHT">
+                            <Label fx:id="vehiclesCountLabel" styleClass="status-text"/>
+                            <Pagination fx:id="vehiclesPagination" pageCount="1" maxPageIndicatorCount="5"/>
+                        </HBox>
+                    </VBox>
+                </TitledPane>
+
+                <!-- CUSTOMERS TABLE SECTION -->
+                <TitledPane text="Customers Table" expanded="true">
+                    <VBox spacing="10">
+                        <Label text="Customer Records" styleClass="section-title"/>
+                        <TableView fx:id="customersTable" prefHeight="300" minHeight="200">
+                            <columns>
+                                <TableColumn fx:id="customerIdColumn" text="ID" prefWidth="50"/>
+                                <TableColumn fx:id="customerNameColumn" text="Name" prefWidth="150"/>
+                                <TableColumn fx:id="customerEmailColumn" text="Email" prefWidth="200"/>
+                                <TableColumn fx:id="customerPhoneColumn" text="Phone" prefWidth="120"/>
+                                <TableColumn fx:id="customerAddressColumn" text="Address" prefWidth="200"/>
+                                <TableColumn fx:id="customerVehiclesColumn" text="Vehicles" prefWidth="80"/>
+                                <TableColumn fx:id="customerCreatedAtColumn" text="Created At" prefWidth="150"/>
+                            </columns>
+                            <columnResizePolicy>
+                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                            </columnResizePolicy>
+                            <placeholder>
+                                <Label text="No customers found" styleClass="status-text"/>
+                            </placeholder>
+                        </TableView>
+                        <HBox spacing="10" alignment="CENTER_RIGHT">
+                            <Label fx:id="customersCountLabel" styleClass="status-text"/>
+                            <Pagination fx:id="customersPagination" pageCount="1" maxPageIndicatorCount="5"/>
+                        </HBox>
+                    </VBox>
+                </TitledPane>
+
+                <!-- SERVICE RECORDS TABLE SECTION -->
+                <TitledPane text="Service Records Table" expanded="true">
+                    <VBox spacing="10">
+                        <Label text="Vehicle Service History" styleClass="section-title"/>
+                        <TableView fx:id="serviceRecordsTable" prefHeight="300" minHeight="200">
+                            <columns>
+                                <TableColumn fx:id="serviceIdColumn" text="ID" prefWidth="50"/>
+                                <TableColumn fx:id="serviceVehicleColumn" text="Vehicle" prefWidth="120"/>
+                                <TableColumn fx:id="serviceWorkshopColumn" text="Workshop" prefWidth="150"/>
+                                <TableColumn fx:id="serviceTypeColumn" text="Service Type" prefWidth="120"/>
+                                <TableColumn fx:id="serviceDateColumn" text="Service Date" prefWidth="120"/>
+                                <TableColumn fx:id="serviceCostColumn" text="Cost (M)" prefWidth="100"/>
+                                <TableColumn fx:id="serviceOdometerColumn" text="Odometer" prefWidth="100"/>
+                                <TableColumn fx:id="serviceStatusColumn" text="Status" prefWidth="100"/>
+                            </columns>
+                            <columnResizePolicy>
+                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                            </columnResizePolicy>
+                            <placeholder>
+                                <Label text="No service records found" styleClass="status-text"/>
+                            </placeholder>
+                        </TableView>
+                        <HBox spacing="10" alignment="CENTER_RIGHT">
+                            <Label fx:id="serviceCountLabel" styleClass="status-text"/>
+                            <Pagination fx:id="servicePagination" pageCount="1" maxPageIndicatorCount="5"/>
+                        </HBox>
+                    </VBox>
+                </TitledPane>
+
+                <!-- Status Label -->
+                <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER"/>
+
+                <!-- Back Button -->
+                <HBox spacing="10" alignment="CENTER_RIGHT">
+                    <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-secondary" prefWidth="150"/>
+                </HBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <fx:include source="FooterComponent.fxml"/>
+    </bottom>
+</BorderPane>

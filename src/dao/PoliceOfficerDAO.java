@@ -94,6 +94,75 @@ public class PoliceOfficerDAO extends BaseDAO<PoliceOfficer> {
         return result > 0;
     }
 
+    /**
+     * Update police officer's profile image path
+     * @param officerId The ID of the police officer
+     * @param imagePath The file path to the profile image
+     * @return true if update was successful, false otherwise
+     */
+    public boolean updateProfileImage(int officerId, String imagePath) throws SQLException {
+        String sql = "UPDATE police_officers SET profile_image = ? WHERE id = ?";
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = getConnection();
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, imagePath);
+            ps.setInt(2, officerId);
+            int result = ps.executeUpdate();
+
+            // Also log the activity - could be handled by trigger
+            System.out.println("Profile image updated for officer ID: " + officerId + " - Path: " + imagePath);
+
+            return result > 0;
+        } finally {
+            closeResources(null, ps, conn);
+        }
+    }
+
+    /**
+     * Get profile image path for a police officer
+     * @param officerId The ID of the police officer
+     * @return The file path to the profile image, or null if not set
+     */
+    public String getProfileImagePath(int officerId) throws SQLException {
+        String sql = "SELECT profile_image FROM police_officers WHERE id = ?";
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = getConnection();
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1, officerId);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("profile_image");
+            }
+            return null;
+        } finally {
+            closeResources(rs, ps, conn);
+        }
+    }
+
+    /**
+     * Clear profile image for a police officer
+     * @param officerId The ID of the police officer
+     * @return true if update was successful, false otherwise
+     */
+    public boolean clearProfileImage(int officerId) throws SQLException {
+        String sql = "UPDATE police_officers SET profile_image = NULL WHERE id = ?";
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = getConnection();
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1, officerId);
+            return ps.executeUpdate() > 0;
+        } finally {
+            closeResources(null, ps, conn);
+        }
+    }
+
     @Override
     public boolean delete(int id) throws SQLException {
         String sql = "DELETE FROM police_officers WHERE id = ?";
@@ -153,6 +222,30 @@ public class PoliceOfficerDAO extends BaseDAO<PoliceOfficer> {
                 return rs.getBoolean("requires_approval");
             }
             return false;
+        } finally {
+            closeResources(rs, ps, conn);
+        }
+    }
+
+    /**
+     * Get rank level for a given rank name
+     * @param rankName The name of the rank
+     * @return The rank level number, or 0 if not found
+     */
+    public int getRankLevel(String rankName) throws SQLException {
+        String sql = "SELECT rank_level FROM police_ranks WHERE rank_name = ?";
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = getConnection();
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, rankName);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("rank_level");
+            }
+            return 0;
         } finally {
             closeResources(rs, ps, conn);
         }
