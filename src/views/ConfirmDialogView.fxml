@@ -4,17 +4,19 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ConfirmDialogController" spacing="15" style="-fx-background-color: #2d2d2d; -fx-border-color: #4a4a4a; -fx-border-radius: 5; -fx-background-radius: 5;">
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ConfirmDialogController"
+      spacing="15" alignment="CENTER"
+      style="-fx-background-color: #2d2d2d; -fx-border-color: #4a4a4a; -fx-border-radius: 8; -fx-background-radius: 8;">
     <padding>
         <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>
 
-    <Label fx:id="titleLabel" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #e0e0e0;"/>
+    <Label fx:id="titleLabel" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white;" alignment="CENTER" maxWidth="Infinity"/>
     <Separator/>
-    <Label fx:id="messageLabel" style="-fx-text-fill: #e0e0e0; -fx-wrap-text: true;"/>
+    <Label fx:id="messageLabel" style="-fx-text-fill: #cccccc; -fx-wrap-text: true;" alignment="CENTER" maxWidth="Infinity"/>
 
-    <HBox spacing="10" alignment="CENTER_RIGHT">
-        <Button fx:id="confirmButton" text="Confirm" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-cursor: hand;"/>
-        <Button fx:id="cancelButton" text="Cancel" style="-fx-background-color: #7f8c8d; -fx-text-fill: white; -fx-cursor: hand;"/>
+    <HBox spacing="10" alignment="CENTER">
+        <Button fx:id="confirmButton" text="Confirm" styleClass="button-success"/>
+        <Button fx:id="cancelButton" text="Cancel" styleClass="button-secondary"/>
     </HBox>
 </VBox>

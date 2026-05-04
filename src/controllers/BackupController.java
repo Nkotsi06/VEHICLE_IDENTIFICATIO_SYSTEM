@@ -134,7 +134,6 @@ public class BackupController {
         try {
             List<String> backups = FileHandler.listFiles(backupLocation);
             if (backups != null && !backups.isEmpty()) {
-                // Find latest backup by file modification date
                 String latest = backups.get(backups.size() - 1);
                 if (lastBackupLabel != null) lastBackupLabel.setText(latest);
 
@@ -171,7 +170,6 @@ public class BackupController {
             if (backupLocationLabel != null) backupLocationLabel.setText("Location: " + backupLocation);
             loadBackupsList();
 
-            // Log audit
             int currentUserId = SessionManager.getInstance().getUserId();
             try {
                 auditDAO.logAction(currentUserId, "CHANGE_BACKUP_LOCATION: " + backupLocation, "127.0.0.1");
@@ -205,7 +203,6 @@ public class BackupController {
 
                 updateProgress(1.0);
 
-                // Log audit
                 int currentUserId = SessionManager.getInstance().getUserId();
                 try {
                     auditDAO.logAction(currentUserId, "CREATE_BACKUP: " + backupType, "127.0.0.1");
@@ -247,7 +244,6 @@ public class BackupController {
                 "Schedule " + schedule + " backup starting from " + date + "?");
 
         if (confirmed) {
-            // Log audit
             int currentUserId = SessionManager.getInstance().getUserId();
             try {
                 auditDAO.logAction(currentUserId, "SCHEDULE_BACKUP: " + schedule + " from " + date, "127.0.0.1");
@@ -274,7 +270,6 @@ public class BackupController {
                 "Restore from backup: " + selectedBackup + "?\n\nThis will overwrite current data. This action cannot be undone.");
 
         if (confirmed) {
-            // Log audit
             int currentUserId = SessionManager.getInstance().getUserId();
             try {
                 auditDAO.logAction(currentUserId, "RESTORE_BACKUP: " + selectedBackup, "127.0.0.1");
@@ -316,7 +311,6 @@ public class BackupController {
             try {
                 File file = new File(backupLocation + "/" + selectedBackup);
                 if (file.delete()) {
-                    // Log audit
                     int currentUserId = SessionManager.getInstance().getUserId();
                     try {
                         auditDAO.logAction(currentUserId, "DELETE_BACKUP: " + selectedBackup, "127.0.0.1");

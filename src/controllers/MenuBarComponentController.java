@@ -8,26 +8,40 @@ import utils.SceneManager;
 import utils.SessionManager;
 import dao.AuditDAO;
 
+/**
+ * Controller for the Application Menu Bar
+ * Handles navigation between different modules based on user role
+ * Dynamically shows/hides menu items based on user permissions
+ */
 public class MenuBarComponentController {
 
-    // File Menu
+    // ============================================
+    // FILE MENU COMPONENTS
+    // ============================================
     @FXML private MenuItem exitMenuItem;
 
-    // Module Menus (Role-Specific)
+    // ============================================
+    // MODULE MENUS (ROLE-SPECIFIC)
+    // ============================================
     @FXML private Menu adminModuleMenu;
     @FXML private Menu policeModuleMenu;
     @FXML private Menu insuranceModuleMenu;
     @FXML private Menu workshopModuleMenu;
     @FXML private Menu customerModuleMenu;
 
-    // Common Menus
+    // ============================================
+    // COMMON MENUS
+    // ============================================
     @FXML private Menu reportsMenu;
     @FXML private Menu toolsMenu;
     @FXML private Menu helpMenu;
     @FXML private Menu accountMenu;
 
-    // Police Module Items
+    // ============================================
+    // POLICE MODULE MENU ITEMS
+    // ============================================
     @FXML private MenuItem policeDashboardMenuItem;
+    @FXML private MenuItem policeProfileMenuItem;
     @FXML private MenuItem stolenVehiclesMenuItem;
     @FXML private MenuItem violationsMenuItem;
     @FXML private MenuItem warrantsMenuItem;
@@ -36,9 +50,18 @@ public class MenuBarComponentController {
     @FXML private MenuItem vehicleTrackingMenuItem;
     @FXML private MenuItem reconstructMovementMenuItem;
     @FXML private MenuItem expiredDocsMenuItem;
+    @FXML private MenuItem trafficCameraIntegrationMenuItem;
+    @FXML private MenuItem mobilePatrolMenuItem;
+    @FXML private MenuItem incidentReportsMenuItem;
+    @FXML private MenuItem officerLogsMenuItem;
+    @FXML private MenuItem policeReportsMenuItem;
+    @FXML private MenuItem policeExportMenuItem;
+    @FXML private MenuItem ocrScannerMenuItem;
     @FXML private MenuItem globalSearchMenuItem;
 
-    // Admin Module Items
+    // ============================================
+    // ADMIN MODULE MENU ITEMS
+    // ============================================
     @FXML private MenuItem adminDashboardMenuItem;
     @FXML private MenuItem adminProfileMenuItem;
     @FXML private MenuItem userManagementMenuItem;
@@ -52,8 +75,11 @@ public class MenuBarComponentController {
     @FXML private MenuItem settingsMenuItem;
     @FXML private MenuItem dummyDataMenuItem;
 
-    // Insurance Module Items
+    // ============================================
+    // INSURANCE MODULE MENU ITEMS
+    // ============================================
     @FXML private MenuItem insuranceDashboardMenuItem;
+    @FXML private MenuItem insuranceProfileMenuItem;
     @FXML private MenuItem policiesMenuItem;
     @FXML private MenuItem claimsMenuItem;
     @FXML private MenuItem verifyInsuranceMenuItem;
@@ -61,11 +87,12 @@ public class MenuBarComponentController {
     @FXML private MenuItem providersMenuItem;
     @FXML private MenuItem compareProvidersMenuItem;
     @FXML private MenuItem noClaimBonusMenuItem;
-    @FXML private MenuItem insuranceProfileMenuItem;
     @FXML private MenuItem insuranceReportsMenuItem;
     @FXML private MenuItem insuranceNotificationsMenuItem;
 
-    // Workshop Module Items
+    // ============================================
+    // WORKSHOP MODULE MENU ITEMS
+    // ============================================
     @FXML private MenuItem workshopDashboardMenuItem;
     @FXML private MenuItem workshopProfileMenuItem;
     @FXML private MenuItem mechanicsMenuItem;
@@ -78,7 +105,9 @@ public class MenuBarComponentController {
     @FXML private MenuItem workshopAnalyticsMenuItem;
     @FXML private MenuItem workshopReportsMenuItem;
 
-    // Customer Module Items
+    // ============================================
+    // CUSTOMER MODULE MENU ITEMS
+    // ============================================
     @FXML private MenuItem customerDashboardMenuItem;
     @FXML private MenuItem customerProfileMenuItem;
     @FXML private MenuItem myVehiclesMenuItem;
@@ -91,25 +120,44 @@ public class MenuBarComponentController {
     @FXML private MenuItem serviceRemindersMenuItem;
     @FXML private MenuItem customerNotificationsMenuItem;
 
-    // Reports Menu Items
+    // ============================================
+    // REPORTS MENU ITEMS
+    // ============================================
     @FXML private MenuItem reportsMenuItem;
     @FXML private MenuItem exportMenuItem;
 
-    // Tools Menu Items
+    // ============================================
+    // TOOLS MENU ITEMS
+    // ============================================
     @FXML private MenuItem searchMenuItem;
 
-    // Help Menu Items
+    // ============================================
+    // HELP MENU ITEMS
+    // ============================================
     @FXML private MenuItem helpMenuItem;
     @FXML private MenuItem aboutMenuItem;
 
-    // Account Menu Items
+    // ============================================
+    // ACCOUNT MENU ITEMS
+    // ============================================
     @FXML private MenuItem profileMenuItem;
     @FXML private MenuItem settingsMenuItemGlobal;
     @FXML private MenuItem accountNotificationsMenuItem;
     @FXML private MenuItem logoutMenuItem;
 
+    // ============================================
+    // DAO INSTANCES
+    // ============================================
     private AuditDAO auditDAO;
 
+    // ============================================
+    // INITIALIZATION METHODS
+    // ============================================
+
+    /**
+     * Initializes the menu bar controller
+     * Sets up menu visibility based on user role and configures event handlers
+     */
     @FXML
     public void initialize() {
         auditDAO = new AuditDAO();
@@ -117,6 +165,10 @@ public class MenuBarComponentController {
         setupEventHandlers();
     }
 
+    /**
+     * Configures which menus are visible based on the logged-in user's role
+     * Different roles see different module menus
+     */
     private void setupMenuVisibility() {
         String role = SessionManager.getInstance().getUserRole();
 
@@ -131,7 +183,7 @@ public class MenuBarComponentController {
         switch (role.toUpperCase()) {
             case "ADMIN":
                 showAdminMenu();
-                showAllRoleMenusForAdmin();
+                showAllRoleMenusForAdmin();  // Admin sees all modules
                 // Settings only visible to ADMIN
                 if (settingsMenuItem != null) settingsMenuItem.setVisible(true);
                 if (settingsMenuItemGlobal != null) settingsMenuItemGlobal.setVisible(true);
@@ -162,6 +214,9 @@ public class MenuBarComponentController {
         }
     }
 
+    /**
+     * Hides all module-specific menus
+     */
     private void hideAllModuleMenus() {
         if (adminModuleMenu != null) adminModuleMenu.setVisible(false);
         if (policeModuleMenu != null) policeModuleMenu.setVisible(false);
@@ -170,36 +225,54 @@ public class MenuBarComponentController {
         if (customerModuleMenu != null) customerModuleMenu.setVisible(false);
     }
 
+    /**
+     * Shows admin module menu and all sub-items
+     */
     private void showAdminMenu() {
         if (adminModuleMenu != null) {
             adminModuleMenu.setVisible(true);
         }
     }
 
+    /**
+     * Shows police module menu and all police-specific items
+     */
     private void showPoliceMenu() {
         if (policeModuleMenu != null) {
             policeModuleMenu.setVisible(true);
         }
     }
 
+    /**
+     * Shows insurance module menu
+     */
     private void showInsuranceMenu() {
         if (insuranceModuleMenu != null) {
             insuranceModuleMenu.setVisible(true);
         }
     }
 
+    /**
+     * Shows workshop module menu
+     */
     private void showWorkshopMenu() {
         if (workshopModuleMenu != null) {
             workshopModuleMenu.setVisible(true);
         }
     }
 
+    /**
+     * Shows customer module menu
+     */
     private void showCustomerMenu() {
         if (customerModuleMenu != null) {
             customerModuleMenu.setVisible(true);
         }
     }
 
+    /**
+     * For admin users, shows all other role menus for management purposes
+     */
     private void showAllRoleMenusForAdmin() {
         if (policeModuleMenu != null) policeModuleMenu.setVisible(true);
         if (insuranceModuleMenu != null) insuranceModuleMenu.setVisible(true);
@@ -208,6 +281,13 @@ public class MenuBarComponentController {
         if (toolsMenu != null) toolsMenu.setVisible(true);
     }
 
+    // ============================================
+    // EVENT HANDLER SETUP
+    // ============================================
+
+    /**
+     * Sets up all menu item click event handlers
+     */
     private void setupEventHandlers() {
         // Exit Application
         if (exitMenuItem != null) {
@@ -256,6 +336,9 @@ public class MenuBarComponentController {
         if (policeDashboardMenuItem != null) {
             policeDashboardMenuItem.setOnAction(event -> SceneManager.getInstance().switchToPoliceView());
         }
+        if (policeProfileMenuItem != null) {
+            policeProfileMenuItem.setOnAction(event -> SceneManager.getInstance().switchToPoliceProfileView());
+        }
         if (stolenVehiclesMenuItem != null) {
             stolenVehiclesMenuItem.setOnAction(event -> SceneManager.getInstance().switchToStolenVehicleView());
         }
@@ -280,6 +363,27 @@ public class MenuBarComponentController {
         if (expiredDocsMenuItem != null) {
             expiredDocsMenuItem.setOnAction(event -> SceneManager.getInstance().switchToExpiredDocumentView());
         }
+        if (trafficCameraIntegrationMenuItem != null) {
+            trafficCameraIntegrationMenuItem.setOnAction(event -> SceneManager.getInstance().switchToTrafficCameraView());
+        }
+        if (mobilePatrolMenuItem != null) {
+            mobilePatrolMenuItem.setOnAction(event -> SceneManager.getInstance().switchToMobilePatrolView());
+        }
+        if (incidentReportsMenuItem != null) {
+            incidentReportsMenuItem.setOnAction(event -> SceneManager.getInstance().switchToIncidentReportView());
+        }
+        if (officerLogsMenuItem != null) {
+            officerLogsMenuItem.setOnAction(event -> SceneManager.getInstance().switchToOfficerLogView());
+        }
+        if (policeReportsMenuItem != null) {
+            policeReportsMenuItem.setOnAction(event -> SceneManager.getInstance().switchToPoliceReportView());
+        }
+        if (policeExportMenuItem != null) {
+            policeExportMenuItem.setOnAction(event -> SceneManager.getInstance().switchToPoliceExportView());
+        }
+        if (ocrScannerMenuItem != null) {
+            ocrScannerMenuItem.setOnAction(event -> SceneManager.getInstance().switchToOCRScannerView());
+        }
         if (globalSearchMenuItem != null) {
             globalSearchMenuItem.setOnAction(event -> SceneManager.getInstance().switchToSearchView());
         }
@@ -287,6 +391,9 @@ public class MenuBarComponentController {
         // ========== INSURANCE MODULE EVENT HANDLERS ==========
         if (insuranceDashboardMenuItem != null) {
             insuranceDashboardMenuItem.setOnAction(event -> SceneManager.getInstance().switchToInsuranceView());
+        }
+        if (insuranceProfileMenuItem != null) {
+            insuranceProfileMenuItem.setOnAction(event -> SceneManager.getInstance().switchToInsuranceProfileView());
         }
         if (policiesMenuItem != null) {
             policiesMenuItem.setOnAction(event -> SceneManager.getInstance().switchToInsurancePolicyView());
@@ -308,9 +415,6 @@ public class MenuBarComponentController {
         }
         if (noClaimBonusMenuItem != null) {
             noClaimBonusMenuItem.setOnAction(event -> SceneManager.getInstance().switchToNoClaimBonusView());
-        }
-        if (insuranceProfileMenuItem != null) {
-            insuranceProfileMenuItem.setOnAction(event -> SceneManager.getInstance().switchToInsuranceProfileView());
         }
         if (insuranceReportsMenuItem != null) {
             insuranceReportsMenuItem.setOnAction(event -> SceneManager.getInstance().switchToInsuranceReportView());
@@ -391,18 +495,7 @@ public class MenuBarComponentController {
 
         // ========== REPORTS MENU EVENT HANDLERS ==========
         if (reportsMenuItem != null) {
-            reportsMenuItem.setOnAction(event -> {
-                String role = SessionManager.getInstance().getUserRole();
-                if ("POLICE".equals(role)) {
-                    SceneManager.getInstance().switchToPoliceReportView();
-                } else if ("INSURANCE".equals(role)) {
-                    SceneManager.getInstance().switchToInsuranceReportView();
-                } else if ("WORKSHOP".equals(role)) {
-                    SceneManager.getInstance().switchToWorkshopReportView();
-                } else {
-                    SceneManager.getInstance().switchToReportView();
-                }
-            });
+            reportsMenuItem.setOnAction(event -> switchToRoleBasedReports());
         }
         if (exportMenuItem != null) {
             exportMenuItem.setOnAction(event -> switchToRoleBasedExport());
@@ -436,6 +529,35 @@ public class MenuBarComponentController {
         }
     }
 
+    /**
+     * Switches to the appropriate reports view based on user role
+     */
+    private void switchToRoleBasedReports() {
+        String role = SessionManager.getInstance().getUserRole();
+        if (role == null) {
+            SceneManager.getInstance().switchToReportView();
+            return;
+        }
+
+        switch (role.toUpperCase()) {
+            case "POLICE":
+                SceneManager.getInstance().switchToPoliceReportView();
+                break;
+            case "INSURANCE":
+                SceneManager.getInstance().switchToInsuranceReportView();
+                break;
+            case "WORKSHOP":
+                SceneManager.getInstance().switchToWorkshopReportView();
+                break;
+            default:
+                SceneManager.getInstance().switchToReportView();
+                break;
+        }
+    }
+
+    /**
+     * Switches to the appropriate export view based on user role
+     */
     private void switchToRoleBasedExport() {
         String role = SessionManager.getInstance().getUserRole();
         if (role == null) {
@@ -459,6 +581,13 @@ public class MenuBarComponentController {
         }
     }
 
+    // ============================================
+    // BUSINESS LOGIC METHODS
+    // ============================================
+
+    /**
+     * Handles application exit with confirmation
+     */
     private void handleExit() {
         boolean confirmed = AlertUtil.showConfirmation("Exit", "Are you sure you want to exit the application?");
         if (confirmed) {
@@ -466,6 +595,9 @@ public class MenuBarComponentController {
         }
     }
 
+    /**
+     * Handles user logout with confirmation and audit logging
+     */
     private void handleLogout() {
         boolean confirmed = AlertUtil.showConfirmation("Logout", "Are you sure you want to logout?");
         if (confirmed) {
@@ -482,6 +614,9 @@ public class MenuBarComponentController {
         }
     }
 
+    /**
+     * Handles profile view navigation based on user role
+     */
     private void handleProfile() {
         String role = SessionManager.getInstance().getUserRole();
         if (role == null) {
@@ -511,6 +646,9 @@ public class MenuBarComponentController {
         }
     }
 
+    /**
+     * Displays help dialog with contact information
+     */
     private void showHelpDialog() {
         AlertUtil.showInfo("Help",
                 "Vehicle Identification System Help\n\n" +
@@ -520,6 +658,9 @@ public class MenuBarComponentController {
                         "Documentation available in the user manual.");
     }
 
+    /**
+     * Displays about dialog with version information
+     */
     private void showAboutDialog() {
         AlertUtil.showInfo("About",
                 "Vehicle Identification System\n" +

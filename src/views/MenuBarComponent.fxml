@@ -6,7 +6,7 @@
 <?import javafx.scene.control.SeparatorMenuItem?>
 
 <MenuBar xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MenuBarComponentController"
-         styleClass="main-menu-bar">
+         styleClass="main-menu-bar" stylesheets="@../css/application.css">
 
     <!-- ========== FILE MENU ========== -->
     <Menu text="File">
@@ -42,6 +42,8 @@
         <Menu fx:id="policeModuleMenu" text="Police" visible="false">
             <MenuItem fx:id="policeDashboardMenuItem" text="Dashboard"/>
             <SeparatorMenuItem/>
+            <MenuItem fx:id="policeProfileMenuItem" text="My Profile"/>
+            <SeparatorMenuItem/>
             <MenuItem fx:id="stolenVehiclesMenuItem" text="Stolen Vehicles"/>
             <MenuItem fx:id="violationsMenuItem" text="Violations"/>
             <MenuItem fx:id="warrantsMenuItem" text="Warrants"/>
@@ -51,12 +53,22 @@
             <MenuItem fx:id="reconstructMovementMenuItem" text="Reconstruct Movement"/>
             <MenuItem fx:id="expiredDocsMenuItem" text="Expired Documents"/>
             <SeparatorMenuItem/>
+            <MenuItem fx:id="trafficCameraIntegrationMenuItem" text="Traffic Camera Integration"/>
+            <MenuItem fx:id="mobilePatrolMenuItem" text="Mobile Patrol"/>
+            <MenuItem fx:id="incidentReportsMenuItem" text="Incident Reports"/>
+            <MenuItem fx:id="officerLogsMenuItem" text="Officer Logs"/>
+            <MenuItem fx:id="policeReportsMenuItem" text="Police Reports"/>
+            <MenuItem fx:id="policeExportMenuItem" text="Police Data Export"/>
+            <MenuItem fx:id="ocrScannerMenuItem" text="OCR Document Scanner"/>
+            <SeparatorMenuItem/>
             <MenuItem fx:id="globalSearchMenuItem" text="Global Search"/>
         </Menu>
 
         <!-- Insurance Submenu -->
         <Menu fx:id="insuranceModuleMenu" text="Insurance" visible="false">
             <MenuItem fx:id="insuranceDashboardMenuItem" text="Dashboard"/>
+            <SeparatorMenuItem/>
+            <MenuItem fx:id="insuranceProfileMenuItem" text="My Profile"/>
             <SeparatorMenuItem/>
             <MenuItem fx:id="policiesMenuItem" text="Policies"/>
             <MenuItem fx:id="claimsMenuItem" text="Claims"/>
@@ -66,7 +78,6 @@
             <MenuItem fx:id="compareProvidersMenuItem" text="Compare Providers"/>
             <MenuItem fx:id="noClaimBonusMenuItem" text="No Claim Bonus"/>
             <SeparatorMenuItem/>
-            <MenuItem fx:id="insuranceProfileMenuItem" text="Profile"/>
             <MenuItem fx:id="insuranceReportsMenuItem" text="Reports"/>
             <SeparatorMenuItem/>
             <MenuItem fx:id="insuranceNotificationsMenuItem" text="Notifications"/>
@@ -76,27 +87,29 @@
         <Menu fx:id="workshopModuleMenu" text="Workshop" visible="false">
             <MenuItem fx:id="workshopDashboardMenuItem" text="Dashboard"/>
             <SeparatorMenuItem/>
-            <MenuItem fx:id="workshopProfileMenuItem" text="Profile"/>
+            <MenuItem fx:id="workshopProfileMenuItem" text="My Profile"/>
             <SeparatorMenuItem/>
-            <MenuItem fx:id="mechanicsMenuItem" text="Mechanics"/>
+            <MenuItem fx:id="workshopRegistrationMenuItem" text="Workshop Registration"/>
+            <SeparatorMenuItem/>
+            <MenuItem fx:id="workshopServicesMenuItem" text="Workshop Services"/>
             <MenuItem fx:id="serviceRecordsMenuItem" text="Service Records"/>
-            <MenuItem fx:id="inventoryMenuItem" text="Parts Inventory"/>
-            <SeparatorMenuItem/>
-            <MenuItem fx:id="registerVehicleMenuItem" text="Register Vehicle"/>
-            <MenuItem fx:id="qrCheckinMenuItem" text="QR Check-in"/>
+            <MenuItem fx:id="mechanicsMenuItem" text="Mechanics"/>
+            <MenuItem fx:id="partsInventoryMenuItem" text="Parts Inventory"/>
             <MenuItem fx:id="digitalInspectionMenuItem" text="Digital Inspection"/>
+            <MenuItem fx:id="qrCheckinMenuItem" text="QR Check-in"/>
             <SeparatorMenuItem/>
             <MenuItem fx:id="workshopRevenueMenuItem" text="Revenue Report"/>
             <MenuItem fx:id="workshopAnalyticsMenuItem" text="Service Analytics"/>
-            <SeparatorMenuItem/>
             <MenuItem fx:id="workshopReportsMenuItem" text="Reports"/>
+            <SeparatorMenuItem/>
+            <MenuItem fx:id="waitTimeEstimatorMenuItem" text="Wait Time Estimator"/>
         </Menu>
 
         <!-- Customer Submenu -->
         <Menu fx:id="customerModuleMenu" text="Customer" visible="false">
             <MenuItem fx:id="customerDashboardMenuItem" text="Dashboard"/>
             <SeparatorMenuItem/>
-            <MenuItem fx:id="customerProfileMenuItem" text="Profile"/>
+            <MenuItem fx:id="customerProfileMenuItem" text="My Profile"/>
             <MenuItem fx:id="myVehiclesMenuItem" text="My Vehicles"/>
             <MenuItem fx:id="myQueriesMenuItem" text="My Queries"/>
             <MenuItem fx:id="myComplaintsMenuItem" text="My Complaints"/>
@@ -129,7 +142,7 @@
         <MenuItem fx:id="aboutMenuItem" text="About"/>
     </Menu>
 
-    <!-- ========== ACCOUNT MENU (NO CHANGE PASSWORD) ========== -->
+    <!-- ========== ACCOUNT MENU ========== -->
     <Menu text="Account">
         <MenuItem fx:id="profileMenuItem" text="My Profile"/>
         <SeparatorMenuItem/>

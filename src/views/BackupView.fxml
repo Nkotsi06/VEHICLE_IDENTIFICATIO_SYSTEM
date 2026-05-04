@@ -5,86 +5,103 @@
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.BackupController">
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.BackupController"
+            stylesheets="@../css/application.css" styleClass="border-pane">
 
     <top>
-        <VBox>
-            <fx:include source="MenuBarComponent.fxml"/>
-        </VBox>
+        <fx:include source="MenuBarComponent.fxml"/>
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="true">
-            <VBox spacing="15" style="-fx-padding: 20;">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
+            <VBox spacing="20" alignment="TOP_CENTER"
+                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
 
-                <Label text="Backup Management" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-
-                <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40" style="-fx-padding: 5;"/>
-
-                <TitledPane text="Backup Configuration" expanded="true" style="-fx-font-weight: bold;">
-                    <VBox spacing="10">
-                        <GridPane hgap="10" vgap="10">
-                            <Label text="Backup Type:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <ComboBox fx:id="backupTypeComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="200"/>
-
-                            <Label text="Schedule:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <ComboBox fx:id="scheduleComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="200"/>
-                            <DatePicker fx:id="scheduleDatePicker" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
-
-                            <Label text="Location:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <HBox spacing="10" GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.columnSpan="2">
-                                <Label fx:id="backupLocationLabel" style="-fx-text-fill: #7f8c8d;" HBox.hgrow="ALWAYS"/>
-                                <Button fx:id="chooseLocationButton" text="Change Location" style="-fx-cursor: hand;"/>
-                            </HBox>
-                        </GridPane>
-
-                        <HBox spacing="10">
-                            <Button fx:id="createBackupButton" text="Create Backup Now" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
-                                <effect>
-                                    <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                                </effect>
-                            </Button>
-                            <Button fx:id="scheduleBackupButton" text="Schedule Backup" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                            <Button fx:id="fadeButton" text="Animate" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
-                                <effect>
-                                    <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                                </effect>
-                            </Button>
-                        </HBox>
-                    </VBox>
-                </TitledPane>
-
-                <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false" style="-fx-padding: 5;"/>
-                <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+                <Label text="Backup Management" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
+                <Label text="Create, schedule, and restore database backups" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
 
                 <Separator/>
 
-                <TitledPane text="Backup Statistics" expanded="true" style="-fx-font-weight: bold;">
-                    <GridPane hgap="20" vgap="10" style="-fx-background-color: #f8f9fa; -fx-padding: 15; -fx-border-radius: 5;">
-                        <Label text="Last Backup:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <Label fx:id="lastBackupLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+                <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
 
-                        <Label text="Backup Size:" GridPane.rowIndex="0" GridPane.columnIndex="2" style="-fx-font-weight: bold;"/>
-                        <Label fx:id="backupSizeLabel" GridPane.rowIndex="0" GridPane.columnIndex="3" style="-fx-text-fill: #2c3e50;"/>
+                <!-- Backup Configuration Card -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="800" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Backup Configuration" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                        <Label text="Total Backups:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <Label fx:id="backupCountLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
-                    </GridPane>
-                </TitledPane>
+                        <GridPane hgap="15" vgap="12" alignment="CENTER">
+                            <columnConstraints>
+                                <ColumnConstraints halignment="RIGHT" minWidth="100"/>
+                                <ColumnConstraints minWidth="200"/>
+                            </columnConstraints>
 
-                <TitledPane text="Available Backups" expanded="true" style="-fx-font-weight: bold;">
-                    <VBox spacing="10">
-                        <ListView fx:id="backupsList" prefHeight="200" style="-fx-padding: 5;"/>
-                        <HBox spacing="10">
-                            <Button fx:id="restoreButton" text="Restore Selected" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                            <Button fx:id="refreshButton" text="Refresh" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                            <Button fx:id="deleteBackupButton" text="Delete Selected" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                            <Label text="Backup Type:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="backupTypeComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="200" promptText="Select backup type"/>
+
+                            <Label text="Schedule:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="scheduleComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="200" promptText="Select schedule"/>
+
+                            <Label text="Schedule Date:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <DatePicker fx:id="scheduleDatePicker" GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="200"/>
+                        </GridPane>
+
+                        <HBox spacing="15" alignment="CENTER">
+                            <Button fx:id="createBackupButton" text="Create Backup Now" styleClass="button-success" prefWidth="150"/>
+                            <Button fx:id="scheduleBackupButton" text="Schedule Backup" styleClass="button-primary" prefWidth="130"/>
+                            <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100"/>
                         </HBox>
                     </VBox>
-                </TitledPane>
+                </HBox>
 
-                <HBox spacing="10" alignment="CENTER_RIGHT">
-                    <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;"/>
+                <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+                <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
+
+                <Separator/>
+
+                <!-- Backup Statistics Card -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="800" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Backup Statistics" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+
+                        <GridPane hgap="20" vgap="10" alignment="CENTER">
+                            <columnConstraints>
+                                <ColumnConstraints halignment="RIGHT" minWidth="100"/>
+                                <ColumnConstraints minWidth="150"/>
+                                <ColumnConstraints halignment="RIGHT" minWidth="100"/>
+                                <ColumnConstraints minWidth="150"/>
+                            </columnConstraints>
+
+                            <Label text="Last Backup:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="lastBackupLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" styleClass="status-text"/>
+
+                            <Label text="Backup Size:" GridPane.rowIndex="0" GridPane.columnIndex="2" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="backupSizeLabel" GridPane.rowIndex="0" GridPane.columnIndex="3" styleClass="status-text"/>
+
+                            <Label text="Total Backups:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="backupCountLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" styleClass="status-text"/>
+                        </GridPane>
+                    </VBox>
+                </HBox>
+
+                <!-- Available Backups Card -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="800" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Available Backups" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+
+                        <ListView fx:id="backupsList" prefHeight="200"/>
+
+                        <HBox spacing="15" alignment="CENTER">
+                            <Button fx:id="restoreButton" text="Restore Selected" styleClass="button-warning" prefWidth="130"/>
+                            <Button fx:id="refreshButton" text="Refresh" styleClass="button-info" prefWidth="100"/>
+                            <Button fx:id="deleteBackupButton" text="Delete Selected" styleClass="button-danger" prefWidth="130"/>
+                        </HBox>
+                    </VBox>
+                </HBox>
+
+                <!-- Back Button -->
+                <HBox spacing="10" alignment="CENTER">
+                    <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-secondary" prefWidth="150"/>
                 </HBox>
 
             </VBox>

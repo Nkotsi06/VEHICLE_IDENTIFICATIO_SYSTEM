@@ -1,324 +1,110 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.ExpiredDocumentAlert;
 
+/**
+ * ExpiryAlertDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class ExpiryAlertDAO extends BaseDAO<ExpiredDocumentAlert> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public ExpiryAlertDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public ExpiredDocumentAlert findById(int id) throws SQLException {
-        String sql = "SELECT * FROM vw_vehicle_document_expiry WHERE id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, id);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return mapRow(rs);
-            }
-            return null;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        List<ExpiredDocumentAlert> results = viewLoader.loadViewWithCondition("vw_vehicle_document_expiry", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<ExpiredDocumentAlert> findAll() throws SQLException {
-        String sql = "SELECT * FROM vw_vehicle_document_expiry ORDER BY expiry_date";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<ExpiredDocumentAlert> alerts = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                alerts.add(mapRow(rs));
-            }
-            return alerts;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.loadView("vw_vehicle_document_expiry");
     }
 
     public List<ExpiredDocumentAlert> findByVehicleId(int vehicleId) throws SQLException {
-        String sql = "SELECT * FROM vw_vehicle_document_expiry WHERE vehicle_id = ? ORDER BY expiry_date";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<ExpiredDocumentAlert> alerts = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, vehicleId);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                alerts.add(mapRow(rs));
-            }
-            return alerts;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.loadViewWithCondition("vw_vehicle_document_expiry", "vehicle_id = ? ORDER BY expiry_date", vehicleId);
     }
 
     public List<ExpiredDocumentAlert> findByRegistrationNumber(String registrationNumber) throws SQLException {
-        String sql = "SELECT * FROM vw_vehicle_document_expiry WHERE registration_number = ? ORDER BY expiry_date";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<ExpiredDocumentAlert> alerts = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, registrationNumber);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                alerts.add(mapRow(rs));
-            }
-            return alerts;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.loadViewWithCondition("vw_vehicle_document_expiry", "registration_number = ? ORDER BY expiry_date", registrationNumber);
     }
 
     public List<ExpiredDocumentAlert> findByDocumentType(String documentType) throws SQLException {
-        String sql = "SELECT * FROM vw_vehicle_document_expiry WHERE document_type = ? ORDER BY expiry_date";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<ExpiredDocumentAlert> alerts = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, documentType);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                alerts.add(mapRow(rs));
-            }
-            return alerts;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.loadViewWithCondition("vw_vehicle_document_expiry", "document_type = ? ORDER BY expiry_date", documentType);
     }
 
     public List<ExpiredDocumentAlert> findExpiredDocuments() throws SQLException {
-        String sql = "SELECT * FROM vw_expired_documents ORDER BY expiry_date";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<ExpiredDocumentAlert> alerts = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                alerts.add(mapRow(rs));
-            }
-            return alerts;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.loadView("vw_expired_documents");
     }
 
     public List<ExpiredDocumentAlert> findExpiringDocuments(int daysThreshold) throws SQLException {
-        String sql = "SELECT * FROM vw_vehicle_document_expiry WHERE expiry_date BETWEEN CURRENT_DATE AND CURRENT_DATE + ? ORDER BY expiry_date";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<ExpiredDocumentAlert> alerts = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, daysThreshold);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                alerts.add(mapRow(rs));
-            }
-            return alerts;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.loadViewWithCondition("vw_vehicle_document_expiry",
+                "expiry_date BETWEEN CURRENT_DATE AND CURRENT_DATE + ? ORDER BY expiry_date", daysThreshold);
     }
 
     public List<ExpiredDocumentAlert> findCriticalAlerts() throws SQLException {
-        String sql = "SELECT * FROM vw_vehicle_document_expiry WHERE expiry_status IN ('EXPIRED', 'CRITICAL') ORDER BY expiry_date";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<ExpiredDocumentAlert> alerts = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                alerts.add(mapRow(rs));
-            }
-            return alerts;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.loadViewWithCondition("vw_vehicle_document_expiry",
+                "expiry_status IN ('EXPIRED', 'CRITICAL') ORDER BY expiry_date");
     }
 
     public List<ExpiredDocumentAlert> findAlertsByStatus(String expiryStatus) throws SQLException {
-        String sql = "SELECT * FROM vw_vehicle_document_expiry WHERE expiry_status = ? ORDER BY expiry_date";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<ExpiredDocumentAlert> alerts = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, expiryStatus);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                alerts.add(mapRow(rs));
-            }
-            return alerts;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.loadViewWithCondition("vw_vehicle_document_expiry", "expiry_status = ? ORDER BY expiry_date", expiryStatus);
     }
 
     public void checkVehicleDocuments(String registrationNumber) throws SQLException {
-        String sql = "CALL sp_check_vehicle_documents(?, ?, ?, ?, ?, ?)";
-        Connection conn = null;
-        java.sql.CallableStatement cs = null;
-        try {
-            conn = getConnection();
-            cs = conn.prepareCall("{call sp_check_vehicle_documents(?, ?, ?, ?, ?, ?)}");
-            cs.setString(1, registrationNumber);
-            cs.registerOutParameter(2, Types.INTEGER);
-            cs.registerOutParameter(3, Types.INTEGER);
-            cs.registerOutParameter(4, Types.INTEGER);
-            cs.registerOutParameter(5, Types.VARCHAR);
-            cs.registerOutParameter(6, Types.VARCHAR);
-            cs.execute();
-        } finally {
-            if (cs != null) cs.close();
-            closeResources(null, null, conn);
-        }
+        procedureCaller.executeCheckVehicleDocuments(registrationNumber);
     }
 
     public void runExpiredDocumentDetection() throws SQLException {
-        String sql = "CALL sp_detect_expired_documents()";
-        Connection conn = null;
-        java.sql.CallableStatement cs = null;
-        try {
-            conn = getConnection();
-            cs = conn.prepareCall("{call sp_detect_expired_documents()}");
-            cs.execute();
-        } finally {
-            if (cs != null) cs.close();
-            closeResources(null, null, conn);
-        }
+        procedureCaller.executeDetectExpiredDocuments();
     }
 
     public boolean generateViolationForExpiredDocuments(int vehicleId) throws SQLException {
-        String sql = "INSERT INTO violations (vehicle_id, violation_date, violation_type, fine_amount, officer_name, payment_status) " +
-                "SELECT id, CURRENT_DATE, 'EXPIRED_VEHICLE_DOCUMENTS', 500.00, 'SYSTEM', 'UNPAID' " +
-                "FROM vehicles WHERE id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, vehicleId);
-            int result = ps.executeUpdate();
-            return result > 0;
-        } finally {
-            closeResources(null, ps, conn);
-        }
+        return procedureCaller.executeGenerateViolationForExpiredDocuments(vehicleId);
     }
 
     public List<ExpiredDocumentAlert> getVehicleCompleteDocumentStatus(int vehicleId) throws SQLException {
-        String sql = "SELECT * FROM vw_vehicle_complete_document_status WHERE vehicle_id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<ExpiredDocumentAlert> alerts = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, vehicleId);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                alerts.add(mapRow(rs));
-            }
-            return alerts;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.loadViewWithCondition("vw_vehicle_complete_document_status", "vehicle_id = ?", vehicleId);
     }
 
     @Override
     public boolean insert(ExpiredDocumentAlert entity) throws SQLException {
+        // Alerts are auto-generated
         return false;
     }
 
     @Override
     public boolean update(ExpiredDocumentAlert entity) throws SQLException {
+        // Alerts are auto-generated
         return false;
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM vehicle_documents WHERE id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, id);
-            int result = ps.executeUpdate();
-            return result > 0;
-        } finally {
-            closeResources(null, ps, conn);
-        }
+        return procedureCaller.executeDeleteExpiredDocumentAlert(id);
     }
 
     public boolean deleteByVehicleId(int vehicleId) throws SQLException {
-        String sql = "DELETE FROM vehicle_documents WHERE vehicle_id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, vehicleId);
-            int result = ps.executeUpdate();
-            return result > 0;
-        } finally {
-            closeResources(null, ps, conn);
-        }
+        return procedureCaller.executeDeleteExpiredDocumentsByVehicle(vehicleId);
     }
 
     public int countExpiredDocuments() throws SQLException {
-        String sql = "SELECT COUNT(*) FROM vw_expired_documents";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.countViewRows("vw_expired_documents");
     }
 
     @Override
@@ -338,7 +124,9 @@ public class ExpiryAlertDAO extends BaseDAO<ExpiredDocumentAlert> {
         if (rs.getDate("expiry_date") != null) {
             alert.setExpiryDate(rs.getDate("expiry_date").toLocalDate());
         }
-        alert.setDaysOverdue(rs.getInt("days_remaining") < 0 ? Math.abs(rs.getInt("days_remaining")) : 0);
+
+        int daysRemaining = rs.getInt("days_remaining");
+        alert.setDaysOverdue(daysRemaining < 0 ? Math.abs(daysRemaining) : 0);
 
         String expiryStatus = rs.getString("expiry_status");
         if ("EXPIRED".equals(expiryStatus)) {

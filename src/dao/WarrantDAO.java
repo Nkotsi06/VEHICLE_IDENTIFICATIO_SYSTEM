@@ -1,103 +1,102 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.Warrant;
 
+/**
+ * WarrantDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class WarrantDAO extends BaseDAO<Warrant> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public WarrantDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public Warrant findById(int id) throws SQLException {
-        String sql = "SELECT * FROM warrants WHERE id = ?";
-        return executeQuerySingle(sql, id);
+        List<Warrant> results = viewLoader.loadViewWithCondition("vw_warrants", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<Warrant> findAll() throws SQLException {
-        String sql = "SELECT * FROM vw_active_warrants ORDER BY issue_date DESC";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_warrants");
     }
 
     public List<Warrant> findActiveWarrants() throws SQLException {
-        String sql = "SELECT * FROM vw_active_warrants ORDER BY expiry_date ASC";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_active_warrants");
     }
 
     public List<Warrant> findByVehicleId(int vehicleId) throws SQLException {
-        String sql = "SELECT * FROM vw_active_warrants WHERE vehicle_id = ?";
-        return executeQuery(sql, vehicleId);
+        return viewLoader.loadViewWithCondition("vw_active_warrants", "vehicle_id = ?", vehicleId);
     }
 
     public List<Warrant> findByViolationId(int violationId) throws SQLException {
-        String sql = "SELECT * FROM warrants WHERE violation_id = ?";
-        return executeQuery(sql, violationId);
+        return viewLoader.loadViewWithCondition("vw_warrants", "violation_id = ?", violationId);
     }
 
     public List<Warrant> findExpiredWarrants() throws SQLException {
-        String sql = "SELECT * FROM warrants WHERE expiry_date < CURRENT_DATE AND status = 'ACTIVE'";
-        return executeQuery(sql);
+        return viewLoader.loadViewWithCondition("vw_warrants", "expiry_date < CURRENT_DATE AND status = 'ACTIVE'");
     }
 
     public List<Warrant> findByJudge(String judgeName) throws SQLException {
-        String sql = "SELECT * FROM warrants WHERE judge_name ILIKE ? ORDER BY issue_date DESC";
-        return executeQuery(sql, "%" + judgeName + "%");
+        return viewLoader.loadViewWithCondition("vw_warrants", "judge_name ILIKE ? ORDER BY issue_date DESC", "%" + judgeName + "%");
     }
 
     public boolean issueWarrant(int violationId, String judgeName, LocalDate issueDate, LocalDate expiryDate) throws SQLException {
-        return executeProcedure("sp_issue_warrant", violationId, judgeName, issueDate, expiryDate);
+        Integer warrantId = procedureCaller.executeIssueWarrant(violationId, judgeName, issueDate, expiryDate);
+        return warrantId != null && warrantId > 0;
     }
 
     @Override
     public boolean insert(Warrant entity) throws SQLException {
-        return executeProcedure("sp_issue_warrant",
+        Integer warrantId = procedureCaller.executeIssueWarrant(
                 entity.getViolationId(),
                 entity.getJudgeName(),
                 entity.getIssueDate(),
                 entity.getExpiryDate()
         );
+        if (warrantId != null && warrantId > 0) {
+            entity.setId(warrantId);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public boolean update(Warrant entity) throws SQLException {
-        String sql = "UPDATE warrants SET status = ? WHERE id = ?";
-        int result = executeUpdate(sql, entity.getStatus(), entity.getId());
-        return result > 0;
+        if ("EXECUTED".equals(entity.getStatus())) {
+            return procedureCaller.executeExecuteWarrant(entity.getId());
+        } else if ("CANCELLED".equals(entity.getStatus())) {
+            return procedureCaller.executeCancelWarrant(entity.getId());
+        }
+        return false;
     }
 
     public boolean closeWarrant(int warrantId) throws SQLException {
-        String sql = "CALL sp_close_warrant(?)";
-        int result = executeUpdate(sql, warrantId);
-        return result >= 0;
+        return procedureCaller.executeExecuteWarrant(warrantId);
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM warrants WHERE id = ?";
-        int result = executeUpdate(sql, id);
-        return result > 0;
+        return procedureCaller.executeDeleteWarrant(id);
     }
 
     public int countActiveWarrants() throws SQLException {
-        String sql = "SELECT COUNT(*) FROM warrants WHERE status = 'ACTIVE' AND expiry_date >= CURRENT_DATE";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.countViewRowsWithCondition("vw_active_warrants", "1=1");
     }
 
     @Override

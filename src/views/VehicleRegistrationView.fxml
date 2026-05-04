@@ -1,57 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.VehicleRegistrationController">
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.VehicleRegistrationController"
+            stylesheets="@../css/application.css" styleClass="border-pane">
 
     <top>
-        <VBox>
-            <fx:include source="MenuBarComponent.fxml"/>
-        </VBox>
+        <fx:include source="MenuBarComponent.fxml"/>
     </top>
 
     <center>
-        <VBox spacing="20" style="-fx-padding: 20;">
-            <Label text="Vehicle Registration" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
+            <VBox spacing="20" alignment="TOP_CENTER"
+                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
 
-            <GridPane hgap="15" vgap="10">
-                <Label text="Registration Number:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                <TextField fx:id="registrationNumberField" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250"/>
+                <Label text="Vehicle Registration" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                <Label text="Make:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                <TextField fx:id="makeField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="800" styleClass="profile-edit-card" alignment="CENTER">
+                        <GridPane hgap="15" vgap="12" alignment="CENTER">
+                            <Label text="Registration Number:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="registrationNumberField" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250"/>
 
-                <Label text="Model:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                <TextField fx:id="modelField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                            <Label text="Make:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="makeField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-                <Label text="Year:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                <TextField fx:id="yearField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                            <Label text="Model:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="modelField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
-                <Label text="Color:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-                <TextField fx:id="colorField" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                            <Label text="Year:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="yearField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
 
-                <Label text="Engine Number:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
-                <TextField fx:id="engineNumberField" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+                            <Label text="Color:" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="colorField" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
 
-                <Label text="Chassis Number:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
-                <TextField fx:id="chassisNumberField" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+                            <Label text="Engine Number:" GridPane.rowIndex="5" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="engineNumberField" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
 
-                <Label text="Owner:" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
-                <ComboBox fx:id="ownerComboBox" GridPane.rowIndex="7" GridPane.columnIndex="1" prefWidth="250"/>
+                            <Label text="Chassis Number:" GridPane.rowIndex="6" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="chassisNumberField" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
 
-                <Label text="Initial Status:" GridPane.rowIndex="8" GridPane.columnIndex="0"/>
-                <ComboBox fx:id="statusComboBox" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
-            </GridPane>
+                            <Label text="Owner:" GridPane.rowIndex="7" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="ownerComboBox" GridPane.rowIndex="7" GridPane.columnIndex="1" prefWidth="250"/>
 
-            <HBox spacing="10" alignment="CENTER">
-                <Button fx:id="registerButton" text="Register Vehicle" style="-fx-background-color: #27ae60; -fx-text-fill: white;"/>
-                <Button fx:id="clearButton" text="Clear"/>
-                <Button fx:id="backButton" text="Cancel"/>
-            </HBox>
+                            <Label text="Initial Status:" GridPane.rowIndex="8" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="statusComboBox" GridPane.rowIndex="8" GridPane.columnIndex="1" prefWidth="200"/>
+                        </GridPane>
 
-            <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d;"/>
-        </VBox>
+                        <HBox alignment="CENTER">
+                            <Button fx:id="registerButton" text="Register Vehicle" styleClass="button-success" prefWidth="120">
+                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                            </Button>
+                            <Button fx:id="clearButton" text="Clear" styleClass="button-secondary" prefWidth="100"/>
+                            <Button fx:id="backButton" text="Cancel" styleClass="button-secondary" prefWidth="100"/>
+                        </HBox>
+                    </VBox>
+                </HBox>
+
+                <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
+
+            </VBox>
+        </ScrollPane>
     </center>
 
     <bottom>

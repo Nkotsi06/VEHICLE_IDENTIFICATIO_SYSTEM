@@ -9,93 +9,110 @@
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ServiceAnalyticsController">
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ServiceAnalyticsController"
+            stylesheets="@../css/application.css" styleClass="border-pane">
 
     <top>
-        <VBox>
-            <fx:include source="MenuBarComponent.fxml"/>
-        </VBox>
+        <fx:include source="MenuBarComponent.fxml"/>
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="true">
-            <VBox spacing="20" style="-fx-padding: 20;">
-                <Label text="Service Analytics" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-                <Label text="Analyze service performance and trends" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
+            <VBox spacing="20" alignment="TOP_CENTER"
+                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
+
+                <Label text="Service Analytics" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
+                <Label text="Analyze service performance and trends" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
 
                 <Separator/>
 
                 <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
 
-                <GridPane hgap="20" vgap="15" style="-fx-background-color: #f8f9fa; -fx-padding: 20; -fx-border-radius: 10; -fx-background-radius: 10;">
-                    <Label text="Total Services:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
-                    <Label fx:id="totalServicesLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                <!-- Stats Grid -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="1000" style="-fx-background-color: #f8f9fa; -fx-padding: 20; -fx-border-radius: 10;" alignment="CENTER">
+                        <GridPane hgap="20" vgap="15" alignment="CENTER">
+                            <Label text="Total Services:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                            <Label fx:id="totalServicesLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
 
-                    <Label text="Most Common Service:" GridPane.rowIndex="0" GridPane.columnIndex="2" style="-fx-font-weight: bold;"/>
-                    <Label fx:id="mostCommonServiceLabel" GridPane.rowIndex="0" GridPane.columnIndex="3" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2980b9;"/>
+                            <Label text="Most Common Service:" GridPane.rowIndex="0" GridPane.columnIndex="2" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="mostCommonServiceLabel" GridPane.rowIndex="0" GridPane.columnIndex="3" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2980b9;"/>
 
-                    <Label text="Average Cost:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                    <Label fx:id="averageCostLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #27ae60;"/>
+                            <Label text="Average Cost:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="averageCostLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #27ae60;"/>
 
-                    <Label text="Busiest Month:" GridPane.rowIndex="1" GridPane.columnIndex="2" style="-fx-font-weight: bold;"/>
-                    <Label fx:id="busiestMonthLabel" GridPane.rowIndex="1" GridPane.columnIndex="3" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #e67e22;"/>
+                            <Label text="Busiest Month:" GridPane.rowIndex="1" GridPane.columnIndex="2" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="busiestMonthLabel" GridPane.rowIndex="1" GridPane.columnIndex="3" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #e67e22;"/>
 
-                    <Label text="Customer Satisfaction:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                    <ProgressBar fx:id="satisfactionProgress" prefWidth="200" progress="0"/>
-                    <Label fx:id="satisfactionLabel" GridPane.rowIndex="2" GridPane.columnIndex="1" style="-fx-text-fill: #f39c12;"/>
-                </GridPane>
-
-                <Separator/>
-
-                <Label text="Service Type Distribution" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-                <PieChart fx:id="serviceTypeChart" prefHeight="300" prefWidth="500"/>
-
-                <Separator/>
-
-                <Label text="Monthly Service Trend" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-                <BarChart fx:id="monthlyTrendChart" prefHeight="350">
-                    <xAxis>
-                        <CategoryAxis label="Month"/>
-                    </xAxis>
-                    <yAxis>
-                        <NumberAxis label="Number of Services"/>
-                    </yAxis>
-                </BarChart>
+                            <Label text="Customer Satisfaction:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <ProgressBar fx:id="satisfactionProgress" prefWidth="200" progress="0"/>
+                            <Label fx:id="satisfactionLabel" GridPane.rowIndex="2" GridPane.columnIndex="1" style="-fx-text-fill: #f39c12;"/>
+                        </GridPane>
+                    </VBox>
+                </HBox>
 
                 <Separator/>
 
-                <Label text="Service Type Statistics" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-                <TableView fx:id="serviceTypeTable" prefHeight="250">
-                    <columns>
-                        <TableColumn fx:id="typeColumn" text="Service Type" prefWidth="200"/>
-                        <TableColumn fx:id="countColumn" text="Count" prefWidth="100"/>
-                        <TableColumn fx:id="avgCostColumn" text="Average Cost (M)" prefWidth="150"/>
-                        <TableColumn fx:id="minCostColumn" text="Min (M)" prefWidth="100"/>
-                        <TableColumn fx:id="maxCostColumn" text="Max (M)" prefWidth="100"/>
-                    </columns>
-                    <columnResizePolicy>
-                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                    </columnResizePolicy>
-                    <placeholder>
-                        <Label text="No data available" style="-fx-text-fill: #7f8c8d;"/>
-                    </placeholder>
-                </TableView>
+                <!-- Service Type Distribution -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="600" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Service Type Distribution" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+                        <PieChart fx:id="serviceTypeChart" prefHeight="300" prefWidth="500"/>
+                    </VBox>
+                </HBox>
 
-                <Pagination fx:id="analyticsPagination" pageCount="1" maxPageIndicatorCount="5"/>
+                <Separator/>
+
+                <!-- Monthly Service Trend -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="900" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Monthly Service Trend" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+                        <BarChart fx:id="monthlyTrendChart" prefHeight="350">
+                            <xAxis><CategoryAxis label="Month"/></xAxis>
+                            <yAxis><NumberAxis label="Number of Services"/></yAxis>
+                        </BarChart>
+                    </VBox>
+                </HBox>
+
+                <Separator/>
+
+                <!-- Service Type Statistics -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="1000" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Service Type Statistics" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+
+                        <TableView fx:id="serviceTypeTable" prefHeight="250" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
+                            <columns>
+                                <TableColumn fx:id="typeColumn" text="Service Type" minWidth="180"/>
+                                <TableColumn fx:id="countColumn" text="Count" minWidth="80" maxWidth="110"/>
+                                <TableColumn fx:id="avgCostColumn" text="Average Cost (M)" minWidth="120" maxWidth="160"/>
+                                <TableColumn fx:id="minCostColumn" text="Min (M)" minWidth="80" maxWidth="110"/>
+                                <TableColumn fx:id="maxCostColumn" text="Max (M)" minWidth="80" maxWidth="110"/>
+                            </columns>
+                            <placeholder>
+                                <Label text="No data available" styleClass="status-text"/>
+                            </placeholder>
+                        </TableView>
+
+                        <HBox alignment="CENTER">
+                            <Pagination fx:id="analyticsPagination" pageCount="1" maxPageIndicatorCount="5"/>
+                        </HBox>
+                    </VBox>
+                </HBox>
 
                 <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
-                <HBox spacing="10">
-                    <Button fx:id="refreshButton" text="Refresh" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
-                        <effect>
-                            <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                        </effect>
+                <HBox alignment="CENTER">
+                    <Button fx:id="refreshButton" text="Refresh" styleClass="button-info">
+                        <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
                     </Button>
-                    <Button fx:id="exportButton" text="Export Analytics" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                    <Button fx:id="backButton" text="Back" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                    <Button fx:id="exportButton" text="Export Analytics" styleClass="button-success"/>
+                    <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-secondary"/>
                 </HBox>
 
-                <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+                <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
+
             </VBox>
         </ScrollPane>
     </center>

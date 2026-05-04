@@ -59,6 +59,7 @@ public class CustomerController {
     private DigitalWalletDAO walletDAO;
     private InsurancePolicyDAO policyDAO;
     private ServiceScheduleDAO scheduleDAO;
+
     private int customerId;
     private int userId;
     private ObservableList<Vehicle> vehicleList;
@@ -79,6 +80,7 @@ public class CustomerController {
         walletDAO = new DigitalWalletDAO();
         policyDAO = new InsurancePolicyDAO();
         scheduleDAO = new ServiceScheduleDAO();
+
         vehicleList = FXCollections.observableArrayList();
         notificationList = FXCollections.observableArrayList();
 
@@ -95,12 +97,13 @@ public class CustomerController {
         welcomeLabel.setText("Welcome, " + (fullName != null ? fullName : "Customer"));
         statusLabel.setText("Ready");
 
-        // Start auto-refresh every 60 seconds
         startAutoRefresh();
     }
 
     private void setupTableColumns() {
-        // Recent Vehicles Table
+        recentVehiclesTable.getColumns().clear();
+        recentNotificationsTable.getColumns().clear();
+
         TableColumn<Vehicle, String> regCol = new TableColumn<>("Registration");
         regCol.setCellValueFactory(cellData -> cellData.getValue().registrationNumberProperty());
         regCol.setPrefWidth(120);
@@ -128,7 +131,6 @@ public class CustomerController {
 
         recentVehiclesTable.getColumns().addAll(regCol, makeCol, modelCol, yearCol, statusCol);
 
-        // Recent Notifications Table
         TableColumn<Notification, String> msgCol = new TableColumn<>("Message");
         msgCol.setCellValueFactory(cellData -> cellData.getValue().messageProperty());
         msgCol.setPrefWidth(350);

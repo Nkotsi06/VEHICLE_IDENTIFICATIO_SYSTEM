@@ -11,10 +11,13 @@ import javafx.scene.control.Label;
 import utils.AlertUtil;
 import utils.SceneManager;
 import utils.SessionManager;
+import utils.ValidationUtil;
 import dao.CustomerQueryDAO;
 import dao.VehicleDAO;
 import models.CustomerQuery;
 import models.Vehicle;
+
+import java.util.List;
 
 public class CustomerQueryController {
 
@@ -68,7 +71,7 @@ public class CustomerQueryController {
 
     private void loadVehicles() {
         try {
-            java.util.List<Vehicle> vehicles = vehicleDAO.findByOwnerId(customerId);
+            List<Vehicle> vehicles = vehicleDAO.findByOwnerId(customerId);
             vehicleComboBox.getItems().setAll(vehicles);
         } catch (Exception e) {
             e.printStackTrace();
@@ -77,7 +80,7 @@ public class CustomerQueryController {
 
     private void loadQueries() {
         try {
-            java.util.List<CustomerQuery> queries;
+            List<CustomerQuery> queries;
             if (SessionManager.getInstance().isAdmin() || SessionManager.getInstance().isWorkshop()) {
                 queries = queryDAO.findAll();
             } else {
@@ -138,7 +141,7 @@ public class CustomerQueryController {
             return;
         }
 
-        if (!utils.ValidationUtil.isNotEmpty(queryTextArea.getText())) {
+        if (!ValidationUtil.isNotEmpty(queryTextArea.getText())) {
             AlertUtil.showWarning("Validation Error", "Please enter your query.");
             queryTextArea.requestFocus();
             return;
@@ -172,7 +175,7 @@ public class CustomerQueryController {
             return;
         }
 
-        if (!utils.ValidationUtil.isNotEmpty(responseTextArea.getText())) {
+        if (!ValidationUtil.isNotEmpty(responseTextArea.getText())) {
             AlertUtil.showWarning("Validation Error", "Please enter a response.");
             responseTextArea.requestFocus();
             return;

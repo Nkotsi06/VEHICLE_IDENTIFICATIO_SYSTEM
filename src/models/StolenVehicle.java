@@ -1,6 +1,7 @@
 package models;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -8,7 +9,15 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
+/**
+ * StolenVehicle model representing stolen vehicle reports.
+ *
+ * @author Vehicle Identification System Team
+ * @version 1.0
+ */
 public class StolenVehicle extends BaseEntity {
+
+    // Core fields
     private int id;
     private int vehicleId;
     private String registrationNumber;
@@ -22,7 +31,13 @@ public class StolenVehicle extends BaseEntity {
     private Double latitude;
     private Double longitude;
     private Double distance;
-    private String description;  // ADDED: missing field
+    private String description;
+
+    // Status constants
+    public static final String STATUS_ACTIVE = "ACTIVE";
+    public static final String STATUS_RECOVERED = "RECOVERED";
+    public static final String STATUS_CLOSED = "CLOSED";
+    public static final String STATUS_UNDER_INVESTIGATION = "UNDER_INVESTIGATION";
 
     // JavaFX Properties for TableView binding
     private final StringProperty registrationNumberProperty = new SimpleStringProperty();
@@ -34,20 +49,74 @@ public class StolenVehicle extends BaseEntity {
     private final StringProperty assignedOfficerProperty = new SimpleStringProperty();
     private final ObjectProperty<LocalDate> recoveredDateProperty = new SimpleObjectProperty<>();
     private final DoubleProperty distanceProperty = new SimpleDoubleProperty();
-    private final StringProperty descriptionProperty = new SimpleStringProperty();  // ADDED
+    private final StringProperty descriptionProperty = new SimpleStringProperty();
+    private final StringProperty statusDisplayProperty = new SimpleStringProperty();
+    private final StringProperty statusColorProperty = new SimpleStringProperty();
 
+    /**
+     * Default constructor - initializes with ACTIVE status.
+     */
     public StolenVehicle() {
         super();
-        this.status = "ACTIVE";
+        this.status = STATUS_ACTIVE;
+
+        statusProperty.set(STATUS_ACTIVE);
+        updateStatusDisplay();
+
+        statusProperty.addListener((obs, oldVal, newVal) -> updateStatusDisplay());
     }
 
+    /**
+     * Constructor for creating a new stolen vehicle report.
+     *
+     * @param vehicleId       the vehicle ID
+     * @param reportedDate    the reported date
+     * @param caseNumber      the case number
+     * @param assignedOfficer the assigned officer
+     */
     public StolenVehicle(int vehicleId, LocalDate reportedDate, String caseNumber, String assignedOfficer) {
         this();
         this.vehicleId = vehicleId;
         this.reportedDate = reportedDate;
         this.caseNumber = caseNumber;
         this.assignedOfficer = assignedOfficer;
+
+        reportedDateProperty.set(reportedDate);
+        caseNumberProperty.set(caseNumber);
+        assignedOfficerProperty.set(assignedOfficer);
     }
+
+    // ============================================
+    // PRIVATE UPDATE METHODS
+    // ============================================
+
+    private void updateStatusDisplay() {
+        switch (status) {
+            case STATUS_ACTIVE:
+                statusDisplayProperty.set("Active");
+                statusColorProperty.set("#F44336");
+                break;
+            case STATUS_RECOVERED:
+                statusDisplayProperty.set("Recovered");
+                statusColorProperty.set("#4CAF50");
+                break;
+            case STATUS_CLOSED:
+                statusDisplayProperty.set("Closed");
+                statusColorProperty.set("#9E9E9E");
+                break;
+            case STATUS_UNDER_INVESTIGATION:
+                statusDisplayProperty.set("Under Investigation");
+                statusColorProperty.set("#FF9800");
+                break;
+            default:
+                statusDisplayProperty.set(status);
+                statusColorProperty.set("#9E9E9E");
+        }
+    }
+
+    // ============================================
+    // GETTERS AND SETTERS WITH PROPERTY UPDATES
+    // ============================================
 
     public int getVehicleId() {
         return vehicleId;
@@ -203,9 +272,65 @@ public class StolenVehicle extends BaseEntity {
         return descriptionProperty;
     }
 
-    public boolean isActive() {
-        return "ACTIVE".equals(status);
+    public String getStatusDisplay() {
+        return statusDisplayProperty.get();
     }
+
+    public StringProperty statusDisplayProperty() {
+        return statusDisplayProperty;
+    }
+
+    public String getStatusColor() {
+        return statusColorProperty.get();
+    }
+
+    public StringProperty statusColorProperty() {
+        return statusColorProperty;
+    }
+
+    // ============================================
+    // BUSINESS LOGIC METHODS
+    // ============================================
+
+    public boolean isActive() {
+        return STATUS_ACTIVE.equals(status);
+    }
+
+    public boolean isRecovered() {
+        return STATUS_RECOVERED.equals(status);
+    }
+
+    public String getFormattedReportedDate() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        return reportedDate != null ? reportedDate.format(formatter) : "";
+    }
+
+    public String getFormattedRecoveredDate() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        return recoveredDate != null ? recoveredDate.format(formatter) : "";
+    }
+
+    public String getFormattedDistance() {
+        if (distance == null) return "N/A";
+        if (distance < 1) return String.format("%.0f meters", distance * 1000);
+        return String.format("%.2f km", distance);
+    }
+
+    public void markAsRecovered(LocalDate date) {
+        this.status = STATUS_RECOVERED;
+        this.recoveredDate = date;
+        statusProperty.set(STATUS_RECOVERED);
+        recoveredDateProperty.set(date);
+    }
+
+    public void markAsUnderInvestigation() {
+        this.status = STATUS_UNDER_INVESTIGATION;
+        statusProperty.set(STATUS_UNDER_INVESTIGATION);
+    }
+
+    // ============================================
+    // OVERRIDE METHODS
+    // ============================================
 
     @Override
     public int getId() {
@@ -219,6 +344,32 @@ public class StolenVehicle extends BaseEntity {
 
     @Override
     public String toString() {
-        return registrationNumber + " - " + caseNumber + " (" + status + ")";
+        return registrationNumber + " - " + caseNumber + " (" + getStatusDisplay() + ")";
+    }
+
+    /**
+     * Creates a copy of this stolen vehicle record.
+     *
+     * @return a new StolenVehicle instance
+     */
+    public StolenVehicle copy() {
+        StolenVehicle copy = new StolenVehicle();
+        copy.setId(this.id);
+        copy.setVehicleId(this.vehicleId);
+        copy.setRegistrationNumber(this.registrationNumber);
+        copy.setMake(this.make);
+        copy.setModel(this.model);
+        copy.setReportedDate(this.reportedDate);
+        copy.setCaseNumber(this.caseNumber);
+        copy.setStatus(this.status);
+        copy.setAssignedOfficer(this.assignedOfficer);
+        copy.setRecoveredDate(this.recoveredDate);
+        copy.setLatitude(this.latitude);
+        copy.setLongitude(this.longitude);
+        copy.setDistance(this.distance);
+        copy.setDescription(this.description);
+        copy.setCreatedAt(this.getCreatedAt());
+        copy.setUpdatedAt(this.getUpdatedAt());
+        return copy;
     }
 }

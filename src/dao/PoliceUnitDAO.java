@@ -1,75 +1,85 @@
 package dao;
 
-import java.sql.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
+
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.PoliceUnit;
 
+/**
+ * PoliceUnitDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class PoliceUnitDAO extends BaseDAO<PoliceUnit> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public PoliceUnitDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public PoliceUnit findById(int id) throws SQLException {
-        String sql = "SELECT * FROM police_units WHERE id = ?";
-        return executeQuerySingle(sql, id);
+        List<PoliceUnit> results = viewLoader.loadViewWithCondition("vw_police_units", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     public PoliceUnit findByUnitId(String unitId) throws SQLException {
-        String sql = "SELECT * FROM police_units WHERE unit_id = ?";
-        return executeQuerySingle(sql, unitId);
+        List<PoliceUnit> results = viewLoader.loadViewWithCondition("vw_police_units", "unit_id = ?", unitId);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<PoliceUnit> findAll() throws SQLException {
-        String sql = "SELECT * FROM police_units ORDER BY officer_name";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_police_units");
     }
 
     public List<PoliceUnit> findByStatus(String status) throws SQLException {
-        String sql = "SELECT * FROM police_units WHERE status = ? ORDER BY officer_name";
-        return executeQuery(sql, status);
+        return viewLoader.loadViewWithCondition("vw_police_units", "status = ? ORDER BY officer_name", status);
     }
 
     public List<PoliceUnit> findAvailableUnits() throws SQLException {
-        String sql = "SELECT * FROM police_units WHERE status IN ('AVAILABLE', 'ON_PATROL') ORDER BY officer_name";
-        return executeQuery(sql);
+        return viewLoader.loadViewWithCondition("vw_police_units", "status IN ('AVAILABLE', 'ON_PATROL') ORDER BY officer_name");
     }
 
     @Override
     public boolean insert(PoliceUnit entity) throws SQLException {
-        String sql = "INSERT INTO police_units (unit_id, officer_name, badge_number, status) VALUES (?, ?, ?, ?)";
-        int result = executeUpdate(sql, entity.getUnitId(), entity.getOfficerName(), entity.getBadgeNumber(), entity.getStatus());
-        return result > 0;
+        return procedureCaller.executeRegisterPoliceUnit(
+                entity.getUnitId(),
+                entity.getOfficerName(),
+                entity.getBadgeNumber(),
+                entity.getDeviceId()
+        );
     }
 
     public boolean updateLocation(String unitId, double latitude, double longitude) throws SQLException {
-        String sql = "CALL sp_update_police_unit_location(?, ?, ?)";
-        int result = executeUpdate(sql, unitId, latitude, longitude);
-        return result >= 0;
+        return procedureCaller.executeUpdatePoliceUnitLocation(unitId, latitude, longitude);
     }
 
     public boolean updateStatus(int unitId, String status) throws SQLException {
-        String sql = "UPDATE police_units SET status = ? WHERE id = ?";
-        int result = executeUpdate(sql, status, unitId);
-        return result > 0;
+        return procedureCaller.executeUpdatePoliceUnitStatus(unitId, status);
     }
 
     @Override
     public boolean update(PoliceUnit entity) throws SQLException {
-        String sql = "UPDATE police_units SET officer_name = ?, badge_number = ?, status = ?, device_id = ? WHERE id = ?";
-        int result = executeUpdate(sql,
+        return procedureCaller.executeUpdatePoliceUnit(
+                entity.getId(),
                 entity.getOfficerName(),
                 entity.getBadgeNumber(),
                 entity.getStatus(),
-                entity.getDeviceId(),
-                entity.getId()
+                entity.getDeviceId()
         );
-        return result > 0;
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM police_units WHERE id = ?";
-        int result = executeUpdate(sql, id);
-        return result > 0;
+        return procedureCaller.executeDeletePoliceUnit(id);
     }
 
     @Override

@@ -1,79 +1,91 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.Violation;
 
+/**
+ * ViolationDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class ViolationDAO extends BaseDAO<Violation> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public ViolationDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public Violation findById(int id) throws SQLException {
-        String sql = "SELECT * FROM vw_violations WHERE id = ?";
-        return executeQuerySingle(sql, id);
+        List<Violation> results = viewLoader.loadViewWithCondition("vw_violations", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<Violation> findAll() throws SQLException {
-        String sql = "SELECT * FROM vw_violations ORDER BY violation_date DESC";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_violations");
     }
 
     public List<Violation> findByVehicleId(int vehicleId) throws SQLException {
-        String sql = "SELECT * FROM vw_violations WHERE vehicle_id = ? ORDER BY violation_date DESC";
-        return executeQuery(sql, vehicleId);
+        return viewLoader.loadViewWithCondition("vw_violations", "vehicle_id = ? ORDER BY violation_date DESC", vehicleId);
     }
 
     public List<Violation> findByRegistrationNumber(String registrationNumber) throws SQLException {
-        String sql = "SELECT * FROM vw_violations WHERE registration_number = ? ORDER BY violation_date DESC";
-        return executeQuery(sql, registrationNumber);
+        return viewLoader.loadViewWithCondition("vw_violations", "registration_number = ? ORDER BY violation_date DESC", registrationNumber);
     }
 
     public List<Violation> findUnpaidViolations() throws SQLException {
-        String sql = "SELECT * FROM vw_unpaid_violations ORDER BY violation_date DESC";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_unpaid_violations");
     }
 
     public List<Violation> findPaidViolations() throws SQLException {
-        String sql = "SELECT * FROM vw_violations WHERE payment_status = 'PAID' ORDER BY violation_date DESC";
-        return executeQuery(sql);
+        return viewLoader.loadViewWithCondition("vw_violations", "payment_status = 'PAID' ORDER BY violation_date DESC");
     }
 
     public List<Violation> findByViolationType(String violationType) throws SQLException {
-        String sql = "SELECT * FROM vw_violations WHERE violation_type ILIKE ? ORDER BY violation_date DESC";
-        return executeQuery(sql, "%" + violationType + "%");
+        return viewLoader.loadViewWithCondition("vw_violations", "violation_type ILIKE ? ORDER BY violation_date DESC", "%" + violationType + "%");
     }
 
     public List<Violation> findByDateRange(LocalDate startDate, LocalDate endDate) throws SQLException {
-        String sql = "SELECT * FROM vw_violations WHERE violation_date BETWEEN ? AND ? ORDER BY violation_date DESC";
-        return executeQuery(sql, startDate, endDate);
+        return viewLoader.loadViewWithCondition("vw_violations", "violation_date BETWEEN ? AND ? ORDER BY violation_date DESC", startDate, endDate);
     }
 
     public List<Violation> findByOfficer(String officerName) throws SQLException {
-        String sql = "SELECT * FROM vw_violations WHERE officer_name ILIKE ? ORDER BY violation_date DESC";
-        return executeQuery(sql, "%" + officerName + "%");
+        return viewLoader.loadViewWithCondition("vw_violations", "officer_name ILIKE ? ORDER BY violation_date DESC", "%" + officerName + "%");
     }
 
     @Override
     public boolean insert(Violation entity) throws SQLException {
-        return executeProcedure("sp_add_violation",
+        Integer violationId = procedureCaller.executeAddViolation(
                 entity.getVehicleId(),
-                entity.getViolationDate(),
+                java.sql.Date.valueOf(entity.getViolationDate()),
                 entity.getViolationType(),
                 entity.getFineAmount(),
                 entity.getLocation(),
                 entity.getOfficerName(),
-                entity.getPaymentStatus()
+                entity.getLatitude(),
+                entity.getLongitude()
         );
+        if (violationId != null && violationId > 0) {
+            entity.setId(violationId);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public boolean update(Violation entity) throws SQLException {
-        return executeProcedure("sp_update_violation",
+        return procedureCaller.executeUpdateViolation(
                 entity.getId(),
                 entity.getVehicleId(),
                 entity.getViolationDate(),
@@ -86,49 +98,20 @@ public class ViolationDAO extends BaseDAO<Violation> {
     }
 
     public boolean markAsPaid(int violationId) throws SQLException {
-        return executeProcedure("sp_mark_violation_paid", violationId);
+        return procedureCaller.executeMarkViolationPaid(violationId);
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        return executeProcedure("sp_delete_violation", id);
+        return procedureCaller.executeDeleteViolation(id);
     }
 
     public double getTotalUnpaidFines() throws SQLException {
-        String sql = "SELECT COALESCE(SUM(fine_amount), 0) FROM violations WHERE payment_status = 'UNPAID'";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getDouble(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.getSumUnpaidFines();
     }
 
     public int countViolationsByVehicle(int vehicleId) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM violations WHERE vehicle_id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, vehicleId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.countViewRowsWithCondition("vw_violations", "vehicle_id = ?", vehicleId);
     }
 
     @Override

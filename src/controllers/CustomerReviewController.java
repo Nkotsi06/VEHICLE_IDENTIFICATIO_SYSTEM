@@ -12,10 +12,13 @@ import javafx.scene.control.ToggleGroup;
 import utils.AlertUtil;
 import utils.SceneManager;
 import utils.SessionManager;
+import utils.ValidationUtil;
 import dao.CustomerReviewDAO;
 import dao.WorkshopDAO;
 import models.CustomerReview;
 import models.Workshop;
+
+import java.util.List;
 
 public class CustomerReviewController {
 
@@ -73,7 +76,7 @@ public class CustomerReviewController {
 
     private void loadWorkshops() {
         try {
-            java.util.List<Workshop> workshops = workshopDAO.findApprovedWorkshops();
+            List<Workshop> workshops = workshopDAO.findApprovedWorkshops();
             workshopComboBox.getItems().setAll(workshops);
         } catch (Exception e) {
             e.printStackTrace();
@@ -82,7 +85,7 @@ public class CustomerReviewController {
 
     private void loadReviews() {
         try {
-            java.util.List<CustomerReview> reviews;
+            List<CustomerReview> reviews;
             if (SessionManager.getInstance().isAdmin()) {
                 reviews = reviewDAO.findAll();
             } else {
@@ -118,7 +121,7 @@ public class CustomerReviewController {
             return;
         }
 
-        if (!utils.ValidationUtil.isNotEmpty(reviewTextArea.getText())) {
+        if (!ValidationUtil.isNotEmpty(reviewTextArea.getText())) {
             AlertUtil.showWarning("Validation Error", "Please enter your review.");
             reviewTextArea.requestFocus();
             return;

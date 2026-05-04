@@ -5,129 +5,139 @@
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.GeofencingController">
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.GeofencingController"
+            stylesheets="@../css/application.css" styleClass="border-pane">
 
     <top>
-        <VBox>
-            <fx:include source="MenuBarComponent.fxml"/>
-        </VBox>
+        <fx:include source="MenuBarComponent.fxml"/>
     </top>
 
     <center>
-        <TabPane>
-            <Tab text="Geofence Zones" closable="false">
-                <ScrollPane fitToWidth="true" fitToHeight="true">
-                    <SplitPane dividerPositions="0.5">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
+            <VBox spacing="20" alignment="TOP_CENTER"
+                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
 
-                        <!-- Left Panel - Geofence Zones -->
-                        <VBox spacing="10" style="-fx-padding: 15;">
-                            <Label text="Geofence Zones" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                <TabPane maxWidth="Infinity" styleClass="centered-tab-pane" tabClosingPolicy="UNAVAILABLE">
 
-                            <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="30"/>
+                    <!-- Geofence Zones Tab -->
+                    <Tab text="Geofence Zones" closable="false">
+                        <VBox spacing="20" alignment="TOP_CENTER" style="-fx-background-color: white; -fx-padding: 25;">
+                            <HBox spacing="20" alignment="CENTER">
+                                <!-- Left Panel - Geofence Zones -->
+                                <VBox spacing="10" alignment="CENTER" HBox.hgrow="ALWAYS">
+                                    <VBox styleClass="profile-edit-card" alignment="CENTER">
+                                        <Label text="Geofence Zones" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                            <TableView fx:id="zonesTable" prefHeight="400">
+                                        <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="30"/>
+
+                                        <TableView fx:id="zonesTable" prefHeight="400" minHeight="300" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
+                                            <columns>
+                                                <TableColumn fx:id="zoneNameColumn" text="Zone Name" minWidth="120" maxWidth="160"/>
+                                                <TableColumn fx:id="zoneTypeColumn" text="Type" minWidth="100" maxWidth="130"/>
+                                                <TableColumn fx:id="radiusColumn" text="Radius (m)" minWidth="80" maxWidth="110"/>
+                                                <TableColumn fx:id="zoneStatusColumn" text="Status" minWidth="70" maxWidth="90"/>
+                                                <TableColumn fx:id="latitudeColumn" text="Latitude" minWidth="90" maxWidth="120"/>
+                                                <TableColumn fx:id="longitudeColumn" text="Longitude" minWidth="90" maxWidth="120"/>
+                                            </columns>
+                                            <placeholder>
+                                                <Label text="No geofence zones" styleClass="status-text"/>
+                                            </placeholder>
+                                        </TableView>
+
+                                        <HBox alignment="CENTER">
+                                            <Pagination fx:id="zonesPagination" pageCount="1" maxPageIndicatorCount="5"/>
+                                        </HBox>
+
+                                        <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+
+                                        <HBox alignment="CENTER">
+                                            <Button fx:id="refreshButton" text="Refresh" styleClass="button-info" prefWidth="100"/>
+                                            <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100">
+                                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                                            </Button>
+                                        </HBox>
+                                    </VBox>
+                                </VBox>
+
+                                <!-- Right Panel - Zone Details -->
+                                <VBox spacing="15" alignment="CENTER" HBox.hgrow="ALWAYS">
+                                    <VBox styleClass="profile-edit-card" alignment="CENTER">
+                                        <Label text="Zone Details" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+
+                                        <GridPane hgap="10" vgap="10" alignment="CENTER">
+                                            <columnConstraints>
+                                                <ColumnConstraints halignment="RIGHT" minWidth="100"/>
+                                                <ColumnConstraints minWidth="200"/>
+                                            </columnConstraints>
+
+                                            <Label text="Zone Name:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                            <TextField fx:id="zoneNameField" GridPane.rowIndex="0" GridPane.columnIndex="1" promptText="Enter zone name"/>
+
+                                            <Label text="Latitude:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                            <TextField fx:id="latitudeField" GridPane.rowIndex="1" GridPane.columnIndex="1" promptText="Enter latitude"/>
+
+                                            <Label text="Longitude:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                            <TextField fx:id="longitudeField" GridPane.rowIndex="2" GridPane.columnIndex="1" promptText="Enter longitude"/>
+
+                                            <Label text="Radius (meters):" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                            <TextField fx:id="radiusField" GridPane.rowIndex="3" GridPane.columnIndex="1" promptText="Enter radius"/>
+
+                                            <Label text="Zone Type:" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                            <ComboBox fx:id="zoneTypeComboBox" GridPane.rowIndex="4" GridPane.columnIndex="1" prefWidth="200"/>
+
+                                            <Label text="Status:" GridPane.rowIndex="5" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                            <ComboBox fx:id="zoneStatusComboBox" GridPane.rowIndex="5" GridPane.columnIndex="1" prefWidth="200"/>
+                                        </GridPane>
+
+                                        <HBox alignment="CENTER">
+                                            <Button fx:id="addZoneButton" text="Add Zone" styleClass="button-success" prefWidth="100">
+                                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                                            </Button>
+                                            <Button fx:id="updateZoneButton" text="Update" styleClass="button-info" prefWidth="90"/>
+                                            <Button fx:id="deleteZoneButton" text="Delete" styleClass="button-danger" prefWidth="90"/>
+                                        </HBox>
+
+                                        <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
+                                    </VBox>
+                                </VBox>
+                            </HBox>
+                        </VBox>
+                    </Tab>
+
+                    <!-- Alert Events Tab -->
+                    <Tab text="Alert Events" closable="false">
+                        <VBox spacing="15" alignment="TOP_CENTER" style="-fx-background-color: white; -fx-padding: 25;">
+                            <Label text="Geofence Alert Events" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+
+                            <TableView fx:id="alertsTable" prefHeight="400" minHeight="300" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
                                 <columns>
-                                    <TableColumn fx:id="zoneNameColumn" text="Zone Name" prefWidth="150"/>
-                                    <TableColumn fx:id="zoneTypeColumn" text="Type" prefWidth="120"/>
-                                    <TableColumn fx:id="radiusColumn" text="Radius (m)" prefWidth="100"/>
-                                    <TableColumn fx:id="zoneStatusColumn" text="Status" prefWidth="80"/>
-                                    <TableColumn fx:id="latitudeColumn" text="Latitude" prefWidth="100"/>
-                                    <TableColumn fx:id="longitudeColumn" text="Longitude" prefWidth="100"/>
+                                    <TableColumn fx:id="alertZoneColumn" text="Zone" minWidth="120" maxWidth="160"/>
+                                    <TableColumn fx:id="alertVehicleColumn" text="Vehicle" minWidth="120" maxWidth="160"/>
+                                    <TableColumn fx:id="alertTypeColumn" text="Alert Type" minWidth="100" maxWidth="130"/>
+                                    <TableColumn fx:id="alertTimestampColumn" text="Timestamp" minWidth="150" maxWidth="190"/>
                                 </columns>
-                                <columnResizePolicy>
-                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                                </columnResizePolicy>
                                 <placeholder>
-                                    <Label text="No geofence zones" style="-fx-text-fill: #7f8c8d;"/>
+                                    <Label text="No alert events" styleClass="status-text"/>
                                 </placeholder>
                             </TableView>
 
-                            <Pagination fx:id="zonesPagination" pageCount="1" maxPageIndicatorCount="5"/>
-
-                            <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
-
-                            <HBox spacing="10">
-                                <Button fx:id="refreshButton" text="Refresh" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                                <Button fx:id="fadeButton" text="Animate" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
-                                    <effect>
-                                        <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                                    </effect>
-                                </Button>
+                            <HBox alignment="CENTER">
+                                <Pagination fx:id="alertsPagination" pageCount="1" maxPageIndicatorCount="5"/>
                             </HBox>
                         </VBox>
+                    </Tab>
+                </TabPane>
 
-                        <!-- Right Panel - Zone Details -->
-                        <VBox spacing="15" style="-fx-padding: 15;">
-                            <Label text="Zone Details" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                <HBox alignment="CENTER">
+                    <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-secondary" prefWidth="150"/>
+                </HBox>
 
-                            <GridPane hgap="10" vgap="10">
-                                <Label text="Zone Name:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                                <TextField fx:id="zoneNameField" GridPane.rowIndex="0" GridPane.columnIndex="1" promptText="Enter zone name"/>
-
-                                <Label text="Latitude:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                                <TextField fx:id="latitudeField" GridPane.rowIndex="1" GridPane.columnIndex="1" promptText="Enter latitude"/>
-
-                                <Label text="Longitude:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                                <TextField fx:id="longitudeField" GridPane.rowIndex="2" GridPane.columnIndex="1" promptText="Enter longitude"/>
-
-                                <Label text="Radius (meters):" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                                <TextField fx:id="radiusField" GridPane.rowIndex="3" GridPane.columnIndex="1" promptText="Enter radius"/>
-
-                                <Label text="Zone Type:" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                                <ComboBox fx:id="zoneTypeComboBox" GridPane.rowIndex="4" GridPane.columnIndex="1" prefWidth="200"/>
-
-                                <Label text="Status:" GridPane.rowIndex="5" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                                <ComboBox fx:id="zoneStatusComboBox" GridPane.rowIndex="5" GridPane.columnIndex="1" prefWidth="200"/>
-                            </GridPane>
-
-                            <HBox spacing="10">
-                                <Button fx:id="addZoneButton" text="Add Zone" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 100;">
-                                    <effect>
-                                        <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                                    </effect>
-                                </Button>
-                                <Button fx:id="updateZoneButton" text="Update" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 90;"/>
-                                <Button fx:id="deleteZoneButton" text="Delete" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 90;"/>
-                            </HBox>
-
-                            <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
-                        </VBox>
-                    </SplitPane>
-                </ScrollPane>
-            </Tab>
-
-            <Tab text="Alert Events" closable="false">
-                <VBox spacing="10" style="-fx-padding: 15;">
-                    <Label text="Geofence Alert Events" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-
-                    <TableView fx:id="alertsTable" prefHeight="400">
-                        <columns>
-                            <TableColumn fx:id="alertZoneColumn" text="Zone" prefWidth="150"/>
-                            <TableColumn fx:id="alertVehicleColumn" text="Vehicle" prefWidth="150"/>
-                            <TableColumn fx:id="alertTypeColumn" text="Alert Type" prefWidth="120"/>
-                            <TableColumn fx:id="alertTimestampColumn" text="Timestamp" prefWidth="180"/>
-                        </columns>
-                        <columnResizePolicy>
-                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                        </columnResizePolicy>
-                        <placeholder>
-                            <Label text="No alert events" style="-fx-text-fill: #7f8c8d;"/>
-                        </placeholder>
-                    </TableView>
-
-                    <Pagination fx:id="alertsPagination" pageCount="1" maxPageIndicatorCount="5"/>
-                </VBox>
-            </Tab>
-        </TabPane>
+            </VBox>
+        </ScrollPane>
     </center>
 
     <bottom>
-        <VBox spacing="0">
-            <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
-                <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-            </HBox>
-            <fx:include source="FooterComponent.fxml"/>
-        </VBox>
+        <fx:include source="FooterComponent.fxml"/>
     </bottom>
-
 </BorderPane>

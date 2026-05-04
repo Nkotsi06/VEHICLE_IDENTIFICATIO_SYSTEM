@@ -1,74 +1,80 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.VehicleHistory;
 
+/**
+ * VehicleHistoryDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class VehicleHistoryDAO extends BaseDAO<VehicleHistory> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public VehicleHistoryDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public VehicleHistory findById(int id) throws SQLException {
-        String sql = "SELECT * FROM vw_vehicle_history WHERE id = ?";
-        return executeQuerySingle(sql, id);
+        List<VehicleHistory> results = viewLoader.loadViewWithCondition("vw_vehicle_history", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<VehicleHistory> findAll() throws SQLException {
-        String sql = "SELECT * FROM vw_vehicle_history";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_vehicle_history");
     }
 
     public List<VehicleHistory> findByVehicleId(int vehicleId) throws SQLException {
-        String sql = "SELECT * FROM vw_vehicle_history WHERE vehicle_id = ? ORDER BY event_date DESC";
-        return executeQuery(sql, vehicleId);
+        return viewLoader.loadViewWithCondition("vw_vehicle_history", "vehicle_id = ? ORDER BY event_date DESC", vehicleId);
     }
 
     public List<VehicleHistory> findByVehicleIdAndDateRange(int vehicleId, LocalDate startDate, LocalDate endDate) throws SQLException {
-        String sql = "SELECT * FROM vw_vehicle_history WHERE vehicle_id = ? AND event_date BETWEEN ? AND ? ORDER BY event_date DESC";
-        return executeQuery(sql, vehicleId, startDate, endDate);
+        return viewLoader.loadViewWithCondition("vw_vehicle_history", "vehicle_id = ? AND event_date BETWEEN ? AND ? ORDER BY event_date DESC", vehicleId, startDate, endDate);
     }
 
     public List<VehicleHistory> findByEventType(String eventType) throws SQLException {
-        String sql = "SELECT * FROM vw_vehicle_history WHERE event_type = ? ORDER BY event_date DESC";
-        return executeQuery(sql, eventType);
+        return viewLoader.loadViewWithCondition("vw_vehicle_history", "event_type = ? ORDER BY event_date DESC", eventType);
     }
 
     @Override
     public boolean insert(VehicleHistory entity) throws SQLException {
-        String sql = "INSERT INTO vehicle_history (vehicle_id, event_type, event_date, description, details) VALUES (?, ?, ?, ?, ?)";
-        int result = executeUpdate(sql,
+        return procedureCaller.executeInsertVehicleHistory(
                 entity.getVehicleId(),
                 entity.getEventType(),
                 entity.getEventDate(),
                 entity.getDescription(),
                 entity.getDetails()
         );
-        return result > 0;
     }
 
     @Override
     public boolean update(VehicleHistory entity) throws SQLException {
-        String sql = "UPDATE vehicle_history SET description = ?, details = ? WHERE id = ?";
-        int result = executeUpdate(sql, entity.getDescription(), entity.getDetails(), entity.getId());
-        return result > 0;
+        return procedureCaller.executeUpdateVehicleHistory(
+                entity.getId(),
+                entity.getDescription(),
+                entity.getDetails()
+        );
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM vehicle_history WHERE id = ?";
-        int result = executeUpdate(sql, id);
-        return result > 0;
+        return procedureCaller.executeDeleteVehicleHistory(id);
     }
 
     public boolean deleteByVehicleId(int vehicleId) throws SQLException {
-        String sql = "DELETE FROM vehicle_history WHERE vehicle_id = ?";
-        int result = executeUpdate(sql, vehicleId);
-        return result > 0;
+        return procedureCaller.executeDeleteVehicleHistoryByVehicle(vehicleId);
     }
 
     @Override

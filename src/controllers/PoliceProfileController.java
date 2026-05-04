@@ -24,7 +24,6 @@ import models.RankChangeRequest;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,9 +32,17 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.UUID;
 
+/**
+ * Controller for Police Officer Profile Management
+ * Handles viewing and editing police officer personal and professional information
+ * Includes rank change requests, password management, and activity logging
+ */
 public class PoliceProfileController {
+
+    // ============================================
+    // FXML UI COMPONENTS - DISPLAY LABELS
+    // ============================================
 
     @FXML private Label badgeNumberLabel;
     @FXML private Label rankDisplayLabel;
@@ -47,6 +54,10 @@ public class PoliceProfileController {
     @FXML private Label accountStatusLabel;
     @FXML private Label statusLabel;
 
+    // ============================================
+    // FORM FIELDS
+    // ============================================
+
     @FXML private TextField fullNameField;
     @FXML private TextField emailField;
     @FXML private TextField phoneField;
@@ -54,18 +65,34 @@ public class PoliceProfileController {
     @FXML private TextField stationField;
     @FXML private TextField supervisorField;
 
+    // ============================================
+    // COMBO BOXES
+    // ============================================
+
     @FXML private ComboBox<String> rankComboBox;
     @FXML private ComboBox<String> departmentComboBox;
 
+    // ============================================
+    // IMAGE COMPONENTS
+    // ============================================
+
     @FXML private ImageView profileImageView;
+
+    // ============================================
+    // BUTTONS
+    // ============================================
 
     @FXML private Button saveButton;
     @FXML private Button cancelButton;
     @FXML private Button backButton;
     @FXML private Button uploadPhotoButton;
-    @FXML private Button changePasswordButton;  // Added
+    @FXML private Button changePasswordButton;
     @FXML private Button requestRankChangeButton;
     @FXML private Button refreshActivityButton;
+
+    // ============================================
+    // ACTIVITY TABLE
+    // ============================================
 
     @FXML private TableView<OfficerActivityLog> activityTable;
     @FXML private TableColumn<OfficerActivityLog, String> activityTimeColumn;
@@ -73,14 +100,27 @@ public class PoliceProfileController {
     @FXML private TableColumn<OfficerActivityLog, String> activityDescriptionColumn;
     @FXML private TableColumn<OfficerActivityLog, String> activityTargetColumn;
 
+    // ============================================
+    // PROGRESS INDICATORS
+    // ============================================
+
     @FXML private ProgressIndicator loadProgress;
     @FXML private ProgressBar operationProgress;
     @FXML private Pagination activityPagination;
+
+    // ============================================
+    // DAO INSTANCES
+    // ============================================
 
     private PoliceOfficerDAO policeOfficerDAO;
     private OfficerActivityLogDAO activityLogDAO;
     private RankChangeRequestDAO rankChangeRequestDAO;
     private UserDAO userDAO;
+
+    // ============================================
+    // DATA MODELS
+    // ============================================
+
     private PoliceOfficer currentOfficer;
     private List<OfficerActivityLog> fullActivityList;
     private int currentPage = 0;
@@ -89,6 +129,14 @@ public class PoliceProfileController {
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private String profileImageDirectory = "uploads/police_profiles/";
 
+    // ============================================
+    // INITIALIZATION METHODS
+    // ============================================
+
+    /**
+     * Initializes the police profile controller
+     * Sets up DAOs, table columns, loads profile data, and configures UI
+     */
     @FXML
     public void initialize() {
         policeOfficerDAO = new PoliceOfficerDAO();
@@ -106,6 +154,9 @@ public class PoliceProfileController {
         statusLabel.setText("Ready");
     }
 
+    /**
+     * Creates directory for storing profile images if it doesn't exist
+     */
     private void createImageDirectory() {
         try {
             Path path = Paths.get(profileImageDirectory);
@@ -117,6 +168,9 @@ public class PoliceProfileController {
         }
     }
 
+    /**
+     * Configures activity table columns with cell value factories
+     */
     private void setupTableColumns() {
         activityTimeColumn.setCellValueFactory(cellData ->
                 new javafx.beans.property.SimpleStringProperty(formatDateTime(cellData.getValue().getCreatedAt())));
@@ -124,12 +178,16 @@ public class PoliceProfileController {
         activityDescriptionColumn.setCellValueFactory(cellData -> cellData.getValue().actionDescriptionProperty());
         activityTargetColumn.setCellValueFactory(cellData -> cellData.getValue().targetTypeProperty());
 
+        // Center align columns
         activityTimeColumn.setStyle("-fx-alignment: CENTER;");
         activityActionColumn.setStyle("-fx-alignment: CENTER-LEFT;");
         activityDescriptionColumn.setStyle("-fx-alignment: CENTER-LEFT;");
         activityTargetColumn.setStyle("-fx-alignment: CENTER;");
     }
 
+    /**
+     * Configures pagination for activity log table
+     */
     private void setupPagination() {
         if (activityPagination != null) {
             activityPagination.currentPageIndexProperty().addListener((obs, old, newPage) -> {
@@ -139,6 +197,9 @@ public class PoliceProfileController {
         }
     }
 
+    /**
+     * Updates activity table to show current page
+     */
     private void updateTablePage() {
         if (fullActivityList == null || fullActivityList.isEmpty()) return;
         int start = currentPage * pageSize;
@@ -148,6 +209,9 @@ public class PoliceProfileController {
         }
     }
 
+    /**
+     * Loads available ranks and departments into combo boxes
+     */
     private void setupComboBoxes() {
         try {
             List<String> ranks = policeOfficerDAO.getAllRanks();
@@ -160,16 +224,22 @@ public class PoliceProfileController {
         }
     }
 
+    /**
+     * Sets up button click handlers
+     */
     private void setupButtonHandlers() {
         saveButton.setOnAction(event -> handleSave());
         cancelButton.setOnAction(event -> handleCancel());
         backButton.setOnAction(event -> handleBack());
         uploadPhotoButton.setOnAction(event -> handleUploadPhoto());
-        changePasswordButton.setOnAction(event -> handleChangePassword());  // Added
+        changePasswordButton.setOnAction(event -> handleChangePassword());
         requestRankChangeButton.setOnAction(event -> handleRequestRankChange());
         refreshActivityButton.setOnAction(event -> loadActivityLog());
     }
 
+    /**
+     * Applies visual effects to buttons
+     */
     private void applyVisualEffects() {
         DropShadow dropShadow = new DropShadow();
         dropShadow.setRadius(5.0);
@@ -181,10 +251,17 @@ public class PoliceProfileController {
         cancelButton.setEffect(dropShadow);
         backButton.setEffect(dropShadow);
         uploadPhotoButton.setEffect(dropShadow);
-        changePasswordButton.setEffect(dropShadow);  // Added
+        changePasswordButton.setEffect(dropShadow);
         requestRankChangeButton.setEffect(dropShadow);
     }
 
+    // ============================================
+    // PROFILE LOADING METHODS
+    // ============================================
+
+    /**
+     * Loads police officer profile from database for current user
+     */
     private void loadPoliceProfile() {
         showProgress(true);
         statusLabel.setText("Loading profile...");
@@ -200,6 +277,9 @@ public class PoliceProfileController {
             } else {
                 AlertUtil.showError("Load Failed", "Could not find police officer record for this user.");
                 statusLabel.setText("Profile load failed");
+                // Disable editing features when no officer record exists
+                setEditMode(false);
+                disableProfileFeatures();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -210,7 +290,40 @@ public class PoliceProfileController {
         }
     }
 
+    /**
+     * Disables profile features when no officer record exists
+     */
+    private void disableProfileFeatures() {
+        uploadPhotoButton.setDisable(true);
+        changePasswordButton.setDisable(true);
+        requestRankChangeButton.setDisable(true);
+        saveButton.setDisable(true);
+        cancelButton.setDisable(true);
+        refreshActivityButton.setDisable(true);
+
+        // Clear form fields
+        fullNameField.setEditable(false);
+        emailField.setEditable(false);
+        phoneField.setEditable(false);
+        addressField.setEditable(false);
+        stationField.setEditable(false);
+        rankComboBox.setDisable(true);
+        departmentComboBox.setDisable(true);
+
+        // Set placeholder text
+        badgeNumberLabel.setText("N/A");
+        rankDisplayLabel.setText("N/A");
+        departmentDisplayLabel.setText("N/A");
+        stationDisplayLabel.setText("N/A");
+        usernameLabel.setText(SessionManager.getInstance().getUsername());
+    }
+
+    /**
+     * Displays profile data in the UI
+     */
     private void displayProfileData() {
+        if (currentOfficer == null) return;
+
         badgeNumberLabel.setText(currentOfficer.getBadgeNumber());
         rankDisplayLabel.setText(currentOfficer.getRank());
         departmentDisplayLabel.setText(currentOfficer.getDepartment());
@@ -225,6 +338,7 @@ public class PoliceProfileController {
         accountStatusLabel.setText(currentOfficer.isActive() ? "ACTIVE" : "INACTIVE");
         accountStatusLabel.setTextFill(currentOfficer.isActive() ? Color.GREEN : Color.RED);
 
+        // Populate form fields
         fullNameField.setText(currentOfficer.getFullName());
         emailField.setText(currentOfficer.getEmail());
         phoneField.setText(currentOfficer.getPhone());
@@ -236,11 +350,18 @@ public class PoliceProfileController {
         departmentComboBox.setValue(currentOfficer.getDepartment());
 
         loadProfileImage();
-
         setEditMode(false);
     }
 
+    /**
+     * Loads profile image from disk or sets default
+     */
     private void loadProfileImage() {
+        if (currentOfficer == null) {
+            setDefaultProfileImage();
+            return;
+        }
+
         if (currentOfficer.getProfileImage() != null && !currentOfficer.getProfileImage().isEmpty()) {
             try {
                 File imageFile = new File(currentOfficer.getProfileImage());
@@ -256,6 +377,9 @@ public class PoliceProfileController {
         setDefaultProfileImage();
     }
 
+    /**
+     * Sets default profile image when no image is available
+     */
     private void setDefaultProfileImage() {
         try {
             profileImageView.setImage(null);
@@ -265,7 +389,15 @@ public class PoliceProfileController {
         }
     }
 
+    /**
+     * Toggles edit mode for the profile form
+     * @param edit true to enable editing, false to disable
+     */
     private void setEditMode(boolean edit) {
+        if (currentOfficer == null) {
+            edit = false;
+        }
+
         isEditing = edit;
         fullNameField.setEditable(edit);
         emailField.setEditable(edit);
@@ -278,7 +410,7 @@ public class PoliceProfileController {
         saveButton.setDisable(!edit);
         cancelButton.setDisable(!edit);
 
-        if (!edit) {
+        if (!edit && currentOfficer != null) {
             fullNameField.setText(currentOfficer.getFullName());
             emailField.setText(currentOfficer.getEmail());
             phoneField.setText(currentOfficer.getPhone());
@@ -289,7 +421,19 @@ public class PoliceProfileController {
         }
     }
 
+    // ============================================
+    // PROFILE UPDATE METHODS
+    // ============================================
+
+    /**
+     * Handles saving profile changes to database
+     */
     private void handleSave() {
+        if (currentOfficer == null) {
+            AlertUtil.showError("Error", "No officer profile loaded. Please refresh and try again.");
+            return;
+        }
+
         if (!validateInputs()) return;
 
         showProgress(true);
@@ -313,6 +457,7 @@ public class PoliceProfileController {
             if (success) {
                 logActivity("PROFILE_UPDATE", "Updated profile information");
 
+                // Log rank change if applicable
                 if (!oldRank.equals(newRank)) {
                     logActivity("RANK_CHANGE", "Rank changed from " + oldRank + " to " + newRank);
                 }
@@ -336,16 +481,39 @@ public class PoliceProfileController {
         }
     }
 
+    /**
+     * Handles cancelling edit mode and reverting changes
+     */
     private void handleCancel() {
         setEditMode(false);
         statusLabel.setText("Edit cancelled");
     }
 
+    /**
+     * Navigates back to police dashboard
+     */
     private void handleBack() {
         SceneManager.getInstance().switchToPoliceView();
     }
 
+    // ============================================
+    // PROFILE PICTURE HANDLING
+    // ============================================
+
+    /**
+     * Handles uploading a new profile picture
+     * FIXED: Added null check for currentOfficer
+     */
     private void handleUploadPhoto() {
+        // Check if currentOfficer is null before proceeding
+        if (currentOfficer == null) {
+            AlertUtil.showError("Profile Not Loaded",
+                    "Your police officer profile could not be loaded. Please refresh the page and try again.\n\n" +
+                            "If this issue persists, please contact your system administrator.");
+            statusLabel.setText("Cannot upload photo - profile not loaded");
+            return;
+        }
+
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select Profile Picture");
         fileChooser.getExtensionFilters().addAll(
@@ -364,7 +532,13 @@ public class PoliceProfileController {
                 String destinationPath = profileImageDirectory + newFileName;
                 File destinationFile = new File(destinationPath);
 
-                // Copy file
+                // Create directory if not exists
+                Path path = Paths.get(profileImageDirectory);
+                if (!Files.exists(path)) {
+                    Files.createDirectories(path);
+                }
+
+                // Copy file to destination
                 try (FileInputStream in = new FileInputStream(selectedFile)) {
                     Files.copy(selectedFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 }
@@ -388,13 +562,18 @@ public class PoliceProfileController {
             } catch (Exception e) {
                 e.printStackTrace();
                 AlertUtil.showError("Upload Failed", "Could not upload image: " + e.getMessage());
-                statusLabel.setText("Upload error");
+                statusLabel.setText("Upload error: " + e.getMessage());
             } finally {
                 hideProgressAfterDelay();
             }
         }
     }
 
+    /**
+     * Extracts file extension from filename
+     * @param fileName The full filename
+     * @return File extension including dot
+     */
     private String getFileExtension(String fileName) {
         int lastDot = fileName.lastIndexOf(".");
         if (lastDot > 0) {
@@ -403,10 +582,22 @@ public class PoliceProfileController {
         return ".jpg";
     }
 
+    // ============================================
+    // PASSWORD MANAGEMENT
+    // ============================================
+
     /**
-     * ADDED: Change Password functionality
+     * Handles changing user password
+     * Prompts for new password and confirmation
+     * FIXED: Added null check for currentOfficer
      */
     private void handleChangePassword() {
+        if (currentOfficer == null) {
+            AlertUtil.showError("Profile Not Loaded",
+                    "Your police officer profile could not be loaded. Please refresh the page and try again.");
+            return;
+        }
+
         TextInputDialog dialog = new TextInputDialog();
         dialog.setTitle("Change Password");
         dialog.setHeaderText("Change Your Password");
@@ -460,11 +651,26 @@ public class PoliceProfileController {
         });
     }
 
+    // ============================================
+    // RANK CHANGE REQUEST
+    // ============================================
+
+    /**
+     * Handles requesting a rank change/promotion
+     * Submits request for admin approval
+     * FIXED: Added null check for currentOfficer
+     */
     private void handleRequestRankChange() {
+        if (currentOfficer == null) {
+            AlertUtil.showError("Profile Not Loaded",
+                    "Your police officer profile could not be loaded. Please refresh the page and try again.");
+            return;
+        }
+
         String newRank = rankComboBox.getValue();
         String currentRank = currentOfficer.getRank();
 
-        if (newRank.equals(currentRank)) {
+        if (newRank == null || newRank.equals(currentRank)) {
             AlertUtil.showWarning("No Change", "Please select a different rank.");
             return;
         }
@@ -514,10 +720,24 @@ public class PoliceProfileController {
             });
         } catch (Exception e) {
             e.printStackTrace();
+            AlertUtil.showError("Error", "Failed to check rank requirements: " + e.getMessage());
         }
     }
 
+    // ============================================
+    // ACTIVITY LOG METHODS
+    // ============================================
+
+    /**
+     * Loads activity log for the current officer
+     */
     private void loadActivityLog() {
+        if (currentOfficer == null) {
+            activityTable.getItems().clear();
+            statusLabel.setText("No officer profile loaded");
+            return;
+        }
+
         showProgress(true);
         statusLabel.setText("Loading activity log...");
 
@@ -535,7 +755,14 @@ public class PoliceProfileController {
         }
     }
 
+    /**
+     * Logs an activity entry for the current officer
+     * @param actionType Type of action performed
+     * @param description Detailed description of the action
+     */
     private void logActivity(String actionType, String description) {
+        if (currentOfficer == null) return;
+
         try {
             activityLogDAO.logActivity(
                     currentOfficer.getId(),
@@ -550,6 +777,14 @@ public class PoliceProfileController {
         }
     }
 
+    // ============================================
+    // VALIDATION METHODS
+    // ============================================
+
+    /**
+     * Validates all form inputs before saving
+     * @return true if all inputs are valid
+     */
     private boolean validateInputs() {
         if (!ValidationUtil.isNotEmpty(fullNameField.getText())) {
             AlertUtil.showWarning("Validation Error", "Full name is required.");
@@ -577,11 +812,24 @@ public class PoliceProfileController {
         return true;
     }
 
+    /**
+     * Formats LocalDateTime for display
+     * @param dateTime The date time to format
+     * @return Formatted date-time string
+     */
     private String formatDateTime(LocalDateTime dateTime) {
         if (dateTime == null) return "";
         return dateTime.format(formatter);
     }
 
+    // ============================================
+    // UI PROGRESS METHODS
+    // ============================================
+
+    /**
+     * Shows/hides progress indicators
+     * @param show true to show, false to hide
+     */
     private void showProgress(boolean show) {
         if (loadProgress != null) loadProgress.setVisible(show);
         if (operationProgress != null) {
@@ -590,6 +838,9 @@ public class PoliceProfileController {
         }
     }
 
+    /**
+     * Hides progress indicators after a short delay
+     */
     private void hideProgressAfterDelay() {
         PauseTransition delay = new PauseTransition(Duration.seconds(1));
         delay.setOnFinished(event -> {

@@ -1,8 +1,19 @@
 package models;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
+/**
+ * GeofenceEvent model representing vehicle entry/exit events in geofenced zones.
+ * This is a simplified version of GeofenceAlertEvent for historical tracking.
+ *
+ * @author Vehicle Identification System Team
+ * @version 1.0
+ */
 public class GeofenceEvent extends BaseEntity {
+
+    // Core fields
+    private int id;
     private int geofenceZoneId;
     private String zoneName;
     private String zoneType;
@@ -19,12 +30,33 @@ public class GeofenceEvent extends BaseEntity {
     private String notificationSentTo;
     private String priority;
 
+    // Event type constants
+    public static final String EVENT_ENTER = "ENTER";
+    public static final String EVENT_EXIT = "EXIT";
+
+    // Priority constants
+    public static final String PRIORITY_HIGH = "HIGH";
+    public static final String PRIORITY_MEDIUM = "MEDIUM";
+    public static final String PRIORITY_LOW = "LOW";
+
+    /**
+     * Default constructor - initializes with default values.
+     */
     public GeofenceEvent() {
         super();
         this.isNotified = false;
-        this.priority = "MEDIUM";
+        this.priority = PRIORITY_MEDIUM;
+        this.eventType = EVENT_ENTER;
     }
 
+    /**
+     * Constructor for creating a new geofence event.
+     *
+     * @param geofenceZoneId the geofence zone ID
+     * @param vehicleId      the vehicle ID
+     * @param eventType      the event type (ENTER/EXIT)
+     * @param eventTimestamp the event timestamp
+     */
     public GeofenceEvent(int geofenceZoneId, int vehicleId, String eventType, LocalDateTime eventTimestamp) {
         this();
         this.geofenceZoneId = geofenceZoneId;
@@ -32,6 +64,10 @@ public class GeofenceEvent extends BaseEntity {
         this.eventType = eventType;
         this.eventTimestamp = eventTimestamp;
     }
+
+    // ============================================
+    // GETTERS AND SETTERS
+    // ============================================
 
     public int getGeofenceZoneId() {
         return geofenceZoneId;
@@ -153,32 +189,140 @@ public class GeofenceEvent extends BaseEntity {
         this.priority = priority;
     }
 
+    // ============================================
+    // BUSINESS LOGIC METHODS
+    // ============================================
+
+    /**
+     * Gets the event icon.
+     *
+     * @return "ENTER" or "EXIT"
+     */
     public String getEventIcon() {
-        return "ENTER".equals(eventType) ? "ENTER" : "EXIT";
+        return EVENT_ENTER.equals(eventType) ? "ENTER" : "EXIT";
     }
 
+    /**
+     * Gets the event color code.
+     *
+     * @return hex color for the event
+     */
     public String getEventColor() {
-        if ("ENTER".equals(eventType)) {
+        if (EVENT_ENTER.equals(eventType)) {
             return "#F44336";
         } else {
             return "#4CAF50";
         }
     }
 
-    public void calculatePriority() {
-        if ("HIGH_CRIME".equals(zoneType) && "ENTER".equals(eventType)) {
-            this.priority = "HIGH";
-        } else if ("SCHOOL_ZONE".equals(zoneType) && "ENTER".equals(eventType)) {
-            this.priority = "HIGH";
-        } else if ("RESTRICTED".equals(zoneType)) {
-            this.priority = "HIGH";
-        } else {
-            this.priority = "MEDIUM";
+    /**
+     * Gets the event type display name.
+     *
+     * @return human-readable event type
+     */
+    public String getEventTypeDisplay() {
+        return EVENT_ENTER.equals(eventType) ? "Entered Zone" : "Exited Zone";
+    }
+
+    /**
+     * Gets the formatted event timestamp.
+     *
+     * @return formatted date-time string
+     */
+    public String getFormattedEventTimestamp() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        return eventTimestamp != null ? eventTimestamp.format(formatter) : "";
+    }
+
+    /**
+     * Gets the formatted distance to zone center.
+     *
+     * @return formatted distance string
+     */
+    public String getFormattedDistance() {
+        if (distanceToZoneCenter == null) return "N/A";
+        if (distanceToZoneCenter < 1) {
+            return String.format("%.0f meters", distanceToZoneCenter * 1000);
         }
+        return String.format("%.2f km", distanceToZoneCenter);
+    }
+
+    /**
+     * Gets the priority display name.
+     *
+     * @return human-readable priority
+     */
+    public String getPriorityDisplay() {
+        switch (priority) {
+            case PRIORITY_HIGH: return "High";
+            case PRIORITY_MEDIUM: return "Medium";
+            case PRIORITY_LOW: return "Low";
+            default: return priority;
+        }
+    }
+
+    /**
+     * Calculates the priority based on zone type and event type.
+     */
+    public void calculatePriority() {
+        if (("HIGH_CRIME".equals(zoneType) || "SCHOOL_ZONE".equals(zoneType) || "RESTRICTED".equals(zoneType))
+                && EVENT_ENTER.equals(eventType)) {
+            this.priority = PRIORITY_HIGH;
+        } else {
+            this.priority = PRIORITY_MEDIUM;
+        }
+    }
+
+    /**
+     * Marks the event as notified.
+     *
+     * @param recipient the recipient of the notification
+     */
+    public void markNotified(String recipient) {
+        this.isNotified = true;
+        this.notificationSentTo = recipient;
+    }
+
+    // ============================================
+    // OVERRIDE METHODS
+    // ============================================
+
+    @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(int id) {
+        this.id = id;
     }
 
     @Override
     public String toString() {
-        return eventType + " - " + zoneName + " - " + registrationNumber + " at " + eventTimestamp;
+        return eventType + " - " + zoneName + " - " + registrationNumber + " at " + getFormattedEventTimestamp();
+    }
+
+    /**
+     * Converts this GeofenceEvent to a GeofenceAlertEvent.
+     *
+     * @return a new GeofenceAlertEvent
+     */
+    public GeofenceAlertEvent toAlertEvent() {
+        GeofenceAlertEvent alert = new GeofenceAlertEvent();
+        alert.setGeofenceZoneId(this.geofenceZoneId);
+        alert.setZoneName(this.zoneName);
+        alert.setZoneType(this.zoneType);
+        alert.setVehicleId(this.vehicleId);
+        alert.setRegistrationNumber(this.registrationNumber);
+        alert.setMake(this.make);
+        alert.setModel(this.model);
+        alert.setAlertType(this.eventType);
+        alert.setAlertTimestamp(this.eventTimestamp);
+        alert.setVehicleLocationLat(this.vehicleLatitude);
+        alert.setVehicleLocationLng(this.vehicleLongitude);
+        alert.setPriority(this.priority);
+        alert.setNotified(this.isNotified);
+        alert.setNotificationSentTo(this.notificationSentTo);
+        return alert;
     }
 }

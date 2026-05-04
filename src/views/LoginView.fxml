@@ -7,7 +7,8 @@
 
 <StackPane xmlns="http://javafx.com/javafx/17"
            xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="controllers.LoginController">
+           fx:controller="controllers.LoginController"
+           stylesheets="@../css/application.css">
 
     <!-- Background Image -->
     <VBox style="-fx-background-image: url('../images/background.jpg');
@@ -27,67 +28,68 @@
                 </padding>
 
                 <!-- Modern Login Card -->
-                <VBox alignment="CENTER" spacing="25"
-                      style="-fx-background-color: rgba(255, 255, 255, 0.97);
-                             -fx-background-radius: 20;
-                             -fx-padding: 40 35 40 35;
-                             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 20, 0, 0, 10);"
-                      maxWidth="420" maxHeight="600">
+                <HBox alignment="CENTER">
+                    <VBox alignment="CENTER" spacing="25"
+                          style="-fx-background-color: rgba(255, 255, 255, 0.97);
+                                 -fx-background-radius: 20;
+                                 -fx-padding: 40 35 40 35;
+                                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 20, 0, 0, 10);"
+                          maxWidth="420">
 
-                    <!-- Title -->
-                    <Label text="Vehicle Identification System"
-                           style="-fx-font-size: 22px;
-                                  -fx-font-weight: bold;
-                                  -fx-text-fill: #2c3e50;
-                                  -fx-text-alignment: center;"
-                           wrapText="true" textAlignment="CENTER"/>
+                        <!-- Title -->
+                        <Label text="Vehicle Identification System"
+                               style="-fx-font-size: 22px;
+                                      -fx-font-weight: bold;
+                                      -fx-text-fill: #2c3e50;
+                                      -fx-text-alignment: center;"
+                               wrapText="true" textAlignment="CENTER" alignment="CENTER" maxWidth="Infinity"/>
 
-                    <Label text="Sign in to your account"
-                           style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+                        <Label text="Sign in to your account"
+                               style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;" alignment="CENTER"/>
 
-                    <Separator prefWidth="300" style="-fx-background-color: #dddddd;"/>
+                        <Separator prefWidth="300" style="-fx-background-color: #dddddd;"/>
 
-                    <!-- Username Field -->
-                    <VBox spacing="8" maxWidth="340">
-                        <Label text="USERNAME" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-font-size: 12px;"/>
-                        <TextField fx:id="usernameField" promptText="Enter your username"
-                                   prefHeight="48" style="-fx-background-radius: 24; -fx-background-color: white; -fx-border-color: #dddddd; -fx-border-radius: 24;"/>
-                    </VBox>
-
-                    <!-- Password Field -->
-                    <VBox spacing="8" maxWidth="340">
-                        <Label text="PASSWORD" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-font-size: 12px;"/>
-                        <PasswordField fx:id="passwordField" promptText="Enter your password"
+                        <!-- Username Field -->
+                        <VBox spacing="8" maxWidth="340" alignment="CENTER">
+                            <Label text="USERNAME" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-font-size: 12px;" alignment="CENTER" maxWidth="Infinity"/>
+                            <TextField fx:id="usernameField" promptText="Enter your username"
                                        prefHeight="48" style="-fx-background-radius: 24; -fx-background-color: white; -fx-border-color: #dddddd; -fx-border-radius: 24;"/>
-                        <TextField fx:id="visiblePasswordField" promptText="Enter your password"
-                                   prefHeight="48" managed="false" visible="false"
-                                   style="-fx-background-radius: 24; -fx-background-color: white; -fx-border-color: #dddddd; -fx-border-radius: 24;"/>
+                        </VBox>
+
+                        <!-- Password Field -->
+                        <VBox spacing="8" maxWidth="340" alignment="CENTER">
+                            <Label text="PASSWORD" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-font-size: 12px;" alignment="CENTER" maxWidth="Infinity"/>
+                            <PasswordField fx:id="passwordField" promptText="Enter your password"
+                                           prefHeight="48" style="-fx-background-radius: 24; -fx-background-color: white; -fx-border-color: #dddddd; -fx-border-radius: 24;"/>
+                            <TextField fx:id="visiblePasswordField" promptText="Enter your password"
+                                       prefHeight="48" managed="false" visible="false"
+                                       style="-fx-background-radius: 24; -fx-background-color: white; -fx-border-color: #dddddd; -fx-border-radius: 24;"/>
+                        </VBox>
+
+                        <!-- Password Toggle Button -->
+                        <Button fx:id="togglePasswordButton" text="Show Password"
+                                styleClass="button-secondary" maxWidth="340" prefHeight="36"/>
+
+                        <!-- Login Button -->
+                        <StackPane maxWidth="340">
+                            <Button fx:id="loginButton" text="LOGIN"
+                                    prefHeight="52" maxWidth="340"
+                                    style="-fx-background-color: #006400;
+                                           -fx-text-fill: white;
+                                           -fx-font-size: 15px;
+                                           -fx-font-weight: bold;
+                                           -fx-background-radius: 26;
+                                           -fx-cursor: hand;"/>
+                            <ProgressIndicator fx:id="loginProgress" visible="false"
+                                               prefWidth="36" prefHeight="36"/>
+                        </StackPane>
+
+                        <!-- Forgot Password Link -->
+                        <Hyperlink fx:id="forgotPasswordLink" text="Forgot Password?"
+                                   style="-fx-font-size: 13px; -fx-text-fill: #006400; -fx-underline: true;"/>
+
                     </VBox>
-
-                    <!-- Password Toggle Button -->
-                    <Button fx:id="togglePasswordButton" text="Show Password"
-                            style="-fx-background-color: #f8f9fa; -fx-text-fill: #2c3e50; -fx-font-size: 12px; -fx-font-weight: bold; -fx-border-color: #dddddd; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;"
-                            maxWidth="340" prefHeight="36"/>
-
-                    <!-- Login Button -->
-                    <StackPane maxWidth="340">
-                        <Button fx:id="loginButton" text="LOGIN"
-                                prefHeight="52" maxWidth="340"
-                                style="-fx-background-color: #006400;
-                                       -fx-text-fill: white;
-                                       -fx-font-size: 15px;
-                                       -fx-font-weight: bold;
-                                       -fx-background-radius: 26;
-                                       -fx-cursor: hand;"/>
-                        <ProgressIndicator fx:id="loginProgress" visible="false"
-                                           prefWidth="36" prefHeight="36"/>
-                    </StackPane>
-
-                    <!-- Forgot Password Link -->
-                    <Hyperlink fx:id="forgotPasswordLink" text="Forgot Password?"
-                               style="-fx-font-size: 13px; -fx-text-fill: #006400; -fx-underline: true;"/>
-
-                </VBox>
+                </HBox>
             </VBox>
         </center>
 

@@ -6,126 +6,151 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.WorkshopProfileController">
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.WorkshopProfileController"
+            stylesheets="@../css/application.css" styleClass="border-pane">
 
     <top>
-        <VBox>
-            <fx:include source="MenuBarComponent.fxml"/>
-        </VBox>
+        <fx:include source="MenuBarComponent.fxml"/>
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="true">
-            <TabPane fx:id="mainTabPane">
-                <Tab text="Profile" closable="false">
-                    <VBox spacing="20" style="-fx-padding: 20;">
-                        <Label text="Workshop Profile" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-                        <Label text="View and update your workshop information" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
+            <VBox spacing="20" alignment="TOP_CENTER"
+                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
 
-                        <Separator/>
+                <TabPane maxWidth="Infinity" tabClosingPolicy="UNAVAILABLE">
 
-                        <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
+                    <!-- Profile Tab -->
+                    <Tab text="Profile" closable="false">
+                        <VBox spacing="20" alignment="TOP_CENTER" style="-fx-background-color: white; -fx-padding: 25;">
 
-                        <HBox spacing="30">
-                            <VBox spacing="10" alignment="CENTER">
-                                <ImageView fx:id="logoImageView" fitHeight="120" fitWidth="120" style="-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 5);"/>
-                                <Button fx:id="uploadLogoButton" text="Change Logo" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                            </VBox>
+                            <Label text="Workshop Profile" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
+                            <Label text="View and update your workshop information" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
 
-                            <VBox spacing="15" HBox.hgrow="ALWAYS">
-                                <GridPane hgap="15" vgap="12">
-                                    <Label text="Workshop Name:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                                    <TextField fx:id="workshopNameField" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="300"/>
+                            <Separator/>
 
-                                    <Label text="Address:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                                    <TextField fx:id="addressField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                            <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
 
-                                    <Label text="Phone:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                                    <TextField fx:id="phoneField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                            <HBox spacing="30" alignment="CENTER">
+                                <!-- Logo Column -->
+                                <VBox spacing="10" alignment="CENTER">
+                                    <ImageView fx:id="logoImageView" fitHeight="120" fitWidth="120" styleClass="profile-image-circle"/>
+                                    <Button fx:id="uploadLogoButton" text="Change Logo" styleClass="button-info" prefWidth="120"/>
+                                </VBox>
 
-                                    <Label text="Email:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                                    <TextField fx:id="emailField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                                <!-- Profile Information Column -->
+                                <VBox spacing="15" HBox.hgrow="ALWAYS">
+                                    <GridPane hgap="15" vgap="12" alignment="CENTER">
+                                        <columnConstraints>
+                                            <ColumnConstraints halignment="RIGHT" minWidth="120"/>
+                                            <ColumnConstraints minWidth="250"/>
+                                        </columnConstraints>
 
-                                    <Label text="License Number:" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                                    <TextField fx:id="licenseNumberField" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                                        <Label text="Workshop Name:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                        <TextField fx:id="workshopNameField" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="300"/>
 
-                                    <Label text="Operating Hours:" GridPane.rowIndex="5" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                                    <TextField fx:id="hoursField" GridPane.rowIndex="5" GridPane.columnIndex="1" promptText="Mon-Fri: 8am-5pm"/>
-                                </GridPane>
-                            </VBox>
-                        </HBox>
+                                        <Label text="Address:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                        <TextField fx:id="addressField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-                        <HBox spacing="15">
-                            <Label text="Approval Status:" style="-fx-font-weight: bold;"/>
-                            <Label fx:id="approvalStatusLabel" style="-fx-font-weight: bold; -fx-text-fill: #f39c12;"/>
-                        </HBox>
+                                        <Label text="Phone:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                        <TextField fx:id="phoneField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
-                        <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+                                        <Label text="Email:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                        <TextField fx:id="emailField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
 
-                        <Separator/>
+                                        <Label text="License Number:" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                        <TextField fx:id="licenseNumberField" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
 
-                        <Label text="Statistics" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                                        <Label text="Operating Hours:" GridPane.rowIndex="5" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                        <TextField fx:id="hoursField" GridPane.rowIndex="5" GridPane.columnIndex="1" promptText="Mon-Fri: 8am-5pm"/>
+                                    </GridPane>
+                                </VBox>
+                            </HBox>
 
-                        <GridPane hgap="20" vgap="10">
-                            <Label text="Total Services:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <Label fx:id="totalServicesStatLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-text-fill: #27ae60; -fx-font-size: 18px; -fx-font-weight: bold;"/>
+                            <HBox alignment="CENTER">
+                                <Label text="Approval Status:" style="-fx-font-weight: bold;"/>
+                                <Label fx:id="approvalStatusLabel" style="-fx-text-fill: #f39c12; -fx-font-weight: bold;"/>
+                            </HBox>
 
-                            <Label text="Total Revenue:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <Label fx:id="totalRevenueStatLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-text-fill: #2980b9; -fx-font-size: 18px; -fx-font-weight: bold;"/>
+                            <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
-                            <Label text="Active Mechanics:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <Label fx:id="activeMechanicsStatLabel" GridPane.rowIndex="2" GridPane.columnIndex="1" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+                            <Separator/>
 
-                            <Label text="Customer Rating:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <ProgressBar fx:id="ratingProgress" prefWidth="200" progress="0"/>
-                            <Label fx:id="ratingLabel" GridPane.rowIndex="3" GridPane.columnIndex="2" style="-fx-text-fill: #f39c12;"/>
-                        </GridPane>
+                            <Label text="Statistics" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                        <Separator/>
+                            <GridPane hgap="20" vgap="10" alignment="CENTER">
+                                <columnConstraints>
+                                    <ColumnConstraints halignment="RIGHT" minWidth="120"/>
+                                    <ColumnConstraints minWidth="150"/>
+                                    <ColumnConstraints halignment="RIGHT" minWidth="120"/>
+                                    <ColumnConstraints minWidth="150"/>
+                                </columnConstraints>
 
-                        <HBox spacing="15" alignment="CENTER_RIGHT">
-                            <Button fx:id="updateProfileButton" text="Update Profile" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 120;">
-                                <effect>
-                                    <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                                </effect>
-                            </Button>
-                            <Button fx:id="cancelButton" text="Cancel" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 100;"/>
-                            <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #7f8c8d; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;"/>
-                        </HBox>
+                                <Label text="Total Services:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <Label fx:id="totalServicesStatLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-text-fill: #27ae60; -fx-font-size: 18px; -fx-font-weight: bold;"/>
 
-                        <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
-                    </VBox>
-                </Tab>
+                                <Label text="Total Revenue:" GridPane.rowIndex="0" GridPane.columnIndex="2" style="-fx-font-weight: bold;"/>
+                                <Label fx:id="totalRevenueStatLabel" GridPane.rowIndex="0" GridPane.columnIndex="3" style="-fx-text-fill: #2980b9; -fx-font-size: 18px; -fx-font-weight: bold;"/>
 
-                <Tab text="Change Password" closable="false">
-                    <VBox spacing="20" style="-fx-padding: 20;">
-                        <Label text="Change Password" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                                <Label text="Active Mechanics:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <Label fx:id="activeMechanicsStatLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
 
-                        <Separator/>
+                                <Label text="Customer Rating:" GridPane.rowIndex="1" GridPane.columnIndex="2" style="-fx-font-weight: bold;"/>
+                                <ProgressBar fx:id="ratingProgress" prefWidth="150" progress="0"/>
+                                <Label fx:id="ratingLabel" GridPane.rowIndex="1" GridPane.columnIndex="3" style="-fx-text-fill: #f39c12;"/>
+                            </GridPane>
 
-                        <GridPane hgap="15" vgap="12">
-                            <Label text="Current Password:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <PasswordField fx:id="currentPasswordField" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250"/>
+                            <Separator/>
 
-                            <Label text="New Password:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <PasswordField fx:id="newPasswordField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                            <HBox alignment="CENTER_RIGHT">
+                                <Button fx:id="updateProfileButton" text="Update Profile" styleClass="button-success" prefWidth="120">
+                                    <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                                </Button>
+                                <Button fx:id="cancelButton" text="Cancel" styleClass="button-secondary" prefWidth="100"/>
+                                <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-primary" prefWidth="150"/>
+                            </HBox>
 
-                            <Label text="Confirm Password:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <PasswordField fx:id="confirmPasswordField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-                        </GridPane>
+                            <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
+                        </VBox>
+                    </Tab>
 
-                        <HBox spacing="15" alignment="CENTER_RIGHT">
-                            <Button fx:id="changePasswordButton" text="Change Password" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;">
-                                <effect>
-                                    <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                                </effect>
-                            </Button>
-                        </HBox>
+                    <!-- Change Password Tab -->
+                    <Tab text="Change Password" closable="false">
+                        <VBox spacing="20" alignment="TOP_CENTER" style="-fx-background-color: white; -fx-padding: 30;">
 
-                        <Label fx:id="passwordStatusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
-                    </VBox>
-                </Tab>
-            </TabPane>
+                            <Label text="Change Password" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
+
+                            <Separator/>
+
+                            <GridPane hgap="15" vgap="12" alignment="CENTER">
+                                <columnConstraints>
+                                    <ColumnConstraints halignment="RIGHT" minWidth="120"/>
+                                    <ColumnConstraints minWidth="250"/>
+                                </columnConstraints>
+
+                                <Label text="Current Password:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <PasswordField fx:id="currentPasswordField" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250"/>
+
+                                <Label text="New Password:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <PasswordField fx:id="newPasswordField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                                <Label text="Confirm Password:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <PasswordField fx:id="confirmPasswordField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                            </GridPane>
+
+                            <HBox alignment="CENTER">
+                                <Button fx:id="changePasswordButton" text="Change Password" styleClass="button-warning" prefWidth="150">
+                                    <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                                </Button>
+                            </HBox>
+
+                            <Label fx:id="passwordStatusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
+                        </VBox>
+                    </Tab>
+                </TabPane>
+
+            </VBox>
         </ScrollPane>
     </center>
 

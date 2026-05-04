@@ -1,75 +1,64 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.ServiceSchedule;
 
+/**
+ * ServiceScheduleDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class ServiceScheduleDAO extends BaseDAO<ServiceSchedule> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public ServiceScheduleDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public ServiceSchedule findById(int id) throws SQLException {
-        String sql = "SELECT * FROM service_schedules WHERE id = ?";
-        return executeQuerySingle(sql, id);
+        List<ServiceSchedule> results = viewLoader.loadViewWithCondition("vw_service_schedules", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<ServiceSchedule> findAll() throws SQLException {
-        String sql = "SELECT * FROM service_schedules ORDER BY due_date";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_service_schedules");
     }
 
     public List<ServiceSchedule> findByVehicleId(int vehicleId) throws SQLException {
-        String sql = "SELECT * FROM service_schedules WHERE vehicle_id = ? ORDER BY due_date";
-        return executeQuery(sql, vehicleId);
+        return viewLoader.loadViewWithCondition("vw_service_schedules", "vehicle_id = ? ORDER BY due_date", vehicleId);
     }
 
     public List<ServiceSchedule> findDueReminders() throws SQLException {
-        String sql = "SELECT * FROM vw_service_reminder WHERE reminder_sent = false ORDER BY due_date";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_service_reminder");
     }
 
     public List<ServiceSchedule> findOverdueSchedules() throws SQLException {
-        String sql = "SELECT * FROM service_schedules WHERE due_date < CURRENT_DATE AND reminder_sent = false ORDER BY due_date";
-        return executeQuery(sql);
+        return viewLoader.loadViewWithCondition("vw_service_schedules", "due_date < CURRENT_DATE AND reminder_sent = false ORDER BY due_date");
     }
 
-    // Count services due by customer ID
     public int countDueByCustomerId(int customerId, int daysThreshold) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM service_schedules ss " +
-                "JOIN vehicles v ON ss.vehicle_id = v.id " +
-                "JOIN customers c ON v.owner_id = c.id " +
-                "WHERE c.id = ? AND ss.due_date <= CURRENT_DATE + INTERVAL '" + daysThreshold + " days'";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, customerId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.countDueServiceRemindersByCustomer(customerId, daysThreshold);
     }
 
     public void sendReminders() throws SQLException {
-        String sql = "CALL sp_send_service_reminders()";
-        executeUpdate(sql);
+        procedureCaller.executeSendServiceReminders();
     }
 
     @Override
     public boolean insert(ServiceSchedule entity) throws SQLException {
-        String sql = "INSERT INTO service_schedules (vehicle_id, service_type, due_date, due_odometer, last_service_date, last_service_odometer) VALUES (?, ?, ?, ?, ?, ?)";
-        int result = executeUpdate(sql,
+        return procedureCaller.executeInsertServiceSchedule(
                 entity.getVehicleId(),
                 entity.getServiceType(),
                 entity.getDueDate(),
@@ -77,33 +66,26 @@ public class ServiceScheduleDAO extends BaseDAO<ServiceSchedule> {
                 entity.getLastServiceDate(),
                 entity.getLastServiceOdometer()
         );
-        return result > 0;
     }
 
     @Override
     public boolean update(ServiceSchedule entity) throws SQLException {
-        String sql = "UPDATE service_schedules SET due_date = ?, due_odometer = ?, reminder_sent = ?, reminder_sent_date = ? WHERE id = ?";
-        int result = executeUpdate(sql,
+        return procedureCaller.executeUpdateServiceSchedule(
+                entity.getId(),
                 entity.getDueDate(),
                 entity.getDueOdometer(),
                 entity.isReminderSent(),
-                entity.getReminderSentDate(),
-                entity.getId()
+                entity.getReminderSentDate()
         );
-        return result > 0;
     }
 
     public boolean markReminderSent(int scheduleId) throws SQLException {
-        String sql = "UPDATE service_schedules SET reminder_sent = true, reminder_sent_date = CURRENT_DATE WHERE id = ?";
-        int result = executeUpdate(sql, scheduleId);
-        return result > 0;
+        return procedureCaller.executeMarkServiceReminderSent(scheduleId);
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM service_schedules WHERE id = ?";
-        int result = executeUpdate(sql, id);
-        return result > 0;
+        return procedureCaller.executeDeleteServiceSchedule(id);
     }
 
     @Override
@@ -114,21 +96,15 @@ public class ServiceScheduleDAO extends BaseDAO<ServiceSchedule> {
 
         try {
             schedule.setRegistrationNumber(rs.getString("registration_number"));
-        } catch (SQLException e) {
-            // Column may not exist - ignore
-        }
+        } catch (SQLException e) {}
 
         try {
             schedule.setCustomerId(rs.getInt("customer_id"));
-        } catch (SQLException e) {
-            // Column may not exist - ignore
-        }
+        } catch (SQLException e) {}
 
         try {
             schedule.setCustomerEmail(rs.getString("customer_email"));
-        } catch (SQLException e) {
-            // Column may not exist - ignore
-        }
+        } catch (SQLException e) {}
 
         schedule.setServiceType(rs.getString("service_type"));
 

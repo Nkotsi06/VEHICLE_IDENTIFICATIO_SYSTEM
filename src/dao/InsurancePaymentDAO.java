@@ -1,62 +1,69 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.InsurancePayment;
 
+/**
+ * InsurancePaymentDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class InsurancePaymentDAO extends BaseDAO<InsurancePayment> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public InsurancePaymentDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public InsurancePayment findById(int id) throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_payments WHERE id = ?";
-        return executeQuerySingle(sql, id);
+        List<InsurancePayment> results = viewLoader.loadViewWithCondition("vw_insurance_payments", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     public InsurancePayment findByReceiptNumber(String receiptNumber) throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_payments WHERE receipt_number = ?";
-        return executeQuerySingle(sql, receiptNumber);
+        List<InsurancePayment> results = viewLoader.loadViewWithCondition("vw_insurance_payments", "receipt_number = ?", receiptNumber);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<InsurancePayment> findAll() throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_payments ORDER BY payment_date DESC";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_insurance_payments");
     }
 
     public List<InsurancePayment> findByInsuranceId(int insuranceId) throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_payments WHERE insurance_id = ? ORDER BY payment_date DESC";
-        return executeQuery(sql, insuranceId);
+        return viewLoader.loadViewWithCondition("vw_insurance_payments", "insurance_id = ? ORDER BY payment_date DESC", insuranceId);
     }
 
     public List<InsurancePayment> findByVehicleId(int vehicleId) throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_payments WHERE vehicle_id = ? ORDER BY payment_date DESC";
-        return executeQuery(sql, vehicleId);
+        return viewLoader.loadViewWithCondition("vw_insurance_payments", "vehicle_id = ? ORDER BY payment_date DESC", vehicleId);
     }
 
     public List<InsurancePayment> findPendingPayments() throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_payments WHERE status = 'PENDING' ORDER BY due_date";
-        return executeQuery(sql);
+        return viewLoader.loadViewWithCondition("vw_insurance_payments", "status = 'PENDING' ORDER BY due_date");
     }
 
     public List<InsurancePayment> findOverduePayments() throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_payments WHERE due_date < CURRENT_DATE AND status = 'PENDING' ORDER BY due_date";
-        return executeQuery(sql);
+        return viewLoader.loadViewWithCondition("vw_insurance_payments", "due_date < CURRENT_DATE AND status = 'PENDING' ORDER BY due_date");
     }
 
     public List<InsurancePayment> findByDateRange(LocalDate startDate, LocalDate endDate) throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_payments WHERE payment_date BETWEEN ? AND ? ORDER BY payment_date DESC";
-        return executeQuery(sql, startDate, endDate);
+        return viewLoader.loadViewWithCondition("vw_insurance_payments", "payment_date BETWEEN ? AND ? ORDER BY payment_date DESC", startDate, endDate);
     }
 
     @Override
     public boolean insert(InsurancePayment entity) throws SQLException {
-        String sql = "CALL sp_record_insurance_payment(?, ?, ?, ?, ?, ?, ?)";
-        int result = executeUpdate(sql,
+        return procedureCaller.executeRecordInsurancePayment(
                 entity.getInsuranceId(),
                 entity.getAmount(),
                 entity.getPaymentDate(),
@@ -65,51 +72,28 @@ public class InsurancePaymentDAO extends BaseDAO<InsurancePayment> {
                 entity.getPaymentMethod(),
                 entity.getReceiptNumber()
         );
-        return result >= 0;
     }
 
     @Override
     public boolean update(InsurancePayment entity) throws SQLException {
-        String sql = "UPDATE insurance_payments SET status = ? WHERE id = ?";
-        int result = executeUpdate(sql, entity.getStatus(), entity.getId());
-        return result > 0;
+        return procedureCaller.executeUpdateInsurancePaymentStatus(entity.getId(), entity.getStatus());
     }
 
     public boolean markAsCompleted(int paymentId) throws SQLException {
-        String sql = "UPDATE insurance_payments SET status = 'COMPLETED' WHERE id = ?";
-        int result = executeUpdate(sql, paymentId);
-        return result > 0;
+        return procedureCaller.executeCompleteInsurancePayment(paymentId);
     }
 
     public boolean markAsFailed(int paymentId) throws SQLException {
-        String sql = "UPDATE insurance_payments SET status = 'FAILED' WHERE id = ?";
-        int result = executeUpdate(sql, paymentId);
-        return result > 0;
+        return procedureCaller.executeFailInsurancePayment(paymentId);
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM insurance_payments WHERE id = ?";
-        int result = executeUpdate(sql, id);
-        return result > 0;
+        return procedureCaller.executeDeleteInsurancePayment(id);
     }
 
     public double getTotalCollected() throws SQLException {
-        String sql = "SELECT COALESCE(SUM(amount + COALESCE(late_fee, 0)), 0) FROM insurance_payments WHERE status = 'COMPLETED'";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getDouble(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.getSumInsurancePaymentsCompleted();
     }
 
     @Override

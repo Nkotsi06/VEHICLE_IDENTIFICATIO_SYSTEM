@@ -1,29 +1,36 @@
 package controllers;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import utils.AlertUtil;
 import utils.SceneManager;
 import utils.ExpiryDetector;
 import dao.VehicleDocumentDAO;
 import dao.VehicleDAO;
 import models.VehicleDocument;
-import models.ExpiredDocumentAlert;
 import models.Vehicle;
+import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for Expired Document Detection
+ * Detects and manages expired vehicle documents
+ * Generates violations for expired documents automatically
+ */
 public class ExpiredDocumentController {
 
+    // ============================================
+    // FXML UI COMPONENTS
+    // ============================================
+
+    // Search Components
     @FXML private TextField searchRegistrationField;
     @FXML private Button searchButton;
     @FXML private Button refreshButton;
     @FXML private Button generateViolationsButton;
     @FXML private Button backButton;
 
+    // Table Components
     @FXML private TableView<VehicleDocument> documentsTable;
     @FXML private TableColumn<VehicleDocument, String> documentTypeColumn;
     @FXML private TableColumn<VehicleDocument, String> documentNumberColumn;
@@ -31,15 +38,28 @@ public class ExpiredDocumentController {
     @FXML private TableColumn<VehicleDocument, String> expiryDateColumn;
     @FXML private TableColumn<VehicleDocument, String> expiryStatusColumn;
 
+    // Statistics Labels
     @FXML private Label expiredCountLabel;
     @FXML private Label criticalCountLabel;
     @FXML private Label warningCountLabel;
     @FXML private Label overallStatusLabel;
 
+    // ============================================
+    // DAO INSTANCES
+    // ============================================
+
     private VehicleDocumentDAO documentDAO;
     private VehicleDAO vehicleDAO;
     private ExpiryDetector expiryDetector;
 
+    // ============================================
+    // INITIALIZATION METHODS
+    // ============================================
+
+    /**
+     * Initializes the expired document controller
+     * Sets up DAOs, table columns, and loads initial data
+     */
     @FXML
     public void initialize() {
         documentDAO = new VehicleDocumentDAO();
@@ -51,6 +71,9 @@ public class ExpiredDocumentController {
         loadAllDocuments();
     }
 
+    /**
+     * Configures table columns with cell value factories
+     */
     private void setupTableColumns() {
         documentTypeColumn.setCellValueFactory(cellData -> cellData.getValue().documentTypeProperty());
         documentNumberColumn.setCellValueFactory(cellData -> cellData.getValue().documentNumberProperty());
@@ -59,6 +82,9 @@ public class ExpiredDocumentController {
         expiryStatusColumn.setCellValueFactory(cellData -> cellData.getValue().expiryStatusProperty());
     }
 
+    /**
+     * Sets up button click handlers
+     */
     private void setupButtonHandlers() {
         searchButton.setOnAction(event -> handleSearch());
         refreshButton.setOnAction(event -> loadAllDocuments());
@@ -66,16 +92,33 @@ public class ExpiredDocumentController {
         backButton.setOnAction(event -> SceneManager.getInstance().switchToPoliceView());
     }
 
+    // ============================================
+    // DATA LOADING METHODS
+    // ============================================
+
+    /**
+     * Loads all vehicle documents from the database
+     * Updates statistics summary
+     */
     private void loadAllDocuments() {
         try {
-            java.util.List<VehicleDocument> documents = documentDAO.findAll();
+            List<VehicleDocument> documents = documentDAO.findAll();
             documentsTable.getItems().setAll(documents);
             updateSummary(documents);
         } catch (Exception e) {
             e.printStackTrace();
+            AlertUtil.showError("Load Failed", "Failed to load documents: " + e.getMessage());
         }
     }
 
+    // ============================================
+    // SEARCH METHOD
+    // ============================================
+
+    /**
+     * Searches for documents by vehicle registration number
+     * Displays expiry alert if documents are expired or critical
+     */
     private void handleSearch() {
         String registrationNumber = searchRegistrationField.getText().trim();
 
@@ -88,11 +131,12 @@ public class ExpiredDocumentController {
             Vehicle vehicle = vehicleDAO.findByRegistrationNumber(registrationNumber);
 
             if (vehicle != null) {
-                java.util.List<VehicleDocument> documents = documentDAO.findByVehicleId(vehicle.getId());
+                List<VehicleDocument> documents = documentDAO.findByVehicleId(vehicle.getId());
                 documentsTable.getItems().setAll(documents);
                 updateSummary(documents);
 
-                java.util.Map<String, Object> checkResult = expiryDetector.checkVehicleDocuments(registrationNumber);
+                // Check for expired or critical documents and show alert
+                Map<String, Object> checkResult = expiryDetector.checkVehicleDocuments(registrationNumber);
                 showExpiryAlert(checkResult);
             } else {
                 AlertUtil.showWarning("Not Found", "No vehicle found with registration number: " + registrationNumber);
@@ -105,7 +149,15 @@ public class ExpiredDocumentController {
         }
     }
 
-    private void updateSummary(java.util.List<VehicleDocument> documents) {
+    // ============================================
+    // SUMMARY METHODS
+    // ============================================
+
+    /**
+     * Updates statistics summary based on document expiry status
+     * @param documents List of vehicle documents
+     */
+    private void updateSummary(List<VehicleDocument> documents) {
         int expired = 0;
         int critical = 0;
         int warning = 0;
@@ -121,6 +173,7 @@ public class ExpiredDocumentController {
         criticalCountLabel.setText(String.valueOf(critical));
         warningCountLabel.setText(String.valueOf(warning));
 
+        // Set overall status message and color
         if (expired > 0) {
             overallStatusLabel.setText("VEHICLE IMPOUND RECOMMENDED");
             overallStatusLabel.setStyle("-fx-text-fill: #F44336; -fx-font-weight: bold;");
@@ -136,6 +189,9 @@ public class ExpiredDocumentController {
         }
     }
 
+    /**
+     * Clears summary statistics when no vehicle is selected
+     */
     private void clearSummary() {
         expiredCountLabel.setText("0");
         criticalCountLabel.setText("0");
@@ -144,7 +200,11 @@ public class ExpiredDocumentController {
         overallStatusLabel.setStyle("-fx-text-fill: #666;");
     }
 
-    private void showExpiryAlert(java.util.Map<String, Object> result) {
+    /**
+     * Shows expiry alert dialog if expired or critical documents are found
+     * @param result Map containing expiry check results
+     */
+    private void showExpiryAlert(Map<String, Object> result) {
         int expiredCount = (int) result.getOrDefault("expiredCount", 0);
         int criticalCount = (int) result.getOrDefault("criticalCount", 0);
         String overallStatus = (String) result.get("overallStatus");
@@ -161,6 +221,14 @@ public class ExpiredDocumentController {
         }
     }
 
+    // ============================================
+    // VIOLATION GENERATION METHOD
+    // ============================================
+
+    /**
+     * Generates violations for all expired documents
+     * This automatically creates fines for vehicles with expired documents
+     */
     private void handleGenerateViolations() {
         boolean confirmed = AlertUtil.showConfirmation("Generate Violations",
                 "This will generate violations for all expired documents. Continue?");
@@ -169,7 +237,7 @@ public class ExpiredDocumentController {
             try {
                 expiryDetector.detectAndGenerateViolations();
                 AlertUtil.showSuccess("Violations generated for expired documents.");
-                loadAllDocuments();
+                loadAllDocuments(); // Refresh the view
             } catch (Exception e) {
                 e.printStackTrace();
                 AlertUtil.showError("Generation Failed", "An error occurred while generating violations.");

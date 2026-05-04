@@ -22,8 +22,17 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 
+/**
+ * Controller for Officer Activity Logs
+ * Displays and filters police officer actions and activities
+ */
 public class OfficerLogController {
 
+    // ============================================
+    // FXML UI COMPONENTS
+    // ============================================
+
+    // Table Components
     @FXML private TableView<OfficerLog> logsTable;
     @FXML private TableColumn<OfficerLog, String> officerColumn;
     @FXML private TableColumn<OfficerLog, String> badgeColumn;
@@ -32,27 +41,39 @@ public class OfficerLogController {
     @FXML private TableColumn<OfficerLog, String> detailsColumn;
     @FXML private TableColumn<OfficerLog, String> timestampColumn;
 
+    // Filter Components
     @FXML private ComboBox<String> actionFilterComboBox;
     @FXML private TextField officerNameField;
     @FXML private DatePicker startDatePicker;
     @FXML private DatePicker endDatePicker;
+
+    // Buttons
     @FXML private Button searchButton;
     @FXML private Button refreshButton;
     @FXML private Button exportButton;
     @FXML private Button backButton;
     @FXML private Button fadeButton;
 
+    // Status and Progress
     @FXML private Label totalCountLabel;
     @FXML private Label statusLabel;
     @FXML private ProgressIndicator loadProgress;
     @FXML private ProgressBar operationProgress;
     @FXML private Pagination logsPagination;
 
+    // ============================================
+    // DAO INSTANCES & DATA MODELS
+    // ============================================
+
     private OfficerLogDAO logDAO;
     private ObservableList<OfficerLog> logList;
     private List<OfficerLog> fullData;
     private int currentPage = 0;
     private int pageSize = 20;
+
+    // ============================================
+    // INITIALIZATION METHODS
+    // ============================================
 
     @FXML
     public void initialize() {
@@ -74,11 +95,11 @@ public class OfficerLogController {
     private void setupTableColumns() {
         officerColumn.setCellValueFactory(cellData -> cellData.getValue().officerNameProperty());
         badgeColumn.setCellValueFactory(cellData -> cellData.getValue().badgeNumberProperty());
-        actionColumn.setCellValueFactory(cellData -> cellData.getValue().actionProperty());
+        actionColumn.setCellValueFactory(cellData -> cellData.getValue().actionDisplayProperty());
         vehicleColumn.setCellValueFactory(cellData -> cellData.getValue().registrationNumberProperty());
-        // Use actionProperty for details column since actionDetailsProperty doesn't exist
-        detailsColumn.setCellValueFactory(cellData -> cellData.getValue().actionProperty());
-        timestampColumn.setCellValueFactory(cellData -> cellData.getValue().timestampProperty().asString());
+        // Use actionDisplayProperty for details column as well
+        detailsColumn.setCellValueFactory(cellData -> cellData.getValue().actionDisplayProperty());
+        timestampColumn.setCellValueFactory(cellData -> cellData.getValue().formattedTimestampProperty());
 
         officerColumn.setStyle("-fx-alignment: CENTER-LEFT;");
         badgeColumn.setStyle("-fx-alignment: CENTER;");
@@ -89,9 +110,7 @@ public class OfficerLogController {
     }
 
     private void setupComboBoxes() {
-        actionFilterComboBox.getItems().addAll("ALL", "LOGIN", "LOGOUT", "SEARCH_VEHICLE",
-                "REPORT_STOLEN", "ADD_VIOLATION", "ISSUE_WARRANT", "GENERATE_BOLO",
-                "VERIFY_INSURANCE", "EXPORT_DATA", "UPDATE_PROFILE");
+        actionFilterComboBox.getItems().addAll("ALL", "VIEW", "REPORT", "BOLO", "WARRANT", "VIOLATION", "STOLEN");
         actionFilterComboBox.setValue("ALL");
     }
 
@@ -112,6 +131,7 @@ public class OfficerLogController {
         int end = Math.min(start + pageSize, fullData.size());
         if (start < fullData.size()) {
             logList.setAll(fullData.subList(start, end));
+            logsTable.setItems(logList);
         }
         totalCountLabel.setText("Total: " + fullData.size() + " | Showing: " + (end - start));
     }
@@ -160,8 +180,6 @@ public class OfficerLogController {
         try {
             List<OfficerLog> logs = logDAO.findAll();
             fullData = logs;
-            // Set the table items
-            logsTable.setItems(FXCollections.observableArrayList(fullData));
             int totalPages = (int) Math.ceil((double) logs.size() / pageSize);
             if (logsPagination != null) logsPagination.setPageCount(Math.max(1, totalPages));
             updateTablePage();
@@ -185,33 +203,34 @@ public class OfficerLogController {
 
         try {
             List<OfficerLog> results = logDAO.findAll();
+            List<OfficerLog> filteredResults = new ArrayList<>(results);
 
-            if (!"ALL".equals(actionFilter)) {
-                results.removeIf(log -> !log.getAction().equals(actionFilter));
+            if (!"ALL".equals(actionFilter) && actionFilter != null) {
+                filteredResults.removeIf(log -> !actionFilter.equals(log.getAction()));
                 updateProgress(0.5);
             }
 
             if (ValidationUtil.isNotEmpty(officerName)) {
-                results.removeIf(log -> !log.getOfficerName().toLowerCase().contains(officerName.toLowerCase()));
+                filteredResults.removeIf(log -> !log.getOfficerName().toLowerCase().contains(officerName.toLowerCase()));
                 updateProgress(0.6);
             }
 
             if (startDatePicker.getValue() != null && endDatePicker.getValue() != null) {
                 LocalDateTime start = startDatePicker.getValue().atStartOfDay();
                 LocalDateTime end = endDatePicker.getValue().atTime(23, 59, 59);
-                results.removeIf(log -> log.getTimestamp().isBefore(start) || log.getTimestamp().isAfter(end));
+                filteredResults.removeIf(log -> log.getTimestamp().isBefore(start) || log.getTimestamp().isAfter(end));
                 updateProgress(0.7);
             }
 
-            fullData = results;
-            int totalPages = (int) Math.ceil((double) results.size() / pageSize);
+            fullData = filteredResults;
+            int totalPages = (int) Math.ceil((double) filteredResults.size() / pageSize);
             if (logsPagination != null) logsPagination.setPageCount(Math.max(1, totalPages));
             updateTablePage();
 
             updateProgress(1.0);
-            statusLabel.setText("Found " + results.size() + " matching records");
+            statusLabel.setText("Found " + filteredResults.size() + " matching records");
 
-            if (results.isEmpty()) {
+            if (filteredResults.isEmpty()) {
                 AlertUtil.showInfo("No Results", "No log entries found matching your criteria.");
             }
 
@@ -235,17 +254,16 @@ public class OfficerLogController {
         updateProgress(0.3);
 
         try {
-            // Convert OfficerLog objects to Map format for export
             List<Map<String, Object>> exportData = new ArrayList<>();
 
             for (OfficerLog log : fullData) {
                 Map<String, Object> row = new HashMap<>();
                 row.put("Officer", log.getOfficerName());
                 row.put("Badge", log.getBadgeNumber());
-                row.put("Action", log.getAction());
+                row.put("Action", log.getActionDisplay());
                 row.put("Vehicle", log.getRegistrationNumber() != null ? log.getRegistrationNumber() : "");
-                row.put("Details", log.getAction());
-                row.put("Timestamp", log.getTimestamp() != null ? log.getTimestamp().toString() : "");
+                row.put("Details", log.getActionDisplay());
+                row.put("Timestamp", log.getFormattedTimestamp());
                 exportData.add(row);
             }
 

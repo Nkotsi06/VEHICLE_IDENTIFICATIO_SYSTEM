@@ -1,134 +1,79 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.ServiceRecord;
 
+/**
+ * ServiceRecordDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class ServiceRecordDAO extends BaseDAO<ServiceRecord> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public ServiceRecordDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public ServiceRecord findById(int id) throws SQLException {
-        String sql = "SELECT * FROM vw_service_records WHERE id = ?";
-        return executeQuerySingle(sql, id);
+        List<ServiceRecord> results = viewLoader.loadViewWithCondition("vw_service_records", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<ServiceRecord> findAll() throws SQLException {
-        String sql = "SELECT * FROM vw_service_records ORDER BY service_date DESC";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_service_records");
     }
 
     public List<ServiceRecord> findByVehicleId(int vehicleId) throws SQLException {
-        String sql = "SELECT * FROM vw_service_records WHERE vehicle_id = ? ORDER BY service_date DESC";
-        return executeQuery(sql, vehicleId);
+        return viewLoader.loadViewWithCondition("vw_service_records", "vehicle_id = ? ORDER BY service_date DESC", vehicleId);
     }
 
     public List<ServiceRecord> findByWorkshopId(int workshopId) throws SQLException {
-        String sql = "SELECT * FROM vw_service_records WHERE workshop_id = ? ORDER BY service_date DESC";
-        return executeQuery(sql, workshopId);
+        return viewLoader.loadViewWithCondition("vw_service_records", "workshop_id = ? ORDER BY service_date DESC", workshopId);
     }
 
     public List<ServiceRecord> findRecentByWorkshopId(int workshopId, int limit) throws SQLException {
-        String sql = "SELECT * FROM vw_service_records WHERE workshop_id = ? ORDER BY service_date DESC LIMIT ?";
-        return executeQuery(sql, workshopId, limit);
+        return viewLoader.loadViewWithCondition("vw_service_records", "workshop_id = ? ORDER BY service_date DESC LIMIT ?", workshopId, limit);
     }
 
     public List<ServiceRecord> findByDateRange(LocalDate startDate, LocalDate endDate) throws SQLException {
-        String sql = "SELECT * FROM vw_service_records WHERE service_date BETWEEN ? AND ? ORDER BY service_date DESC";
-        return executeQuery(sql, startDate, endDate);
+        return viewLoader.loadViewWithCondition("vw_service_records", "service_date BETWEEN ? AND ? ORDER BY service_date DESC", startDate, endDate);
     }
 
     public List<ServiceRecord> findByServiceType(String serviceType) throws SQLException {
-        String sql = "SELECT * FROM vw_service_records WHERE service_type ILIKE ? ORDER BY service_date DESC";
-        return executeQuery(sql, "%" + serviceType + "%");
+        return viewLoader.loadViewWithCondition("vw_service_records", "service_type ILIKE ? ORDER BY service_date DESC", "%" + serviceType + "%");
     }
 
     public List<ServiceRecord> findByMechanicId(int mechanicId) throws SQLException {
-        String sql = "SELECT * FROM vw_service_records WHERE mechanic_id = ? ORDER BY service_date DESC";
-        return executeQuery(sql, mechanicId);
+        return viewLoader.loadViewWithCondition("vw_service_records", "mechanic_id = ? ORDER BY service_date DESC", mechanicId);
     }
 
     public int countByWorkshopId(int workshopId) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM service_records WHERE workshop_id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, workshopId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.countViewRowsWithCondition("vw_service_records", "workshop_id = ?", workshopId);
     }
 
     public double sumRevenueByWorkshopId(int workshopId) throws SQLException {
-        String sql = "SELECT COALESCE(SUM(cost), 0) FROM service_records WHERE workshop_id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, workshopId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getDouble(1);
-            }
-            return 0.0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.getSumServiceCostByWorkshop(workshopId);
     }
 
     public int countUniqueVehiclesByWorkshopIdAndMonth(int workshopId, LocalDate month) throws SQLException {
-        String sql = "SELECT COUNT(DISTINCT vehicle_id) FROM service_records WHERE workshop_id = ? AND EXTRACT(YEAR FROM service_date) = ? AND EXTRACT(MONTH FROM service_date) = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, workshopId);
-            ps.setInt(2, month.getYear());
-            ps.setInt(3, month.getMonthValue());
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.countDistinctVehiclesByWorkshopAndMonth(workshopId, month);
     }
 
     public double averageCostByWorkshopId(int workshopId) throws SQLException {
-        String sql = "SELECT COALESCE(AVG(cost), 0) FROM service_records WHERE workshop_id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, workshopId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getDouble(1);
-            }
-            return 0.0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.getAverageServiceCostByWorkshop(workshopId);
     }
 
     public double getTotalRevenueByWorkshop(int workshopId) throws SQLException {
@@ -137,21 +82,26 @@ public class ServiceRecordDAO extends BaseDAO<ServiceRecord> {
 
     @Override
     public boolean insert(ServiceRecord entity) throws SQLException {
-        return executeProcedure("sp_add_service_record",
+        Integer recordId = procedureCaller.executeAddServiceRecord(
                 entity.getVehicleId(),
                 entity.getWorkshopId(),
                 entity.getMechanicId() > 0 ? entity.getMechanicId() : null,
-                entity.getServiceDate(),
+                java.sql.Date.valueOf(entity.getServiceDate()),
                 entity.getServiceType(),
                 entity.getDescription(),
                 entity.getCost(),
                 entity.getOdometerReading()
         );
+        if (recordId != null && recordId > 0) {
+            entity.setId(recordId);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public boolean update(ServiceRecord entity) throws SQLException {
-        return executeProcedure("sp_update_service_record",
+        return procedureCaller.executeUpdateServiceRecord(
                 entity.getId(),
                 entity.getVehicleId(),
                 entity.getWorkshopId(),
@@ -166,7 +116,7 @@ public class ServiceRecordDAO extends BaseDAO<ServiceRecord> {
 
     @Override
     public boolean delete(int id) throws SQLException {
-        return executeProcedure("sp_delete_service_record", id);
+        return procedureCaller.executeDeleteServiceRecord(id);
     }
 
     @Override

@@ -1,14 +1,12 @@
 package controllers;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import utils.AlertUtil;
 import utils.SceneManager;
 import utils.SessionManager;
+import utils.ValidationUtil;
+import utils.CurrencyUtil;
 import dao.DigitalWalletDAO;
 import dao.WalletTransactionDAO;
 import models.DigitalWallet;
@@ -28,7 +26,11 @@ public class DigitalWalletController {
     @FXML private TableColumn<WalletTransaction, Double> amountColumn;
     @FXML private TableColumn<WalletTransaction, String> typeColumn;
     @FXML private TableColumn<WalletTransaction, String> descriptionColumn;
-    @FXML private TableColumn<WalletTransaction, String> statusColumn;
+    @FXML private TableColumn<WalletTransaction, String> transactionStatusColumn;  // ADDED
+    @FXML private Pagination transactionsPagination;  // ADDED
+    @FXML private ProgressIndicator loadProgress;
+    @FXML private ProgressBar operationProgress;
+    @FXML private Label statusLabel;
 
     private DigitalWalletDAO walletDAO;
     private WalletTransactionDAO transactionDAO;
@@ -46,6 +48,9 @@ public class DigitalWalletController {
         loadWallet();
         loadTransactions();
         setupButtonHandlers();
+        setupPagination();
+
+        statusLabel.setText("Ready");
     }
 
     private void setupTableColumns() {
@@ -53,23 +58,29 @@ public class DigitalWalletController {
         amountColumn.setCellValueFactory(cellData -> cellData.getValue().amountProperty().asObject());
         typeColumn.setCellValueFactory(cellData -> cellData.getValue().transactionTypeProperty());
         descriptionColumn.setCellValueFactory(cellData -> cellData.getValue().descriptionProperty());
-        statusColumn.setCellValueFactory(cellData -> cellData.getValue().statusProperty());
+        transactionStatusColumn.setCellValueFactory(cellData -> cellData.getValue().statusProperty());
+    }
+
+    private void setupPagination() {
+        if (transactionsPagination != null) {
+            transactionsPagination.setPageCount(1);
+            transactionsPagination.setMaxPageIndicatorCount(5);
+        }
     }
 
     private void loadWallet() {
         try {
             currentWallet = walletDAO.findByCustomerId(customerId);
-
             if (currentWallet == null) {
-                walletDAO.insert(new DigitalWallet(customerId, 0));
+                DigitalWallet newWallet = new DigitalWallet();
+                newWallet.setCustomerId(customerId);
+                walletDAO.insert(newWallet);
                 currentWallet = walletDAO.findByCustomerId(customerId);
             }
-
             if (currentWallet != null) {
-                balanceLabel.setText(utils.CurrencyUtil.format(currentWallet.getBalance()));
+                balanceLabel.setText(CurrencyUtil.format(currentWallet.getBalance()));
                 customerNameLabel.setText(SessionManager.getInstance().getFullName());
             }
-
         } catch (Exception e) {
             e.printStackTrace();
             AlertUtil.showError("Load Failed", "Failed to load wallet information.");
@@ -98,8 +109,7 @@ public class DigitalWalletController {
 
     private void handleAddFunds() {
         String amountStr = amountField.getText().trim();
-
-        if (!utils.ValidationUtil.isNotEmpty(amountStr)) {
+        if (!ValidationUtil.isNotEmpty(amountStr)) {
             AlertUtil.showWarning("Validation Error", "Please enter an amount.");
             amountField.requestFocus();
             return;
@@ -107,13 +117,11 @@ public class DigitalWalletController {
 
         try {
             double amount = Double.parseDouble(amountStr);
-
             if (amount <= 0) {
                 AlertUtil.showWarning("Validation Error", "Amount must be greater than 0.");
                 amountField.requestFocus();
                 return;
             }
-
             if (amount > 50000) {
                 AlertUtil.showWarning("Limit Exceeded", "Maximum deposit is 50,000 per transaction.");
                 amountField.requestFocus();
@@ -121,14 +129,12 @@ public class DigitalWalletController {
             }
 
             boolean confirmed = AlertUtil.showConfirmation("Add Funds",
-                    "Add " + utils.CurrencyUtil.format(amount) + " to your wallet?");
-
+                    "Add " + CurrencyUtil.format(amount) + " to your wallet?");
             if (confirmed) {
                 String referenceId = "DEP_" + System.currentTimeMillis();
-                boolean success = walletDAO.addBalance(customerId, amount, referenceId);
-
+                boolean success = walletDAO.addFunds(customerId, amount, referenceId, "Wallet deposit");
                 if (success) {
-                    AlertUtil.showSuccess(utils.CurrencyUtil.format(amount) + " added to your wallet.");
+                    AlertUtil.showSuccess(CurrencyUtil.format(amount) + " added to your wallet.");
                     amountField.clear();
                     loadWallet();
                     loadTransactions();
@@ -136,7 +142,6 @@ public class DigitalWalletController {
                     AlertUtil.showError("Transaction Failed", "Failed to add funds to wallet.");
                 }
             }
-
         } catch (NumberFormatException e) {
             AlertUtil.showError("Invalid Amount", "Please enter a valid amount.");
         } catch (Exception e) {

@@ -1,5 +1,6 @@
 package controllers;
 
+import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -24,10 +25,11 @@ import java.util.List;
 public class InsuranceClaimController {
 
     @FXML private TableView<InsuranceClaim> claimsTable;
+    @FXML private TableColumn<InsuranceClaim, String> claimIdColumn;
     @FXML private TableColumn<InsuranceClaim, String> policyColumn;
     @FXML private TableColumn<InsuranceClaim, String> claimDateColumn;
     @FXML private TableColumn<InsuranceClaim, Double> amountColumn;
-    @FXML private TableColumn<InsuranceClaim, String> statusColumn;
+    @FXML private TableColumn<InsuranceClaim, String> claimStatusColumn;
     @FXML private TableColumn<InsuranceClaim, Double> approvedAmountColumn;
 
     @FXML private ComboBox<InsurancePolicy> policyComboBox;
@@ -58,6 +60,7 @@ public class InsuranceClaimController {
     private InsurancePolicyDAO policyDAO;
     private InsuranceClaim selectedClaim;
     private ObservableList<InsuranceClaim> claimList;
+    private List<InsuranceClaim> fullData;
     private int currentPage = 0;
     private int pageSize = 10;
 
@@ -82,16 +85,17 @@ public class InsuranceClaimController {
     }
 
     private void setupTableColumns() {
+        claimIdColumn.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject().asString());
         policyColumn.setCellValueFactory(cellData -> cellData.getValue().policyNumberProperty());
         claimDateColumn.setCellValueFactory(cellData -> cellData.getValue().claimDateProperty().asString());
         amountColumn.setCellValueFactory(cellData -> cellData.getValue().claimAmountProperty().asObject());
-        statusColumn.setCellValueFactory(cellData -> cellData.getValue().statusProperty());
+        claimStatusColumn.setCellValueFactory(cellData -> cellData.getValue().statusProperty());
         approvedAmountColumn.setCellValueFactory(cellData -> cellData.getValue().approvedAmountProperty().asObject());
 
         policyColumn.setStyle("-fx-alignment: CENTER;");
         claimDateColumn.setStyle("-fx-alignment: CENTER;");
         amountColumn.setStyle("-fx-alignment: CENTER-RIGHT;");
-        statusColumn.setStyle("-fx-alignment: CENTER;");
+        claimStatusColumn.setStyle("-fx-alignment: CENTER;");
         approvedAmountColumn.setStyle("-fx-alignment: CENTER-RIGHT;");
     }
 
@@ -107,10 +111,12 @@ public class InsuranceClaimController {
     }
 
     private void updateTablePage() {
+        if (fullData == null || fullData.isEmpty()) return;
         int start = currentPage * pageSize;
-        int end = Math.min(start + pageSize, claimList.size());
-        if (start < claimList.size()) {
-            claimsTable.setItems(FXCollections.observableArrayList(claimList.subList(start, end)));
+        int end = Math.min(start + pageSize, fullData.size());
+        if (start < fullData.size()) {
+            claimList.setAll(fullData.subList(start, end));
+            claimsTable.setItems(claimList);
         }
     }
 
@@ -133,12 +139,11 @@ public class InsuranceClaimController {
         statusLabel.setText("Loading claims...");
 
         try {
-            List<InsuranceClaim> claims = claimDAO.findAll();
-            claimList.setAll(claims);
-            int totalPages = (int) Math.ceil((double) claims.size() / pageSize);
+            fullData = claimDAO.findAll();
+            int totalPages = (int) Math.ceil((double) fullData.size() / pageSize);
             if (claimsPagination != null) claimsPagination.setPageCount(Math.max(1, totalPages));
             updateTablePage();
-            statusLabel.setText("Loaded " + claims.size() + " claims");
+            statusLabel.setText("Loaded " + fullData.size() + " claims");
         } catch (Exception e) {
             e.printStackTrace();
             statusLabel.setText("Error loading claims");
@@ -160,7 +165,7 @@ public class InsuranceClaimController {
 
     private void showFadeAnimation() {
         if (fadeButton != null) {
-            javafx.animation.FadeTransition fadeTransition = new javafx.animation.FadeTransition(Duration.seconds(1.5), fadeButton);
+            FadeTransition fadeTransition = new FadeTransition(Duration.seconds(1.5), fadeButton);
             fadeTransition.setFromValue(1.0);
             fadeTransition.setToValue(0.2);
             fadeTransition.setCycleCount(4);

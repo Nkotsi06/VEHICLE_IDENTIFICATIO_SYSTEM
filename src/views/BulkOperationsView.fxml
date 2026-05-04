@@ -9,58 +9,70 @@
             stylesheets="@../css/application.css" styleClass="border-pane">
 
     <top>
-        <VBox>
-            <fx:include source="MenuBarComponent.fxml"/>
-        </VBox>
+        <fx:include source="MenuBarComponent.fxml"/>
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
-            <VBox spacing="20" styleClass="dashboard-container" alignment="TOP_CENTER">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
+            <VBox spacing="20" alignment="TOP_CENTER"
+                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
 
-                <Label text="Bulk Operations" styleClass="label-title"/>
-                <Label text="Import, export, update, or delete records in bulk" styleClass="label-subtitle"/>
+                <Label text="Bulk Operations" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
+                <Label text="Import, export, update, or delete records in bulk" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
 
                 <Separator/>
 
                 <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
 
                 <!-- Operation Configuration Section -->
-                <TitledPane text="Operation Configuration" expanded="true" style="-fx-font-weight: bold;">
-                    <GridPane hgap="15" vgap="15" style="-fx-padding: 15;" alignment="CENTER">
-                        <columnConstraints>
-                            <ColumnConstraints minWidth="100" maxWidth="150"/>
-                            <ColumnConstraints minWidth="200" maxWidth="400"/>
-                            <ColumnConstraints minWidth="100" maxWidth="150"/>
-                        </columnConstraints>
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="900" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Operation Configuration" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                        <Label text="Operation Type:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <ComboBox fx:id="operationTypeComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="200" promptText="Select operation"/>
+                        <GridPane hgap="15" vgap="15" alignment="CENTER">
+                            <rowConstraints>
+                                <RowConstraints/>
+                                <RowConstraints/>
+                            </rowConstraints>
+                            <columnConstraints>
+                                <ColumnConstraints minWidth="100" maxWidth="150" halignment="RIGHT"/>
+                                <ColumnConstraints minWidth="200" maxWidth="300"/>
+                                <ColumnConstraints minWidth="100" maxWidth="150"/>
+                            </columnConstraints>
 
-                        <Label text="Entity Type:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <ComboBox fx:id="entityTypeComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="200" promptText="Select entity type"/>
+                            <Label text="Operation Type:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="operationTypeComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="200" promptText="Select operation"/>
 
-                        <Button fx:id="fadeButton" text="Animate" GridPane.rowIndex="0" GridPane.columnIndex="2"
-                                styleClass="button-warning" prefWidth="100"/>
-                    </GridPane>
-                </TitledPane>
+                            <Label text="Entity Type:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="entityTypeComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="200" promptText="Select entity type"/>
+
+                            <Button fx:id="fadeButton" text="Animate" GridPane.rowIndex="0" GridPane.columnIndex="2"
+                                    styleClass="button-warning" prefWidth="100"/>
+                        </GridPane>
+                    </VBox>
+                </HBox>
 
                 <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
                 <!-- File Selection Section -->
-                <TitledPane text="File Selection" expanded="true" style="-fx-font-weight: bold;">
-                    <VBox spacing="10">
-                        <HBox spacing="10" alignment="CENTER_LEFT">
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="900" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="File Selection" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+
+                        <HBox spacing="10" alignment="CENTER">
                             <Button fx:id="loadFileButton" text="Load File" styleClass="button-info"/>
                             <Label fx:id="filePathLabel" text="No file selected" styleClass="status-text"/>
                         </HBox>
                     </VBox>
-                </TitledPane>
+                </HBox>
 
                 <!-- Data (JSON Format) Section -->
-                <TitledPane text="Data (JSON Format)" expanded="true" style="-fx-font-weight: bold;">
-                    <TextArea fx:id="jsonDataArea" prefHeight="200" minHeight="150" maxHeight="300"
-                              promptText='[
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="900" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Data (JSON Format)" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+                        <TextArea fx:id="jsonDataArea" prefHeight="200" minHeight="150" maxHeight="300"
+                                  promptText='[
   {
     "username": "nkone",
     "password": "pass123",
@@ -69,26 +81,28 @@
     "address": "123 Ha Leponesa , Mafeteng",
     "phone": "+266 5432 5678"
   }
-]'/>
-                </TitledPane>
+]' maxWidth="Infinity"/>
+                    </VBox>
+                </HBox>
 
                 <!-- Preview Table for Data -->
-                <TitledPane text="Data Preview" expanded="false" style="-fx-font-weight: bold;" VBox.vgrow="ALWAYS">
-                    <VBox spacing="10" VBox.vgrow="ALWAYS">
-                        <TableView fx:id="previewTable" VBox.vgrow="ALWAYS" prefHeight="300" minHeight="200">
-                            <columnResizePolicy>
-                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                            </columnResizePolicy>
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="900" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Data Preview" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+                        <TableView fx:id="previewTable" prefHeight="300" minHeight="200"
+                                   maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
                             <placeholder>
                                 <Label text="Load data to preview" styleClass="status-text"/>
                             </placeholder>
                         </TableView>
                     </VBox>
-                </TitledPane>
+                </HBox>
 
                 <!-- Actions Section -->
-                <TitledPane text="Actions" expanded="true" style="-fx-font-weight: bold;">
-                    <VBox spacing="15">
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="900" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Actions" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+
                         <HBox spacing="15" alignment="CENTER">
                             <Button fx:id="validateButton" text="Validate Data" styleClass="button-warning" prefWidth="130"/>
                             <Button fx:id="executeButton" text="Execute" styleClass="button-success" prefWidth="130"/>
@@ -97,12 +111,12 @@
 
                         <Separator/>
 
-                        <Label fx:id="statusLabel" styleClass="status-text"/>
+                        <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
                     </VBox>
-                </TitledPane>
+                </HBox>
 
                 <!-- Back Button -->
-                <HBox spacing="10" alignment="CENTER_RIGHT">
+                <HBox spacing="10" alignment="CENTER">
                     <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-secondary" prefWidth="150"/>
                 </HBox>
 

@@ -1,60 +1,108 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ServiceReminderController">
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ServiceReminderController"
+            stylesheets="@../css/application.css" styleClass="border-pane">
 
     <top>
-        <VBox>
-            <fx:include source="MenuBarComponent.fxml"/>
-        </VBox>
+        <fx:include source="MenuBarComponent.fxml"/>
     </top>
 
     <center>
-        <SplitPane dividerPositions="0.55">
-            <VBox spacing="10" style="-fx-padding: 10;">
-                <Label text="Service Reminders" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
-                <TableView fx:id="remindersTable">
-                    <columns>
-                        <TableColumn fx:id="vehicleColumn" text="Vehicle"/>
-                        <TableColumn fx:id="serviceTypeColumn" text="Service Type"/>
-                        <TableColumn fx:id="dueDateColumn" text="Due Date"/>
-                        <TableColumn fx:id="statusColumn" text="Status"/>
-                    </columns>
-                </TableView>
-                <HBox spacing="10">
-                    <Button fx:id="refreshButton" text="Refresh"/>
-                    <Button fx:id="sendRemindersButton" text="Send Reminders" style="-fx-background-color: #27ae60; -fx-text-fill: white;"/>
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
+            <VBox spacing="20" alignment="TOP_CENTER"
+                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
+
+                <Label text="Service Reminders" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
+                <Label text="Manage vehicle service reminders" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
+
+                <Separator/>
+
+                <HBox spacing="20" alignment="CENTER">
+                    <!-- Left Panel - Reminders List -->
+                    <VBox spacing="10" alignment="CENTER" HBox.hgrow="ALWAYS">
+                        <VBox styleClass="profile-edit-card" alignment="CENTER">
+                            <Label text="Service Reminders" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+
+                            <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="30"/>
+
+                            <TableView fx:id="remindersTable" prefHeight="400" minHeight="300" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
+                                <columns>
+                                    <TableColumn fx:id="vehicleColumn" text="Vehicle" minWidth="150" maxWidth="190"/>
+                                    <TableColumn fx:id="serviceTypeColumn" text="Service Type" minWidth="150" maxWidth="190"/>
+                                    <TableColumn fx:id="dueDateColumn" text="Due Date" minWidth="100" maxWidth="130"/>
+                                    <TableColumn fx:id="statusColumn" text="Status" minWidth="80" maxWidth="110"/>
+                                </columns>
+                                <placeholder>
+                                    <Label text="No service reminders" styleClass="status-text"/>
+                                </placeholder>
+                            </TableView>
+
+                            <HBox alignment="CENTER">
+                                <Pagination fx:id="remindersPagination" pageCount="1" maxPageIndicatorCount="5"/>
+                            </HBox>
+
+                            <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+
+                            <HBox alignment="CENTER">
+                                <Button fx:id="refreshButton" text="Refresh" styleClass="button-info" prefWidth="100"/>
+                                <Button fx:id="sendRemindersButton" text="Send Reminders" styleClass="button-success" prefWidth="130">
+                                    <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                                </Button>
+                                <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100">
+                                    <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                                </Button>
+                            </HBox>
+                        </VBox>
+                    </VBox>
+
+                    <!-- Right Panel - Add Reminder -->
+                    <VBox spacing="15" alignment="CENTER" HBox.hgrow="ALWAYS">
+                        <VBox styleClass="profile-edit-card" alignment="CENTER">
+                            <Label text="Add Reminder" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+
+                            <GridPane hgap="10" vgap="10" alignment="CENTER">
+                                <columnConstraints>
+                                    <ColumnConstraints halignment="RIGHT" minWidth="100"/>
+                                    <ColumnConstraints minWidth="250"/>
+                                </columnConstraints>
+
+                                <Label text="Vehicle:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <ComboBox fx:id="vehicleComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250"/>
+
+                                <Label text="Service Type:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <TextField fx:id="serviceTypeField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                                <Label text="Due Date:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <DatePicker fx:id="dueDatePicker" GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="200"/>
+
+                                <Label text="Due Odometer (km):" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <TextField fx:id="dueOdometerField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                            </GridPane>
+
+                            <Button fx:id="addButton" text="Add Reminder" styleClass="button-success" prefWidth="150">
+                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                            </Button>
+
+                            <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
+                        </VBox>
+                    </VBox>
                 </HBox>
+
+                <HBox alignment="CENTER">
+                    <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-secondary" prefWidth="150"/>
+                </HBox>
+
             </VBox>
-
-            <VBox spacing="15" style="-fx-padding: 10;">
-                <Label text="Add Reminder" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
-
-                <GridPane hgap="10" vgap="10">
-                    <Label text="Vehicle:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                    <ComboBox fx:id="vehicleComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-
-                    <Label text="Service Type:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                    <TextField fx:id="serviceTypeField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-
-                    <Label text="Due Date:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                    <DatePicker fx:id="dueDatePicker" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-
-                    <Label text="Due Odometer (km):" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                    <TextField fx:id="dueOdometerField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
-                </GridPane>
-
-                <Button fx:id="addButton" text="Add Reminder" style="-fx-background-color: #27ae60; -fx-text-fill: white;"/>
-            </VBox>
-        </SplitPane>
+        </ScrollPane>
     </center>
 
     <bottom>
-        <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
-            <Button fx:id="backButton" text="Back"/>
-        </HBox>
         <fx:include source="FooterComponent.fxml"/>
     </bottom>
 </BorderPane>

@@ -1,6 +1,7 @@
 package models;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -8,7 +9,16 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
+/**
+ * OfficerLog model representing simplified officer activity logs.
+ * Used for quick viewing of officer actions.
+ *
+ * @author Vehicle Identification System Team
+ * @version 1.0
+ */
 public class OfficerLog extends BaseEntity {
+
+    // Core fields
     private int id;
     private String officerName;
     private String badgeNumber;
@@ -17,6 +27,14 @@ public class OfficerLog extends BaseEntity {
     private String registrationNumber;
     private LocalDateTime timestamp;
 
+    // Action constants
+    public static final String ACTION_VIEW = "VIEW";
+    public static final String ACTION_REPORT = "REPORT";
+    public static final String ACTION_BOLO = "BOLO";
+    public static final String ACTION_WARRANT = "WARRANT";
+    public static final String ACTION_VIOLATION = "VIOLATION";
+    public static final String ACTION_STOLEN = "STOLEN";
+
     // JavaFX Properties for TableView binding
     private final StringProperty officerNameProperty = new SimpleStringProperty();
     private final StringProperty badgeNumberProperty = new SimpleStringProperty();
@@ -24,26 +42,97 @@ public class OfficerLog extends BaseEntity {
     private final IntegerProperty vehicleIdProperty = new SimpleIntegerProperty();
     private final StringProperty registrationNumberProperty = new SimpleStringProperty();
     private final ObjectProperty<LocalDateTime> timestampProperty = new SimpleObjectProperty<>();
+    private final StringProperty actionDisplayProperty = new SimpleStringProperty();
+    private final StringProperty formattedTimestampProperty = new SimpleStringProperty();
 
+    /**
+     * Default constructor.
+     */
     public OfficerLog() {
         super();
+        this.timestamp = LocalDateTime.now();
+        timestampProperty.set(timestamp);
     }
 
-    public OfficerLog(String officerName, String badgeNumber, String action, int vehicleId) {
+    /**
+     * Constructor for creating an officer log entry.
+     *
+     * @param officerName        the officer name
+     * @param badgeNumber        the badge number
+     * @param action             the action performed
+     * @param vehicleId          the vehicle ID
+     * @param registrationNumber the registration number
+     */
+    public OfficerLog(String officerName, String badgeNumber, String action, int vehicleId, String registrationNumber) {
         this();
         this.officerName = officerName;
         this.badgeNumber = badgeNumber;
         this.action = action;
         this.vehicleId = vehicleId;
+        this.registrationNumber = registrationNumber;
         this.timestamp = LocalDateTime.now();
 
-        // Update properties
         officerNameProperty.set(officerName);
         badgeNumberProperty.set(badgeNumber);
         actionProperty.set(action);
         vehicleIdProperty.set(vehicleId);
+        registrationNumberProperty.set(registrationNumber);
         timestampProperty.set(timestamp);
+        updateDisplayProperties();
     }
+
+    /**
+     * Constructor for creating an officer log entry with vehicleId.
+     *
+     * @param officerName the officer name
+     * @param badgeNumber the badge number
+     * @param action      the action performed
+     * @param vehicleId   the vehicle ID
+     */
+    public OfficerLog(String officerName, String badgeNumber, String action, int vehicleId) {
+        this(officerName, badgeNumber, action, vehicleId, null);
+    }
+
+    // ============================================
+    // PRIVATE UPDATE METHODS
+    // ============================================
+
+    private void updateDisplayProperties() {
+        switch (action) {
+            case ACTION_VIEW:
+                actionDisplayProperty.set("Viewed");
+                break;
+            case ACTION_REPORT:
+                actionDisplayProperty.set("Generated Report");
+                break;
+            case ACTION_BOLO:
+                actionDisplayProperty.set("Issued BOLO Alert");
+                break;
+            case ACTION_WARRANT:
+                actionDisplayProperty.set("Issued Warrant");
+                break;
+            case ACTION_VIOLATION:
+                actionDisplayProperty.set("Issued Violation");
+                break;
+            case ACTION_STOLEN:
+                actionDisplayProperty.set("Reported Stolen");
+                break;
+            default:
+                actionDisplayProperty.set(action);
+        }
+
+        formattedTimestampProperty.set(formatTimestamp(timestamp));
+    }
+
+    private String formatTimestamp(LocalDateTime ts) {
+        if (ts == null) return "";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        return ts.format(formatter);
+    }
+
+    // ============================================
+    // GETTERS AND SETTERS WITH PROPERTY UPDATES
+    // ============================================
 
     public String getOfficerName() {
         return officerName;
@@ -78,6 +167,7 @@ public class OfficerLog extends BaseEntity {
     public void setAction(String action) {
         this.action = action;
         actionProperty.set(action);
+        updateDisplayProperties();
     }
 
     public StringProperty actionProperty() {
@@ -117,11 +207,32 @@ public class OfficerLog extends BaseEntity {
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
         timestampProperty.set(timestamp);
+        formattedTimestampProperty.set(formatTimestamp(timestamp));
     }
 
     public ObjectProperty<LocalDateTime> timestampProperty() {
         return timestampProperty;
     }
+
+    public String getActionDisplay() {
+        return actionDisplayProperty.get();
+    }
+
+    public StringProperty actionDisplayProperty() {
+        return actionDisplayProperty;
+    }
+
+    public String getFormattedTimestamp() {
+        return formattedTimestampProperty.get();
+    }
+
+    public StringProperty formattedTimestampProperty() {
+        return formattedTimestampProperty;
+    }
+
+    // ============================================
+    // OVERRIDE METHODS
+    // ============================================
 
     @Override
     public int getId() {
@@ -135,6 +246,25 @@ public class OfficerLog extends BaseEntity {
 
     @Override
     public String toString() {
-        return officerName + " - " + action + " - " + timestamp;
+        return officerName + " - " + getActionDisplay() + " - " + getFormattedTimestamp();
+    }
+
+    /**
+     * Creates a copy of this officer log.
+     *
+     * @return a new OfficerLog instance
+     */
+    public OfficerLog copy() {
+        OfficerLog copy = new OfficerLog();
+        copy.setId(this.id);
+        copy.setOfficerName(this.officerName);
+        copy.setBadgeNumber(this.badgeNumber);
+        copy.setAction(this.action);
+        copy.setVehicleId(this.vehicleId);
+        copy.setRegistrationNumber(this.registrationNumber);
+        copy.setTimestamp(this.timestamp);
+        copy.setCreatedAt(this.getCreatedAt());
+        copy.setUpdatedAt(this.getUpdatedAt());
+        return copy;
     }
 }

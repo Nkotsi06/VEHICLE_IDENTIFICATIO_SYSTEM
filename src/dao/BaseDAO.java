@@ -2,26 +2,42 @@ package dao;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;  // ADD THIS IMPORT
 
 import database.DatabaseConnection;
+import database.ProcedureCaller;
+import database.ViewLoader;
 
+/**
+ * BaseDAO - Provides common functionality for all DAO classes.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public abstract class BaseDAO<T> {
 
+    protected DatabaseConnection dbConnection;
+    protected ProcedureCaller procedureCaller;
+    protected ViewLoader viewLoader;
+
+    public BaseDAO() {
+        this.dbConnection = DatabaseConnection.getInstance();
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
+
     protected Connection getConnection() throws SQLException {
-        return DatabaseConnection.getInstance().getConnection();
+        return dbConnection.getConnection();
     }
 
     protected void closeResources(ResultSet rs, Statement stmt, Connection conn) {
-        try { if (rs != null) rs.close(); } catch (SQLException e) { e.printStackTrace(); }
-        try { if (stmt != null) stmt.close(); } catch (SQLException e) { e.printStackTrace(); }
-        try { if (conn != null && conn != DatabaseConnection.getInstance().getConnection()) conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+        dbConnection.closeResources(rs, stmt, conn);
     }
 
     protected void closeResources(Statement stmt, Connection conn) {
@@ -33,21 +49,23 @@ public abstract class BaseDAO<T> {
     // ============================================
 
     /**
-     * Log an audit action to the database
-     * @param userId The ID of the user performing the action
-     * @param action The action being performed
+     * Log an audit action using stored procedure.
+     *
+     * @param userId    The ID of the user performing the action
+     * @param action    The action being performed
      * @param ipAddress The IP address of the user
      */
     protected void logAudit(int userId, String action, String ipAddress) {
         try {
-            executeProcedure("sp_log_audit_action", userId, action, ipAddress);
+            procedureCaller.executeLogAuditAction(userId, action, ipAddress);
         } catch (SQLException e) {
             System.err.println("Failed to log audit: " + e.getMessage());
         }
     }
 
     /**
-     * Log an audit action with default IP address
+     * Log an audit action with default IP address.
+     *
      * @param userId The ID of the user performing the action
      * @param action The action being performed
      */
@@ -56,7 +74,7 @@ public abstract class BaseDAO<T> {
     }
 
     /**
-     * Get current user ID from session (to be used in DAO methods)
+     * Get current user ID from session.
      */
     protected int getCurrentUserId() {
         try {
@@ -68,167 +86,90 @@ public abstract class BaseDAO<T> {
     }
 
     // ============================================
-    // READ OPERATIONS (USING VIEWS)
+    // VIEW OPERATIONS (No direct SQL)
     // ============================================
 
-    protected int executeUpdate(String sql, Object... params) throws SQLException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            setParameters(ps, params);
-            return ps.executeUpdate();
-        } finally {
-            closeResources(ps, conn);
-        }
+    protected List<Map<String, Object>> loadView(String viewName) throws SQLException {
+        return viewLoader.loadView(viewName);
     }
 
-    protected int executeUpdateWithGeneratedKeys(String sql, Object... params) throws SQLException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            setParameters(ps, params);
-            ps.executeUpdate();
-            rs = ps.getGeneratedKeys();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return -1;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+    protected List<Map<String, Object>> loadViewWithCondition(String viewName, String condition, Object... params)
+            throws SQLException {
+        return viewLoader.loadViewWithCondition(viewName, condition, params);
     }
 
-    protected List<T> executeQuery(String sql, Object... params) throws SQLException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<T> results = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            setParameters(ps, params);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                results.add(mapRow(rs));
-            }
-            return results;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+    protected Map<String, Object> loadViewSingle(String viewName, String condition, Object... params)
+            throws SQLException {
+        return viewLoader.loadViewSingle(viewName, condition, params);
     }
 
-    protected T executeQuerySingle(String sql, Object... params) throws SQLException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            setParameters(ps, params);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return mapRow(rs);
-            }
-            return null;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+    protected int countViewRows(String viewName) throws SQLException {
+        return viewLoader.countViewRows(viewName);
+    }
+
+    protected int countViewRowsWithCondition(String viewName, String condition, Object... params) throws SQLException {
+        return viewLoader.countViewRowsWithCondition(viewName, condition, params);
     }
 
     // ============================================
-    // POSTGRESQL PROCEDURE CALL METHODS
+    // PROCEDURE CALL METHODS (No direct SQL)
     // ============================================
-
-    private String buildPostgresCall(String procedureName, int paramCount) {
-        StringBuilder sql = new StringBuilder("CALL ");
-        sql.append(procedureName).append("(");
-        for (int i = 0; i < paramCount; i++) {
-            if (i > 0) sql.append(",");
-            sql.append("?");
-        }
-        sql.append(")");
-        return sql.toString();
-    }
 
     protected boolean executeProcedure(String procedureName, Object... params) throws SQLException {
-        String sql = buildPostgresCall(procedureName, params.length);
-        Connection conn = null;
-        CallableStatement cs = null;
-        try {
-            conn = getConnection();
-            cs = conn.prepareCall(sql);
-            setProcedureParameters(cs, params);
-            return cs.execute();
-        } finally {
-            closeResources(cs, conn);
-        }
+        return procedureCaller.executeProcedure(procedureName, params);
     }
 
-    @SuppressWarnings("unchecked")
-    protected <R> R executeProcedureWithOutParameter(String procedureName, int outParamType, Object... params) throws SQLException {
-        String sql = buildPostgresCall(procedureName, params.length + 1);
-        Connection conn = null;
-        CallableStatement cs = null;
-        try {
-            conn = getConnection();
-            cs = conn.prepareCall(sql);
-            for (int i = 0; i < params.length; i++) {
-                if (params[i] == null) {
-                    cs.setNull(i + 1, Types.NULL);
-                } else {
-                    cs.setObject(i + 1, params[i]);
-                }
-            }
-            cs.registerOutParameter(params.length + 1, outParamType);
-            cs.execute();
-            return (R) cs.getObject(params.length + 1);
-        } finally {
-            closeResources(cs, conn);
-        }
+    protected <R> R executeProcedureWithOutParameter(String procedureName, int outParamType, Object... params)
+            throws SQLException {
+        return procedureCaller.executeProcedureWithOutParameter(procedureName, outParamType, params);
     }
 
-    protected Integer executeProcedureWithInOutParameter(String procedureName, Object... params) throws SQLException {
-        return executeProcedureWithOutParameter(procedureName, Types.INTEGER, params);
+    protected Integer executeProcedureWithIntegerOut(String procedureName, Object... params) throws SQLException {
+        return procedureCaller.executeProcedureWithIntegerOut(procedureName, params);
     }
 
-    protected int executeProcedureUpdate(String procedureName, Object... params) throws SQLException {
-        String sql = buildPostgresCall(procedureName, params.length);
-        Connection conn = null;
-        CallableStatement cs = null;
-        try {
-            conn = getConnection();
-            cs = conn.prepareCall(sql);
-            setProcedureParameters(cs, params);
-            cs.execute();
-            return cs.getUpdateCount();
-        } finally {
-            closeResources(cs, conn);
-        }
+    protected String executeProcedureWithStringOut(String procedureName, Object... params) throws SQLException {
+        return procedureCaller.executeProcedureWithStringOut(procedureName, params);
     }
 
-    private void setParameters(PreparedStatement ps, Object... params) throws SQLException {
-        for (int i = 0; i < params.length; i++) {
-            if (params[i] == null) {
-                ps.setNull(i + 1, Types.NULL);
-            } else {
-                ps.setObject(i + 1, params[i]);
-            }
-        }
+    protected boolean executeProcedureInTransaction(String procedureName, Object... params) throws SQLException {
+        return procedureCaller.executeProcedureInTransaction(procedureName, params);
     }
 
-    private void setProcedureParameters(CallableStatement cs, Object... params) throws SQLException {
-        for (int i = 0; i < params.length; i++) {
-            if (params[i] == null) {
-                cs.setNull(i + 1, Types.NULL);
-            } else {
-                cs.setObject(i + 1, params[i]);
-            }
-        }
+    // ============================================
+    // COMPATIBILITY METHODS (Deprecated - will be removed)
+    // ============================================
+
+    /**
+     * @deprecated Use viewLoader or procedureCaller instead
+     */
+    @Deprecated
+    protected int executeUpdate(String sql, Object... params) throws SQLException {
+        throw new UnsupportedOperationException("Direct SQL is not allowed. Use stored procedures or views.");
+    }
+
+    /**
+     * @deprecated Use viewLoader or procedureCaller instead
+     */
+    @Deprecated
+    protected int executeUpdateWithGeneratedKeys(String sql, Object... params) throws SQLException {
+        throw new UnsupportedOperationException("Direct SQL is not allowed. Use stored procedures or views.");
+    }
+
+    /**
+     * @deprecated Use viewLoader or procedureCaller instead
+     */
+    @Deprecated
+    protected List<T> executeQuery(String sql, Object... params) throws SQLException {
+        throw new UnsupportedOperationException("Direct SQL is not allowed. Use stored procedures or views.");
+    }
+
+    /**
+     * @deprecated Use viewLoader or procedureCaller instead
+     */
+    @Deprecated
+    protected T executeQuerySingle(String sql, Object... params) throws SQLException {
+        throw new UnsupportedOperationException("Direct SQL is not allowed. Use stored procedures or views.");
     }
 
     // ============================================

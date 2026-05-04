@@ -2,56 +2,86 @@ package dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.InspectionChecklistItem;
 
+/**
+ * InspectionChecklistItemDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class InspectionChecklistItemDAO extends BaseDAO<InspectionChecklistItem> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public InspectionChecklistItemDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public InspectionChecklistItem findById(int id) throws SQLException {
-        String sql = "SELECT * FROM inspection_checklist_items WHERE id = ?";
-        return executeQuerySingle(sql, id);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_inspection_checklist_items", "id = ?", id);
+        return results.isEmpty() ? null : mapToInspectionChecklistItem(results.get(0));
     }
 
     @Override
     public List<InspectionChecklistItem> findAll() throws SQLException {
-        String sql = "SELECT * FROM inspection_checklist_items ORDER BY inspection_id, id";
-        return executeQuery(sql);
+        List<Map<String, Object>> results = viewLoader.loadView("vw_inspection_checklist_items");
+        return mapToInspectionChecklistItemList(results);
     }
 
     public List<InspectionChecklistItem> findByInspectionId(int inspectionId) throws SQLException {
-        String sql = "SELECT * FROM inspection_checklist_items WHERE inspection_id = ? ORDER BY id";
-        return executeQuery(sql, inspectionId);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_inspection_checklist_items", "inspection_id = ? ORDER BY id", inspectionId);
+        return mapToInspectionChecklistItemList(results);
     }
 
     public List<InspectionChecklistItem> findByStatus(String status) throws SQLException {
-        String sql = "SELECT * FROM inspection_checklist_items WHERE status = ?";
-        return executeQuery(sql, status);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_inspection_checklist_items", "status = ?", status);
+        return mapToInspectionChecklistItemList(results);
     }
 
     public List<InspectionChecklistItem> findFailedItemsByInspection(int inspectionId) throws SQLException {
-        String sql = "SELECT * FROM inspection_checklist_items WHERE inspection_id = ? AND status = 'FAIL'";
-        return executeQuery(sql, inspectionId);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_inspection_checklist_items", "inspection_id = ? AND status = 'FAIL'", inspectionId);
+        return mapToInspectionChecklistItemList(results);
     }
 
     @Override
     public boolean insert(InspectionChecklistItem entity) throws SQLException {
-        String sql = "CALL sp_add_inspection_item(?, ?, ?, ?)";
-        int result = executeUpdate(sql,
+        return procedureCaller.executeAddInspectionChecklistItem(
                 entity.getInspectionId(),
                 entity.getItemName(),
                 entity.getStatus(),
                 entity.getNotes()
         );
-        return result >= 0;
     }
 
     public int insertAndGetId(InspectionChecklistItem entity) throws SQLException {
-        String sql = "INSERT INTO inspection_checklist_items (inspection_id, item_name, status, notes, photo_path) VALUES (?, ?, ?, ?, ?)";
-        return executeUpdateWithGeneratedKeys(sql,
+        Integer itemId = procedureCaller.executeAddInspectionChecklistItemWithId(
                 entity.getInspectionId(),
                 entity.getItemName(),
+                entity.getStatus(),
+                entity.getNotes(),
+                entity.getPhotoPath()
+        );
+        if (itemId != null && itemId > 0) {
+            entity.setId(itemId);
+            return itemId;
+        }
+        return -1;
+    }
+
+    @Override
+    public boolean update(InspectionChecklistItem entity) throws SQLException {
+        return procedureCaller.executeUpdateInspectionChecklistItem(
+                entity.getId(),
                 entity.getStatus(),
                 entity.getNotes(),
                 entity.getPhotoPath()
@@ -59,26 +89,67 @@ public class InspectionChecklistItemDAO extends BaseDAO<InspectionChecklistItem>
     }
 
     @Override
-    public boolean update(InspectionChecklistItem entity) throws SQLException {
-        String sql = "UPDATE inspection_checklist_items SET status = ?, notes = ?, photo_path = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
-        int result = executeUpdate(sql, entity.getStatus(), entity.getNotes(), entity.getPhotoPath(), entity.getId());
-        return result > 0;
-    }
-
-    @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM inspection_checklist_items WHERE id = ?";
-        int result = executeUpdate(sql, id);
-        return result > 0;
+        return procedureCaller.executeDeleteInspectionChecklistItem(id);
     }
 
     public boolean deleteByInspectionId(int inspectionId) throws SQLException {
-        String sql = "DELETE FROM inspection_checklist_items WHERE inspection_id = ?";
-        int result = executeUpdate(sql, inspectionId);
-        return result > 0;
+        return procedureCaller.executeDeleteInspectionChecklistItemsByInspection(inspectionId);
     }
 
-    // FIXED: Changed from private to protected to match BaseDAO
+    // ============================================
+    // HELPER METHODS FOR MAPPING
+    // ============================================
+
+    /**
+     * Converts a Map to an InspectionChecklistItem object.
+     *
+     * @param map The map containing the data
+     * @return InspectionChecklistItem object
+     */
+    private InspectionChecklistItem mapToInspectionChecklistItem(Map<String, Object> map) {
+        if (map == null) return null;
+
+        InspectionChecklistItem item = new InspectionChecklistItem();
+
+        if (map.get("id") != null) item.setId(((Number) map.get("id")).intValue());
+        if (map.get("inspection_id") != null) item.setInspectionId(((Number) map.get("inspection_id")).intValue());
+        if (map.get("item_name") != null) item.setItemName(map.get("item_name").toString());
+        if (map.get("status") != null) item.setStatus(map.get("status").toString());
+        if (map.get("notes") != null) item.setNotes(map.get("notes").toString());
+        if (map.get("photo_path") != null) item.setPhotoPath(map.get("photo_path").toString());
+
+        if (map.get("created_at") instanceof java.sql.Timestamp) {
+            item.setCreatedAt(((java.sql.Timestamp) map.get("created_at")).toLocalDateTime());
+        }
+        if (map.get("updated_at") instanceof java.sql.Timestamp) {
+            item.setUpdatedAt(((java.sql.Timestamp) map.get("updated_at")).toLocalDateTime());
+        }
+
+        // Update JavaFX properties
+        item.itemNameProperty().set(item.getItemName());
+        item.statusProperty().set(item.getStatus());
+        item.notesProperty().set(item.getNotes());
+
+        return item;
+    }
+
+    /**
+     * Converts a list of Maps to a list of InspectionChecklistItem objects.
+     *
+     * @param maps List of maps containing the data
+     * @return List of InspectionChecklistItem objects
+     */
+    private List<InspectionChecklistItem> mapToInspectionChecklistItemList(List<Map<String, Object>> maps) {
+        List<InspectionChecklistItem> items = new ArrayList<>();
+        if (maps != null) {
+            for (Map<String, Object> map : maps) {
+                items.add(mapToInspectionChecklistItem(map));
+            }
+        }
+        return items;
+    }
+
     @Override
     protected InspectionChecklistItem mapRow(ResultSet rs) throws SQLException {
         InspectionChecklistItem item = new InspectionChecklistItem();

@@ -4,25 +4,37 @@ import javafx.animation.PauseTransition;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.effect.DropShadow;
-import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import utils.AlertUtil;
 import utils.SceneManager;
+import utils.ValidationUtil;
 import dao.BOLOAlertDAO;
 import dao.VehicleDAO;
 import models.BOLOAlert;
 import models.Vehicle;
 import java.util.List;
 
+/**
+ * Controller for BOLO (Be On the Look Out) Alert Management
+ * Handles creating, viewing, and cancelling BOLO alerts for vehicles of interest
+ * BOLO alerts are distributed to all police units for vehicle tracking
+ */
 public class BOLOController {
+
+    // ============================================
+    // FXML UI COMPONENTS - TABLE
+    // ============================================
 
     @FXML private TableView<BOLOAlert> boloTable;
     @FXML private TableColumn<BOLOAlert, String> vehicleColumn;
     @FXML private TableColumn<BOLOAlert, String> messageColumn;
     @FXML private TableColumn<BOLOAlert, String> priorityColumn;
     @FXML private TableColumn<BOLOAlert, String> expiryDateColumn;
-    @FXML private TableColumn<BOLOAlert, String> boloStatusColumn; // Fixed - was "statusColumn"
+    @FXML private TableColumn<BOLOAlert, String> boloStatusColumn;
+
+    // ============================================
+    // FORM COMPONENTS
+    // ============================================
 
     @FXML private ComboBox<Vehicle> vehicleComboBox;
     @FXML private TextField messageField;
@@ -30,14 +42,27 @@ public class BOLOController {
     @FXML private DatePicker expiryDatePicker;
     @FXML private TextArea detailsArea;
 
+    // ============================================
+    // BUTTONS
+    // ============================================
+
     @FXML private Button generateButton;
     @FXML private Button cancelButton;
     @FXML private Button refreshButton;
     @FXML private Button backButton;
+
+    // ============================================
+    // PROGRESS INDICATORS
+    // ============================================
+
     @FXML private ProgressIndicator loadProgress;
     @FXML private ProgressBar operationProgress;
     @FXML private Pagination boloPagination;
     @FXML private Label statusLabel;
+
+    // ============================================
+    // DAO INSTANCES & DATA MODELS
+    // ============================================
 
     private BOLOAlertDAO boloDAO;
     private VehicleDAO vehicleDAO;
@@ -45,6 +70,10 @@ public class BOLOController {
     private List<BOLOAlert> fullAlertList;
     private int currentPage = 0;
     private int pageSize = 20;
+
+    // ============================================
+    // INITIALIZATION METHODS
+    // ============================================
 
     @FXML
     public void initialize() {
@@ -95,6 +124,7 @@ public class BOLOController {
             vehicleComboBox.getItems().setAll(vehicles);
         } catch (Exception e) {
             e.printStackTrace();
+            statusLabel.setText("Error loading vehicles");
         }
     }
 
@@ -137,6 +167,10 @@ public class BOLOController {
         });
     }
 
+    // ============================================
+    // BUSINESS LOGIC METHODS
+    // ============================================
+
     private void handleGenerate() {
         Vehicle selectedVehicle = vehicleComboBox.getSelectionModel().getSelectedItem();
 
@@ -145,7 +179,7 @@ public class BOLOController {
             return;
         }
 
-        if (!utils.ValidationUtil.isNotEmpty(messageField.getText())) {
+        if (!ValidationUtil.isNotEmpty(messageField.getText())) {
             AlertUtil.showWarning("Validation Error", "Please enter an alert message.");
             messageField.requestFocus();
             return;
@@ -236,6 +270,10 @@ public class BOLOController {
         selectedAlert = null;
         boloTable.getSelectionModel().clearSelection();
     }
+
+    // ============================================
+    // UI PROGRESS METHODS
+    // ============================================
 
     private void showProgress(boolean show) {
         if (loadProgress != null) loadProgress.setVisible(show);

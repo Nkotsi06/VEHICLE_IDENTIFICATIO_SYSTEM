@@ -5,63 +5,75 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.NoClaimBonusRecord;
 
+/**
+ * NoClaimBonusRecordDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class NoClaimBonusRecordDAO extends BaseDAO<NoClaimBonusRecord> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public NoClaimBonusRecordDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public NoClaimBonusRecord findById(int id) throws SQLException {
-        String sql = "SELECT ncb.*, ip.policy_number FROM no_claim_bonus_records ncb JOIN insurance_policies ip ON ncb.insurance_policy_id = ip.id WHERE ncb.id = ?";
-        return executeQuerySingle(sql, id);
+        List<NoClaimBonusRecord> results = viewLoader.loadViewWithCondition("vw_no_claim_bonus", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     public NoClaimBonusRecord findByPolicyId(int policyId) throws SQLException {
-        String sql = "SELECT ncb.*, ip.policy_number FROM no_claim_bonus_records ncb JOIN insurance_policies ip ON ncb.insurance_policy_id = ip.id WHERE ncb.insurance_policy_id = ?";
-        return executeQuerySingle(sql, policyId);
+        List<NoClaimBonusRecord> results = viewLoader.loadViewWithCondition("vw_no_claim_bonus", "insurance_policy_id = ?", policyId);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<NoClaimBonusRecord> findAll() throws SQLException {
-        String sql = "SELECT ncb.*, ip.policy_number FROM no_claim_bonus_records ncb JOIN insurance_policies ip ON ncb.insurance_policy_id = ip.id ORDER BY ncb.insurance_policy_id";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_no_claim_bonus");
     }
 
     public void calculateBonus(int policyId) throws SQLException {
-        String sql = "CALL sp_calculate_no_claim_bonus(?)";
-        executeUpdate(sql, policyId);
+        procedureCaller.executeCalculateNoClaimBonus(policyId);
     }
 
     @Override
     public boolean insert(NoClaimBonusRecord entity) throws SQLException {
-        String sql = "INSERT INTO no_claim_bonus_records (insurance_policy_id, policy_year, claim_free_years, bonus_percentage, calculated_date) VALUES (?, ?, ?, ?, ?)";
-        int result = executeUpdate(sql,
+        return procedureCaller.executeInsertNoClaimBonusRecord(
                 entity.getInsurancePolicyId(),
                 entity.getPolicyYear(),
                 entity.getClaimFreeYears(),
                 entity.getBonusPercentage(),
                 entity.getCalculatedDate()
         );
-        return result > 0;
     }
 
     @Override
     public boolean update(NoClaimBonusRecord entity) throws SQLException {
-        String sql = "UPDATE no_claim_bonus_records SET claim_free_years = ?, bonus_percentage = ?, calculated_date = ? WHERE insurance_policy_id = ? AND policy_year = ?";
-        int result = executeUpdate(sql,
+        return procedureCaller.executeUpdateNoClaimBonusRecord(
+                entity.getInsurancePolicyId(),
+                entity.getPolicyYear(),
                 entity.getClaimFreeYears(),
                 entity.getBonusPercentage(),
-                entity.getCalculatedDate(),
-                entity.getInsurancePolicyId(),
-                entity.getPolicyYear()
+                entity.getCalculatedDate()
         );
-        return result > 0;
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM no_claim_bonus_records WHERE id = ?";
-        int result = executeUpdate(sql, id);
-        return result > 0;
+        return procedureCaller.executeDeleteNoClaimBonusRecord(id);
+    }
+
+    public boolean deleteByPolicyId(int policyId) throws SQLException {
+        return procedureCaller.executeDeleteNoClaimBonusRecordsByPolicy(policyId);
     }
 
     @Override

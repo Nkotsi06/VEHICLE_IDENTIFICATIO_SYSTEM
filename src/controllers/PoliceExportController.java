@@ -17,7 +17,15 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Controller for Police Data Export
+ * Handles exporting police-related data in various formats (CSV, Excel, PDF, JSON)
+ */
 public class PoliceExportController {
+
+    // ============================================
+    // FXML UI COMPONENTS
+    // ============================================
 
     @FXML private ComboBox<String> exportTypeComboBox;
     @FXML private ComboBox<String> formatComboBox;
@@ -34,13 +42,25 @@ public class PoliceExportController {
     @FXML private ProgressBar operationProgress;
     @FXML private TableView<Map<String, Object>> previewTable;
 
+    // ============================================
+    // DAO INSTANCES
+    // ============================================
+
     private ReportGeneratorDAO reportDAO;
 
+    // ============================================
+    // INITIALIZATION METHODS
+    // ============================================
+
+    /**
+     * Initializes the police export controller
+     * Sets up export types, formats, and default values
+     */
     @FXML
     public void initialize() {
         reportDAO = new ReportGeneratorDAO();
 
-        // Police-only export types
+        // Configure police-only export types
         exportTypeComboBox.getItems().addAll(
                 "Stolen Vehicles Report",
                 "Violations Report",
@@ -52,10 +72,11 @@ public class PoliceExportController {
         );
         exportTypeComboBox.setValue("Stolen Vehicles Report");
 
-        // Format options
+        // Configure export formats
         formatComboBox.getItems().addAll("CSV", "Excel", "PDF", "JSON");
         formatComboBox.setValue("CSV");
 
+        // Set default values
         startDatePicker.setValue(LocalDate.now().minusMonths(1));
         endDatePicker.setValue(LocalDate.now());
         fileNameField.setText("police_export");
@@ -65,6 +86,9 @@ public class PoliceExportController {
         statusLabel.setText("Ready");
     }
 
+    /**
+     * Sets up button click handlers
+     */
     private void setupButtonHandlers() {
         exportButton.setOnAction(event -> handleExport());
         previewButton.setOnAction(event -> handlePreview());
@@ -75,6 +99,50 @@ public class PoliceExportController {
         }
     }
 
+    /**
+     * Applies visual effects to buttons
+     */
+    private void applyVisualEffects() {
+        DropShadow dropShadow = new DropShadow();
+        dropShadow.setRadius(5.0);
+        dropShadow.setOffsetX(2.0);
+        dropShadow.setOffsetY(2.0);
+        dropShadow.setColor(Color.rgb(0, 0, 0, 0.3));
+
+        exportButton.setEffect(dropShadow);
+        previewButton.setEffect(dropShadow);
+        clearButton.setEffect(dropShadow);
+        backButton.setEffect(dropShadow);
+        if (fadeButton != null) fadeButton.setEffect(dropShadow);
+    }
+
+    /**
+     * Plays fade animation on the animate button
+     */
+    private void showFadeAnimation() {
+        if (fadeButton != null) {
+            FadeTransition fadeTransition = new FadeTransition(Duration.seconds(1.5), fadeButton);
+            fadeTransition.setFromValue(1.0);
+            fadeTransition.setToValue(0.2);
+            fadeTransition.setCycleCount(4);
+            fadeTransition.setAutoReverse(true);
+            fadeTransition.play();
+            statusLabel.setText("Animation played!");
+
+            PauseTransition reset = new PauseTransition(Duration.seconds(2));
+            reset.setOnFinished(e -> statusLabel.setText("Ready"));
+            reset.play();
+        }
+    }
+
+    // ============================================
+    // PREVIEW METHOD
+    // ============================================
+
+    /**
+     * Handles previewing data before export
+     * Loads and displays sample data in the preview table
+     */
     private void handlePreview() {
         String exportType = exportTypeComboBox.getValue();
         LocalDate startDate = startDatePicker.getValue();
@@ -86,6 +154,7 @@ public class PoliceExportController {
         try {
             List<Map<String, Object>> data = null;
 
+            // Route to appropriate data source based on export type
             switch (exportType) {
                 case "Stolen Vehicles Report":
                     data = reportDAO.generateStolenVehicleReport();
@@ -135,6 +204,11 @@ public class PoliceExportController {
         }
     }
 
+    /**
+     * Updates preview table with data
+     * Dynamically creates columns based on data keys
+     * @param data List of data rows to display
+     */
     private void updatePreviewTable(List<Map<String, Object>> data) {
         if (data == null || data.isEmpty()) return;
 
@@ -151,6 +225,13 @@ public class PoliceExportController {
         previewTable.getItems().setAll(data);
     }
 
+    // ============================================
+    // CLEAR METHOD
+    // ============================================
+
+    /**
+     * Clears all form fields and preview data
+     */
     private void handleClear() {
         exportTypeComboBox.setValue("Stolen Vehicles Report");
         formatComboBox.setValue("CSV");
@@ -163,6 +244,14 @@ public class PoliceExportController {
         AlertUtil.showSuccess("Form Cleared", "All selections have been reset.");
     }
 
+    // ============================================
+    // EXPORT METHOD
+    // ============================================
+
+    /**
+     * Handles exporting data to file
+     * Supports multiple formats (CSV, Excel, PDF, JSON)
+     */
     private void handleExport() {
         String exportType = exportTypeComboBox.getValue();
         String format = formatComboBox.getValue();
@@ -184,6 +273,7 @@ public class PoliceExportController {
             String[] headers = null;
             String[] fields = null;
 
+            // Route to appropriate data source and configure headers
             switch (exportType) {
                 case "Stolen Vehicles Report":
                     data = reportDAO.generateStolenVehicleReport();
@@ -231,6 +321,7 @@ public class PoliceExportController {
             }
 
             if (data != null && !data.isEmpty()) {
+                // Route to appropriate export format handler
                 if ("CSV".equals(format)) {
                     ExportUtil.exportToCSV(data, fileName, headers, fields);
                 } else {
@@ -252,36 +343,14 @@ public class PoliceExportController {
         }
     }
 
-    private void applyVisualEffects() {
-        DropShadow dropShadow = new DropShadow();
-        dropShadow.setRadius(5.0);
-        dropShadow.setOffsetX(2.0);
-        dropShadow.setOffsetY(2.0);
-        dropShadow.setColor(Color.rgb(0, 0, 0, 0.3));
+    // ============================================
+    // UI PROGRESS METHODS
+    // ============================================
 
-        exportButton.setEffect(dropShadow);
-        previewButton.setEffect(dropShadow);
-        clearButton.setEffect(dropShadow);
-        backButton.setEffect(dropShadow);
-        if (fadeButton != null) fadeButton.setEffect(dropShadow);
-    }
-
-    private void showFadeAnimation() {
-        if (fadeButton != null) {
-            FadeTransition fadeTransition = new FadeTransition(Duration.seconds(1.5), fadeButton);
-            fadeTransition.setFromValue(1.0);
-            fadeTransition.setToValue(0.2);
-            fadeTransition.setCycleCount(4);
-            fadeTransition.setAutoReverse(true);
-            fadeTransition.play();
-            statusLabel.setText("Animation played!");
-
-            PauseTransition reset = new PauseTransition(Duration.seconds(2));
-            reset.setOnFinished(e -> statusLabel.setText("Ready"));
-            reset.play();
-        }
-    }
-
+    /**
+     * Shows/hides progress indicators
+     * @param show true to show, false to hide
+     */
     private void showProgress(boolean show) {
         if (loadProgress != null) loadProgress.setVisible(show);
         if (operationProgress != null) {
@@ -290,6 +359,9 @@ public class PoliceExportController {
         }
     }
 
+    /**
+     * Hides progress indicators after a short delay
+     */
     private void hideProgress() {
         PauseTransition delay = new PauseTransition(Duration.seconds(1));
         delay.setOnFinished(event -> {

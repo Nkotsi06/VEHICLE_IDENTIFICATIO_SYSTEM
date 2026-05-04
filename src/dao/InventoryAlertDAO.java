@@ -1,83 +1,76 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.InventoryAlert;
 
+/**
+ * InventoryAlertDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class InventoryAlertDAO extends BaseDAO<InventoryAlert> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public InventoryAlertDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public InventoryAlert findById(int id) throws SQLException {
-        String sql = "SELECT ia.*, pi.part_name FROM inventory_alerts ia " +
-                "LEFT JOIN parts_inventory pi ON ia.part_inventory_id = pi.id " +
-                "WHERE ia.id = ?";
-        return executeQuerySingle(sql, id);
+        List<InventoryAlert> results = viewLoader.loadViewWithCondition("vw_inventory_alerts", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<InventoryAlert> findAll() throws SQLException {
-        String sql = "SELECT ia.*, pi.part_name FROM inventory_alerts ia " +
-                "LEFT JOIN parts_inventory pi ON ia.part_inventory_id = pi.id " +
-                "ORDER BY ia.created_at DESC";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_inventory_alerts");
     }
 
     public List<InventoryAlert> findByPartInventoryId(int partInventoryId) throws SQLException {
-        String sql = "SELECT ia.*, pi.part_name FROM inventory_alerts ia " +
-                "LEFT JOIN parts_inventory pi ON ia.part_inventory_id = pi.id " +
-                "WHERE ia.part_inventory_id = ? ORDER BY ia.created_at DESC";
-        return executeQuery(sql, partInventoryId);
+        return viewLoader.loadViewWithCondition("vw_inventory_alerts", "part_inventory_id = ? ORDER BY created_at DESC", partInventoryId);
     }
 
     public List<InventoryAlert> findByWorkshopId(int workshopId) throws SQLException {
-        String sql = "SELECT ia.*, pi.part_name FROM inventory_alerts ia " +
-                "JOIN parts_inventory pi ON ia.part_inventory_id = pi.id " +
-                "WHERE pi.workshop_id = ? AND ia.is_resolved = false " +
-                "ORDER BY ia.created_at DESC";
-        return executeQuery(sql, workshopId);
+        return viewLoader.loadViewWithCondition("vw_inventory_alerts", "workshop_id = ? AND is_resolved = false ORDER BY created_at DESC", workshopId);
     }
 
     public List<InventoryAlert> findUnresolvedAlerts() throws SQLException {
-        String sql = "SELECT ia.*, pi.part_name FROM inventory_alerts ia " +
-                "LEFT JOIN parts_inventory pi ON ia.part_inventory_id = pi.id " +
-                "WHERE ia.is_resolved = false ORDER BY ia.created_at";
-        return executeQuery(sql);
+        return viewLoader.loadViewWithCondition("vw_inventory_alerts", "is_resolved = false ORDER BY created_at");
     }
 
     public List<InventoryAlert> findByAlertType(String alertType) throws SQLException {
-        String sql = "SELECT ia.*, pi.part_name FROM inventory_alerts ia " +
-                "LEFT JOIN parts_inventory pi ON ia.part_inventory_id = pi.id " +
-                "WHERE ia.alert_type = ? AND ia.is_resolved = false ORDER BY ia.created_at";
-        return executeQuery(sql, alertType);
+        return viewLoader.loadViewWithCondition("vw_inventory_alerts", "alert_type = ? AND is_resolved = false ORDER BY created_at", alertType);
     }
 
     public List<InventoryAlert> findResolvedAlerts() throws SQLException {
-        String sql = "SELECT ia.*, pi.part_name FROM inventory_alerts ia " +
-                "LEFT JOIN parts_inventory pi ON ia.part_inventory_id = pi.id " +
-                "WHERE ia.is_resolved = true ORDER BY ia.resolved_at DESC";
-        return executeQuery(sql);
+        return viewLoader.loadViewWithCondition("vw_inventory_alerts", "is_resolved = true ORDER BY resolved_at DESC");
     }
 
     @Override
     public boolean insert(InventoryAlert entity) throws SQLException {
-        String sql = "INSERT INTO inventory_alerts (part_inventory_id, alert_type, message) VALUES (?, ?, ?)";
-        int result = executeUpdate(sql,
+        Integer alertId = procedureCaller.executeInsertInventoryAlert(
                 entity.getPartInventoryId(),
                 entity.getAlertType(),
                 entity.getMessage()
         );
-        return result > 0;
+        if (alertId != null && alertId > 0) {
+            entity.setId(alertId);
+            return true;
+        }
+        return false;
     }
 
     public int insertAndGetId(InventoryAlert entity) throws SQLException {
-        String sql = "INSERT INTO inventory_alerts (part_inventory_id, alert_type, message) VALUES (?, ?, ?)";
-        return executeUpdateWithGeneratedKeys(sql,
+        return procedureCaller.executeInsertInventoryAlert(
                 entity.getPartInventoryId(),
                 entity.getAlertType(),
                 entity.getMessage()
@@ -85,77 +78,38 @@ public class InventoryAlertDAO extends BaseDAO<InventoryAlert> {
     }
 
     public boolean resolveAlert(int alertId) throws SQLException {
-        String sql = "UPDATE inventory_alerts SET is_resolved = true, resolved_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
-        int result = executeUpdate(sql, alertId);
-        return result > 0;
+        return procedureCaller.executeResolveInventoryAlert(alertId);
     }
 
     public boolean resolveAlertByPartId(int partInventoryId) throws SQLException {
-        String sql = "UPDATE inventory_alerts SET is_resolved = true, resolved_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE part_inventory_id = ? AND is_resolved = false";
-        int result = executeUpdate(sql, partInventoryId);
-        return result > 0;
+        return procedureCaller.executeResolveInventoryAlertsByPart(partInventoryId);
     }
 
     @Override
     public boolean update(InventoryAlert entity) throws SQLException {
-        String sql = "UPDATE inventory_alerts SET is_resolved = ?, resolved_at = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
-        int result = executeUpdate(sql, entity.isResolved(), entity.getResolvedAt(), entity.getId());
-        return result > 0;
+        if (entity.isResolved()) {
+            return resolveAlert(entity.getId());
+        }
+        return false;
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM inventory_alerts WHERE id = ?";
-        int result = executeUpdate(sql, id);
-        return result > 0;
+        return procedureCaller.executeDeleteInventoryAlert(id);
     }
 
     public boolean deleteResolvedAlerts() throws SQLException {
-        String sql = "DELETE FROM inventory_alerts WHERE is_resolved = true";
-        int result = executeUpdate(sql);
-        return result > 0;
+        return procedureCaller.executeDeleteResolvedInventoryAlerts();
     }
 
     public int countUnresolvedAlerts() throws SQLException {
-        String sql = "SELECT COUNT(*) FROM inventory_alerts WHERE is_resolved = false";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.countViewRowsWithCondition("vw_inventory_alerts", "is_resolved = false");
     }
 
     public int countUnresolvedAlertsByWorkshop(int workshopId) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM inventory_alerts ia " +
-                "JOIN parts_inventory pi ON ia.part_inventory_id = pi.id " +
-                "WHERE pi.workshop_id = ? AND ia.is_resolved = false";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, workshopId);
-            rs = rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.countViewRowsWithCondition("vw_inventory_alerts", "workshop_id = ? AND is_resolved = false", workshopId);
     }
 
-    // FIXED: Changed from private to protected with @Override
     @Override
     protected InventoryAlert mapRow(ResultSet rs) throws SQLException {
         InventoryAlert alert = new InventoryAlert();

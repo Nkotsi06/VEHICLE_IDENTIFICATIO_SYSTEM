@@ -11,10 +11,13 @@ import javafx.scene.control.Label;
 import utils.AlertUtil;
 import utils.SceneManager;
 import utils.SessionManager;
+import utils.ValidationUtil;
 import dao.CustomerComplaintDAO;
 import dao.WorkshopDAO;
 import models.CustomerComplaint;
 import models.Workshop;
+
+import java.util.List;
 
 public class CustomerComplaintController {
 
@@ -69,7 +72,7 @@ public class CustomerComplaintController {
 
     private void loadWorkshops() {
         try {
-            java.util.List<Workshop> workshops = workshopDAO.findApprovedWorkshops();
+            List<Workshop> workshops = workshopDAO.findApprovedWorkshops();
             workshopComboBox.getItems().setAll(workshops);
         } catch (Exception e) {
             e.printStackTrace();
@@ -78,7 +81,7 @@ public class CustomerComplaintController {
 
     private void loadComplaints() {
         try {
-            java.util.List<CustomerComplaint> complaints;
+            List<CustomerComplaint> complaints;
             if (SessionManager.getInstance().isAdmin() || SessionManager.getInstance().isWorkshop()) {
                 complaints = complaintDAO.findAll();
             } else {
@@ -141,7 +144,7 @@ public class CustomerComplaintController {
             return;
         }
 
-        if (!utils.ValidationUtil.isNotEmpty(complaintTextArea.getText())) {
+        if (!ValidationUtil.isNotEmpty(complaintTextArea.getText())) {
             AlertUtil.showWarning("Validation Error", "Please enter your complaint.");
             complaintTextArea.requestFocus();
             return;

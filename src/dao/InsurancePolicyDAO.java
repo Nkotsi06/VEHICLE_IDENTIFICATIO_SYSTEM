@@ -1,201 +1,123 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.InsurancePolicy;
 
+/**
+ * InsurancePolicyDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class InsurancePolicyDAO extends BaseDAO<InsurancePolicy> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public InsurancePolicyDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public InsurancePolicy findById(int id) throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_policies WHERE id = ?";
-        return executeQuerySingle(sql, id);
+        List<InsurancePolicy> results = viewLoader.loadViewWithCondition("vw_insurance_policies", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     public InsurancePolicy findByPolicyNumber(String policyNumber) throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_policies WHERE policy_number = ?";
-        return executeQuerySingle(sql, policyNumber);
+        List<InsurancePolicy> results = viewLoader.loadViewWithCondition("vw_insurance_policies", "policy_number = ?", policyNumber);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     public List<InsurancePolicy> searchByPolicyNumber(String keyword) throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_policies WHERE policy_number ILIKE ? ORDER BY policy_number";
-        String searchPattern = "%" + keyword + "%";
-        return executeQuery(sql, searchPattern);
+        String pattern = "%" + keyword + "%";
+        return viewLoader.loadViewWithCondition("vw_insurance_policies", "policy_number ILIKE ? ORDER BY policy_number", pattern);
     }
 
     public List<InsurancePolicy> searchByRegistrationNumber(String keyword) throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_policies WHERE registration_number ILIKE ? ORDER BY registration_number";
-        String searchPattern = "%" + keyword + "%";
-        return executeQuery(sql, searchPattern);
+        String pattern = "%" + keyword + "%";
+        return viewLoader.loadViewWithCondition("vw_insurance_policies", "registration_number ILIKE ? ORDER BY registration_number", pattern);
     }
 
     public List<InsurancePolicy> searchByProviderName(String keyword) throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_policies WHERE provider_name ILIKE ? ORDER BY provider_name";
-        String searchPattern = "%" + keyword + "%";
-        return executeQuery(sql, searchPattern);
+        String pattern = "%" + keyword + "%";
+        return viewLoader.loadViewWithCondition("vw_insurance_policies", "provider_name ILIKE ? ORDER BY provider_name", pattern);
     }
 
     public List<InsurancePolicy> searchInsurance(String keyword) throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_policies WHERE " +
-                "policy_number ILIKE ? OR " +
-                "registration_number ILIKE ? OR " +
-                "provider_name ILIKE ? OR " +
-                "status ILIKE ? " +
-                "ORDER BY policy_number";
-        String searchPattern = "%" + keyword + "%";
-        return executeQuery(sql, searchPattern, searchPattern, searchPattern, searchPattern);
+        String pattern = "%" + keyword + "%";
+        return viewLoader.loadViewWithCondition("vw_insurance_policies",
+                "policy_number ILIKE ? OR registration_number ILIKE ? OR provider_name ILIKE ? OR status ILIKE ? ORDER BY policy_number",
+                pattern, pattern, pattern, pattern);
     }
 
     @Override
     public List<InsurancePolicy> findAll() throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_policies ORDER BY start_date DESC";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_insurance_policies");
     }
 
     public List<InsurancePolicy> findByVehicleId(int vehicleId) throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_policies WHERE vehicle_id = ? ORDER BY start_date DESC";
-        return executeQuery(sql, vehicleId);
+        return viewLoader.loadViewWithCondition("vw_insurance_policies", "vehicle_id = ? ORDER BY start_date DESC", vehicleId);
     }
 
     public List<InsurancePolicy> findActivePolicies() throws SQLException {
-        String sql = "SELECT * FROM vw_active_insurance ORDER BY end_date";
-        return executeQuery(sql);
+        return viewLoader.loadViewWithCondition("vw_insurance_policies", "status = 'ACTIVE' AND end_date >= CURRENT_DATE ORDER BY end_date");
     }
 
     public List<InsurancePolicy> findByProviderId(int providerId) throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_policies WHERE provider_id = ? ORDER BY start_date DESC";
-        return executeQuery(sql, providerId);
+        return viewLoader.loadViewWithCondition("vw_insurance_policies", "provider_id = ? ORDER BY start_date DESC", providerId);
     }
 
     public List<InsurancePolicy> findByCustomerId(int customerId) throws SQLException {
-        String sql = "SELECT ip.* FROM vw_insurance_policies ip " +
-                "JOIN vehicles v ON ip.vehicle_id = v.id " +
-                "WHERE v.owner_id = ? ORDER BY ip.start_date DESC";
-        return executeQuery(sql, customerId);
+        return viewLoader.loadViewWithCondition("vw_insurance_policies", "owner_id = ? ORDER BY start_date DESC", customerId);
     }
 
     public List<InsurancePolicy> findExpiringPolicies(int daysThreshold) throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_policies WHERE status = 'ACTIVE' AND end_date <= CURRENT_DATE + interval '" + daysThreshold + " days' ORDER BY end_date";
-        return executeQuery(sql);
+        return viewLoader.loadViewWithCondition("vw_insurance_policies",
+                "status = 'ACTIVE' AND end_date <= CURRENT_DATE + ? ORDER BY end_date", daysThreshold);
     }
 
     public List<InsurancePolicy> findExpiredPolicies() throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_policies WHERE end_date < CURRENT_DATE AND status = 'ACTIVE'";
-        return executeQuery(sql);
+        return viewLoader.loadViewWithCondition("vw_insurance_policies", "end_date < CURRENT_DATE AND status = 'ACTIVE'");
     }
 
     public int countExpiredByCustomerId(int customerId) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM insurance_policies ip " +
-                "JOIN vehicles v ON ip.vehicle_id = v.id " +
-                "WHERE v.owner_id = ? AND (ip.status = 'EXPIRED' OR ip.end_date < CURRENT_DATE)";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, customerId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.countViewRowsWithCondition("vw_insurance_policies", "owner_id = ? AND (status = 'EXPIRED' OR end_date < CURRENT_DATE)", customerId);
     }
 
     public int countByProviderId(int providerId) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM insurance_policies WHERE provider_id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, providerId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.countViewRowsWithCondition("vw_insurance_policies", "provider_id = ?", providerId);
     }
 
     public int countActiveByProviderId(int providerId) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM insurance_policies WHERE provider_id = ? AND status = 'ACTIVE' AND end_date >= CURRENT_DATE";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, providerId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.countViewRowsWithCondition("vw_insurance_policies", "provider_id = ? AND status = 'ACTIVE' AND end_date >= CURRENT_DATE", providerId);
     }
 
     public double getTotalPremiumByProvider(int providerId) throws SQLException {
-        String sql = "SELECT COALESCE(SUM(premium), 0) FROM insurance_policies WHERE provider_id = ? AND status = 'ACTIVE'";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, providerId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getDouble(1);
-            }
-            return 0.0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.getSumPremiumByProvider(providerId);
     }
 
     public int countActivePolicies() throws SQLException {
-        String sql = "SELECT COUNT(*) FROM insurance_policies WHERE status = 'ACTIVE' AND end_date >= CURRENT_DATE";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.countViewRowsWithCondition("vw_insurance_policies", "status = 'ACTIVE' AND end_date >= CURRENT_DATE");
     }
 
     @Override
     public boolean insert(InsurancePolicy entity) throws SQLException {
-        Integer policyId = executeProcedureWithInOutParameter("sp_add_insurance_policy",
+        Integer policyId = procedureCaller.executeAddInsurancePolicy(
                 entity.getVehicleId(),
                 entity.getProviderId(),
                 entity.getPolicyNumber(),
                 entity.getStartDate(),
                 entity.getEndDate(),
                 entity.getPremium(),
-                entity.getCoverageAmount(),
-                entity.getStatus()
+                entity.getCoverageAmount()
         );
         if (policyId != null && policyId > 0) {
             entity.setId(policyId);
@@ -204,9 +126,21 @@ public class InsurancePolicyDAO extends BaseDAO<InsurancePolicy> {
         return false;
     }
 
+    public int insertAndGetId(InsurancePolicy entity) throws SQLException {
+        return procedureCaller.executeAddInsurancePolicy(
+                entity.getVehicleId(),
+                entity.getProviderId(),
+                entity.getPolicyNumber(),
+                entity.getStartDate(),
+                entity.getEndDate(),
+                entity.getPremium(),
+                entity.getCoverageAmount()
+        );
+    }
+
     @Override
     public boolean update(InsurancePolicy entity) throws SQLException {
-        return executeProcedure("sp_update_insurance_policy",
+        return procedureCaller.executeUpdateInsurancePolicy(
                 entity.getId(),
                 entity.getVehicleId(),
                 entity.getProviderId(),
@@ -221,7 +155,7 @@ public class InsurancePolicyDAO extends BaseDAO<InsurancePolicy> {
 
     @Override
     public boolean delete(int id) throws SQLException {
-        return executeProcedure("sp_delete_insurance_policy", id);
+        return procedureCaller.executeDeleteInsurancePolicy(id);
     }
 
     @Override

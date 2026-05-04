@@ -9,7 +9,15 @@ import utils.SceneManager;
 import utils.SessionManager;
 import utils.ValidationUtil;
 
+/**
+ * Controller for System Settings
+ * Manages general, database, security, and notification settings
+ */
 public class SettingsController {
+
+    // ============================================
+    // FXML UI COMPONENTS
+    // ============================================
 
     @FXML private TabPane settingsTabPane;
 
@@ -56,6 +64,14 @@ public class SettingsController {
     @FXML private ProgressIndicator loadProgress;
     @FXML private ProgressBar operationProgress;
 
+    // ============================================
+    // INITIALIZATION METHODS
+    // ============================================
+
+    /**
+     * Initializes the settings controller
+     * Sets up combo boxes and loads current settings
+     */
     @FXML
     public void initialize() {
         // Add items to combo boxes programmatically (not in FXML)
@@ -70,8 +86,12 @@ public class SettingsController {
 
         loadCurrentSettings();
         setupButtonHandlers();
+        statusLabel.setText("Ready");
     }
 
+    /**
+     * Loads current settings from preferences or database
+     */
     private void loadCurrentSettings() {
         notificationsCheckBox.setSelected(true);
         emailAlertsCheckBox.setSelected(false);
@@ -96,6 +116,10 @@ public class SettingsController {
         smtpPasswordField.setText("");
     }
 
+    /**
+     * Sets up button click handlers
+     * FIXED: Alerts now shown after animation completes using Platform.runLater
+     */
     private void setupButtonHandlers() {
         saveGeneralButton.setOnAction(event -> handleSaveGeneral());
         resetGeneralButton.setOnAction(event -> handleResetGeneral());
@@ -107,6 +131,14 @@ public class SettingsController {
         backButton.setOnAction(event -> handleBack());
     }
 
+    // ============================================
+    // GENERAL SETTINGS METHODS
+    // ============================================
+
+    /**
+     * Handles saving general settings
+     * FIXED: Alert moved to Platform.runLater after animation completes
+     */
     private void handleSaveGeneral() {
         String theme = themeComboBox.getValue();
         String language = languageComboBox.getValue();
@@ -120,11 +152,17 @@ public class SettingsController {
         PauseTransition pause = new PauseTransition(Duration.seconds(0.5));
         pause.setOnFinished(e -> {
             statusLabel.setText("General settings saved.");
-            AlertUtil.showSuccess("Settings Saved", "General settings have been updated.");
+            // Use Platform.runLater to show alert after animation completes
+            javafx.application.Platform.runLater(() ->
+                    AlertUtil.showSuccess("Settings Saved", "General settings have been updated.")
+            );
         });
         pause.play();
     }
 
+    /**
+     * Handles resetting general settings to default
+     */
     private void handleResetGeneral() {
         themeComboBox.setValue("Light");
         languageComboBox.setValue("English");
@@ -133,9 +171,20 @@ public class SettingsController {
         emailAlertsCheckBox.setSelected(false);
         autoSaveCheckBox.setSelected(true);
         statusLabel.setText("General settings reset to default.");
-        AlertUtil.showInfo("Settings Reset", "General settings have been reset to default.");
+        // Use Platform.runLater for alert
+        javafx.application.Platform.runLater(() ->
+                AlertUtil.showInfo("Settings Reset", "General settings have been reset to default.")
+        );
     }
 
+    // ============================================
+    // DATABASE SETTINGS METHODS
+    // ============================================
+
+    /**
+     * Handles testing database connection
+     * FIXED: Alert moved to Platform.runLater after animation completes
+     */
     private void handleTestConnection() {
         String host = dbHostField.getText().trim();
         String port = dbPortField.getText().trim();
@@ -157,11 +206,18 @@ public class SettingsController {
             dbStatusLabel.setText("CONNECTION SUCCESSFUL");
             dbStatusLabel.setStyle("-fx-text-fill: #27ae60; -fx-font-weight: bold;");
             statusLabel.setText("Database connection successful.");
-            AlertUtil.showSuccess("Connection Successful", "Successfully connected to the database.");
+            // Use Platform.runLater to show alert after animation completes
+            javafx.application.Platform.runLater(() ->
+                    AlertUtil.showSuccess("Connection Successful", "Successfully connected to the database.")
+            );
         });
         pause.play();
     }
 
+    /**
+     * Handles saving database settings
+     * FIXED: Alert moved to Platform.runLater after animation completes
+     */
     private void handleSaveDatabase() {
         if (!ValidationUtil.isNotEmpty(dbHostField.getText())) {
             AlertUtil.showWarning("Validation Error", "Database host is required.");
@@ -173,11 +229,22 @@ public class SettingsController {
         PauseTransition pause = new PauseTransition(Duration.seconds(0.5));
         pause.setOnFinished(e -> {
             statusLabel.setText("Database settings saved. Restart required for changes to take effect.");
-            AlertUtil.showInfo("Settings Saved", "Database settings have been saved. Please restart the application for changes to take effect.");
+            // Use Platform.runLater to show alert after animation completes
+            javafx.application.Platform.runLater(() ->
+                    AlertUtil.showInfo("Settings Saved", "Database settings have been saved. Please restart the application for changes to take effect.")
+            );
         });
         pause.play();
     }
 
+    // ============================================
+    // SECURITY SETTINGS METHODS
+    // ============================================
+
+    /**
+     * Handles saving security settings
+     * FIXED: Alert moved to Platform.runLater after animation completes
+     */
     private void handleSaveSecurity() {
         boolean twoFactor = twoFactorCheckBox.isSelected();
         boolean sessionTimeout = sessionTimeoutCheckBox.isSelected();
@@ -195,11 +262,22 @@ public class SettingsController {
         PauseTransition pause = new PauseTransition(Duration.seconds(0.5));
         pause.setOnFinished(e -> {
             statusLabel.setText("Security settings saved.");
-            AlertUtil.showSuccess("Settings Saved", "Security settings have been updated.");
+            // Use Platform.runLater to show alert after animation completes
+            javafx.application.Platform.runLater(() ->
+                    AlertUtil.showSuccess("Settings Saved", "Security settings have been updated.")
+            );
         });
         pause.play();
     }
 
+    // ============================================
+    // NOTIFICATION SETTINGS METHODS
+    // ============================================
+
+    /**
+     * Handles saving notification settings
+     * FIXED: Alert moved to Platform.runLater after animation completes
+     */
     private void handleSaveNotification() {
         boolean emailEnabled = emailNotificationsCheckBox.isSelected();
 
@@ -225,11 +303,18 @@ public class SettingsController {
         PauseTransition pause = new PauseTransition(Duration.seconds(0.5));
         pause.setOnFinished(e -> {
             statusLabel.setText("Notification settings saved.");
-            AlertUtil.showSuccess("Settings Saved", "Notification settings have been updated.");
+            // Use Platform.runLater to show alert after animation completes
+            javafx.application.Platform.runLater(() ->
+                    AlertUtil.showSuccess("Settings Saved", "Notification settings have been updated.")
+            );
         });
         pause.play();
     }
 
+    /**
+     * Handles sending test email
+     * FIXED: Alert moved to Platform.runLater after animation completes
+     */
     private void handleTestEmail() {
         String recipient = SessionManager.getInstance().getEmail();
 
@@ -243,11 +328,21 @@ public class SettingsController {
         PauseTransition pause = new PauseTransition(Duration.seconds(2));
         pause.setOnFinished(e -> {
             statusLabel.setText("Test email sent to " + recipient);
-            AlertUtil.showSuccess("Email Test", "Test email sent successfully to " + recipient);
+            // Use Platform.runLater to show alert after animation completes
+            javafx.application.Platform.runLater(() ->
+                    AlertUtil.showSuccess("Email Test", "Test email sent successfully to " + recipient)
+            );
         });
         pause.play();
     }
 
+    // ============================================
+    // NAVIGATION METHOD
+    // ============================================
+
+    /**
+     * Handles back button navigation based on user role
+     */
     private void handleBack() {
         String role = SessionManager.getInstance().getUserRole();
         if ("ADMIN".equals(role)) {

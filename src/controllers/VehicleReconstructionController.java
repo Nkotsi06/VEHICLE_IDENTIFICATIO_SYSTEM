@@ -9,11 +9,19 @@ import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import utils.AlertUtil;
 import utils.SceneManager;
-import utils.VehicleTrackerReconstructor;  // ADDED: Import
+import utils.VehicleTrackerReconstructor;
 import dao.VehicleDAO;
 import models.Vehicle;
 
+/**
+ * Controller for Vehicle Movement Reconstruction
+ * Reconstructs vehicle movement patterns and detects suspicious activity
+ */
 public class VehicleReconstructionController {
+
+    // ============================================
+    // FXML UI COMPONENTS
+    // ============================================
 
     @FXML private ComboBox<Vehicle> vehicleComboBox;
     @FXML private DatePicker startDatePicker;
@@ -34,9 +42,20 @@ public class VehicleReconstructionController {
     @FXML private ProgressIndicator loadProgress;
     @FXML private ProgressBar operationProgress;
 
+    // ============================================
+    // DAO INSTANCES & DATA MODELS
+    // ============================================
+
     private VehicleDAO vehicleDAO;
     private VehicleTrackerReconstructor reconstructor;
 
+    // ============================================
+    // INITIALIZATION METHODS
+    // ============================================
+
+    /**
+     * Initializes the controller - sets up DAOs, loads vehicles, configures UI
+     */
     @FXML
     public void initialize() {
         vehicleDAO = new VehicleDAO();
@@ -49,6 +68,9 @@ public class VehicleReconstructionController {
         statusLabel.setText("Ready");
     }
 
+    /**
+     * Applies drop shadow visual effects to buttons
+     */
     private void applyVisualEffects() {
         DropShadow dropShadow = new DropShadow();
         dropShadow.setRadius(5.0);
@@ -62,6 +84,9 @@ public class VehicleReconstructionController {
         if (fadeButton != null) fadeButton.setEffect(dropShadow);
     }
 
+    /**
+     * Loads all vehicles into the combo box
+     */
     private void loadVehicles() {
         try {
             java.util.List<Vehicle> vehicles = vehicleDAO.findAll();
@@ -72,11 +97,17 @@ public class VehicleReconstructionController {
         }
     }
 
+    /**
+     * Sets up default date range (last 7 days)
+     */
     private void setupDatePickers() {
         startDatePicker.setValue(java.time.LocalDate.now().minusDays(7));
         endDatePicker.setValue(java.time.LocalDate.now());
     }
 
+    /**
+     * Sets up button click handlers
+     */
     private void setupButtonHandlers() {
         reconstructButton.setOnAction(event -> handleReconstruct());
         exportButton.setOnAction(event -> handleExport());
@@ -84,6 +115,9 @@ public class VehicleReconstructionController {
         if (fadeButton != null) fadeButton.setOnAction(event -> showFadeAnimation());
     }
 
+    /**
+     * Plays fade animation on the animate button
+     */
     private void showFadeAnimation() {
         if (fadeButton != null) {
             FadeTransition fadeTransition = new FadeTransition(Duration.seconds(1.5), fadeButton);
@@ -99,9 +133,17 @@ public class VehicleReconstructionController {
         }
     }
 
+    // ============================================
+    // BUSINESS LOGIC METHODS
+    // ============================================
+
+    /**
+     * Handles vehicle movement reconstruction
+     */
     private void handleReconstruct() {
         Vehicle selectedVehicle = vehicleComboBox.getSelectionModel().getSelectedItem();
 
+        // Input validation
         if (selectedVehicle == null) {
             AlertUtil.showWarning("Validation Error", "Please select a vehicle.");
             return;
@@ -131,6 +173,7 @@ public class VehicleReconstructionController {
             reconstructionDetailsArea.setText("Reconstructing vehicle movement for " +
                     selectedVehicle.getRegistrationNumber() + "...\n");
 
+            // Generate reconstruction report
             VehicleTrackerReconstructor.ReconstructionReport report =
                     reconstructor.generateReconstructionReport(
                             selectedVehicle.getId(),
@@ -152,6 +195,10 @@ public class VehicleReconstructionController {
         }
     }
 
+    /**
+     * Displays reconstruction results in the UI
+     * @param report The reconstruction report containing all metrics
+     */
     private void displayResults(VehicleTrackerReconstructor.ReconstructionReport report) {
         totalDistanceLabel.setText(String.format("%.2f km", report.totalDistance));
         averageSpeedLabel.setText(String.format("%.2f km/h", report.averageSpeed));
@@ -162,6 +209,7 @@ public class VehicleReconstructionController {
         String levelColor = report.getSuspiciousColor();
         suspiciousLevelLabel.setStyle("-fx-text-fill: " + levelColor + "; -fx-font-weight: bold;");
 
+        // Build detailed report
         StringBuilder details = new StringBuilder();
         details.append("=== VEHICLE MOVEMENT RECONSTRUCTION REPORT ===\n\n");
         details.append("Vehicle ID: ").append(report.vehicleId).append("\n");
@@ -204,6 +252,9 @@ public class VehicleReconstructionController {
         exportButton.setDisable(false);
     }
 
+    /**
+     * Handles exporting the reconstruction report to a file
+     */
     private void handleExport() {
         String content = reconstructionDetailsArea.getText();
         if (content == null || content.isEmpty()) {
@@ -221,6 +272,14 @@ public class VehicleReconstructionController {
         }
     }
 
+    // ============================================
+    // UI PROGRESS METHODS
+    // ============================================
+
+    /**
+     * Shows/hides operation progress bar
+     * @param show true to show, false to hide
+     */
     private void showOperationProgress(boolean show) {
         if (operationProgress != null) {
             operationProgress.setVisible(show);
@@ -228,10 +287,17 @@ public class VehicleReconstructionController {
         }
     }
 
+    /**
+     * Updates progress bar value
+     * @param progress value between 0 and 1
+     */
     private void updateProgress(double progress) {
         if (operationProgress != null) operationProgress.setProgress(progress);
     }
 
+    /**
+     * Hides progress indicators after a short delay
+     */
     private void hideProgressAfterDelay() {
         PauseTransition delay = new PauseTransition(Duration.seconds(1.5));
         delay.setOnFinished(event -> {

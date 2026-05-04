@@ -25,7 +25,7 @@ public class NoClaimBonusController {
     @FXML private TableColumn<NoClaimBonusRecord, Integer> yearColumn;
     @FXML private TableColumn<NoClaimBonusRecord, Integer> claimFreeYearsColumn;
     @FXML private TableColumn<NoClaimBonusRecord, String> bonusPercentageColumn;
-    @FXML private TableColumn<NoClaimBonusRecord, Number> savedAmountColumn;
+    @FXML private TableColumn<NoClaimBonusRecord, String> calculatedDateColumn;
 
     @FXML private ComboBox<InsurancePolicy> policyComboBox;
     @FXML private Label currentBonusLabel;
@@ -71,22 +71,13 @@ public class NoClaimBonusController {
         yearColumn.setCellValueFactory(cellData -> cellData.getValue().policyYearProperty().asObject());
         claimFreeYearsColumn.setCellValueFactory(cellData -> cellData.getValue().claimFreeYearsProperty().asObject());
         bonusPercentageColumn.setCellValueFactory(cellData -> cellData.getValue().bonusPercentageProperty());
-        savedAmountColumn.setCellValueFactory(cellData -> {
-            // Calculate saved amount based on a hypothetical premium
-            // Since NoClaimBonusRecord doesn't have savedAmount property, we calculate it
-            double bonusPercent = cellData.getValue().getBonusPercentage();
-            // You would need to get the actual premium from the associated policy
-            // For now, we'll use a placeholder calculation
-            double estimatedPremium = 5000.00;
-            double savedAmount = estimatedPremium * (bonusPercent / 100);
-            return new javafx.beans.property.SimpleDoubleProperty(savedAmount);
-        });
+        calculatedDateColumn.setCellValueFactory(cellData -> cellData.getValue().calculatedDateProperty().asString());
 
         policyColumn.setStyle("-fx-alignment: CENTER;");
         yearColumn.setStyle("-fx-alignment: CENTER;");
         claimFreeYearsColumn.setStyle("-fx-alignment: CENTER;");
         bonusPercentageColumn.setStyle("-fx-alignment: CENTER;");
-        savedAmountColumn.setStyle("-fx-alignment: CENTER-RIGHT;");
+        calculatedDateColumn.setStyle("-fx-alignment: CENTER;");
     }
 
     private void setupPagination() {
@@ -106,6 +97,7 @@ public class NoClaimBonusController {
         int end = Math.min(start + pageSize, fullData.size());
         if (start < fullData.size()) {
             bonusList.setAll(fullData.subList(start, end));
+            bonusTable.setItems(bonusList);
         }
     }
 
@@ -138,7 +130,6 @@ public class NoClaimBonusController {
         try {
             List<NoClaimBonusRecord> records = bonusDAO.findAll();
             fullData = records;
-            bonusTable.setItems(FXCollections.observableArrayList(fullData));
             int totalPages = (int) Math.ceil((double) records.size() / pageSize);
             if (bonusPagination != null) bonusPagination.setPageCount(Math.max(1, totalPages));
             updateTablePage();
@@ -206,7 +197,8 @@ public class NoClaimBonusController {
             updateProgress(0.5);
             bonusDAO.calculateBonus(selectedPolicy.getId());
 
-            Thread.sleep(500); // Small delay for DB operation
+            // Wait a moment for the calculation to complete
+            Thread.sleep(500);
 
             NoClaimBonusRecord record = bonusDAO.findByPolicyId(selectedPolicy.getId());
 

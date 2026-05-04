@@ -1,47 +1,96 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.VehicleStatusController">
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.VehicleStatusController"
+            stylesheets="@../css/application.css" styleClass="border-pane">
 
     <top>
-        <VBox>
-            <fx:include source="MenuBarComponent.fxml"/>
-        </VBox>
+        <fx:include source="MenuBarComponent.fxml"/>
     </top>
 
     <center>
-        <VBox spacing="20" style="-fx-padding: 20;">
-            <Label text="Vehicle Status Management" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
+            <VBox spacing="20" alignment="TOP_CENTER"
+                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
 
-            <TableView fx:id="vehiclesTable">
-                <columns>
-                    <TableColumn fx:id="registrationColumn" text="Registration" prefWidth="150"/>
-                    <TableColumn fx:id="makeColumn" text="Make" prefWidth="120"/>
-                    <TableColumn fx:id="modelColumn" text="Model" prefWidth="120"/>
-                    <TableColumn fx:id="currentStatusColumn" text="Current Status" prefWidth="150"/>
-                </columns>
-            </TableView>
+                <Label text="Vehicle Status Management" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
+                <Label text="Monitor and update vehicle status" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
 
-            <Separator/>
+                <Separator/>
 
-            <GridPane hgap="10" vgap="10" alignment="CENTER">
-                <Label text="Select Vehicle:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                <ComboBox fx:id="vehicleComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="300"/>
+                <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
 
-                <Label text="New Status:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                <ComboBox fx:id="statusComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="300"/>
-            </GridPane>
+                <!-- Vehicle List Table -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="1200" styleClass="profile-edit-card" alignment="CENTER">
+                        <TableView fx:id="vehiclesTable" prefHeight="350" minHeight="250" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
+                            <columns>
+                                <TableColumn fx:id="registrationColumn" text="Registration" minWidth="120" maxWidth="160"/>
+                                <TableColumn fx:id="makeColumn" text="Make" minWidth="100" maxWidth="130"/>
+                                <TableColumn fx:id="modelColumn" text="Model" minWidth="100" maxWidth="130"/>
+                                <TableColumn fx:id="currentStatusColumn" text="Current Status" minWidth="120" maxWidth="160"/>
+                            </columns>
+                            <placeholder>
+                                <Label text="No vehicles found" styleClass="status-text"/>
+                            </placeholder>
+                        </TableView>
 
-            <Label fx:id="vehicleInfoLabel" style="-fx-text-fill: #7f8c8d; -fx-font-size: 12px;"/>
+                        <HBox alignment="CENTER">
+                            <Pagination fx:id="statusPagination" pageCount="1" maxPageIndicatorCount="10"/>
+                        </HBox>
+                    </VBox>
+                </HBox>
 
-            <HBox spacing="10" alignment="CENTER">
-                <Button fx:id="updateStatusButton" text="Update Status" style="-fx-background-color: #2980b9; -fx-text-fill: white;"/>
-                <Button fx:id="refreshButton" text="Refresh"/>
-                <Button fx:id="backButton" text="Back"/>
-            </HBox>
-        </VBox>
+                <Separator/>
+
+                <!-- Update Status Form -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="800" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Update Vehicle Status" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+
+                        <GridPane hgap="15" vgap="12" alignment="CENTER">
+                            <columnConstraints>
+                                <ColumnConstraints halignment="RIGHT" minWidth="100"/>
+                                <ColumnConstraints minWidth="250"/>
+                            </columnConstraints>
+
+                            <Label text="Select Vehicle:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="vehicleComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="300"/>
+
+                            <Label text="New Status:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="statusComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="300"/>
+                        </GridPane>
+
+                        <Label fx:id="vehicleInfoLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
+
+                        <HBox alignment="CENTER">
+                            <Button fx:id="updateStatusButton" text="Update Status" styleClass="button-primary" prefWidth="120">
+                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                            </Button>
+                            <Button fx:id="refreshButton" text="Refresh" styleClass="button-info" prefWidth="100">
+                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                            </Button>
+                            <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100">
+                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                            </Button>
+                            <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-secondary" prefWidth="150">
+                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                            </Button>
+                        </HBox>
+                    </VBox>
+                </HBox>
+
+                <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+
+                <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
+
+            </VBox>
+        </ScrollPane>
     </center>
 
     <bottom>

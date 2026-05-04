@@ -1,195 +1,97 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.InsuranceDocument;
 
+/**
+ * InsuranceDocumentDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class InsuranceDocumentDAO extends BaseDAO<InsuranceDocument> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public InsuranceDocumentDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public InsuranceDocument findById(int id) throws SQLException {
-        String sql = "SELECT * FROM insurance_documents WHERE id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, id);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return mapRow(rs);
-            }
-            return null;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        List<InsuranceDocument> results = viewLoader.loadViewWithCondition("vw_insurance_documents", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<InsuranceDocument> findAll() throws SQLException {
-        String sql = "SELECT * FROM insurance_documents ORDER BY upload_date DESC";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<InsuranceDocument> documents = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                documents.add(mapRow(rs));
-            }
-            return documents;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.loadView("vw_insurance_documents");
     }
 
     public List<InsuranceDocument> findByInsuranceId(int insuranceId) throws SQLException {
-        String sql = "SELECT * FROM insurance_documents WHERE insurance_id = ? ORDER BY upload_date DESC";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<InsuranceDocument> documents = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, insuranceId);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                documents.add(mapRow(rs));
-            }
-            return documents;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.loadViewWithCondition("vw_insurance_documents", "insurance_id = ? ORDER BY upload_date DESC", insuranceId);
     }
 
     public List<InsuranceDocument> findByDocumentType(String documentType) throws SQLException {
-        String sql = "SELECT * FROM insurance_documents WHERE document_type = ? ORDER BY upload_date DESC";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<InsuranceDocument> documents = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, documentType);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                documents.add(mapRow(rs));
-            }
-            return documents;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.loadViewWithCondition("vw_insurance_documents", "document_type = ? ORDER BY upload_date DESC", documentType);
     }
 
     @Override
     public boolean insert(InsuranceDocument entity) throws SQLException {
-        String sql = "INSERT INTO insurance_documents (insurance_id, file_name, file_path, document_type, file_size) VALUES (?, ?, ?, ?, ?)";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, entity.getInsuranceId());
-            ps.setString(2, entity.getFileName());
-            ps.setString(3, entity.getFilePath());
-            ps.setString(4, entity.getDocumentType());
-            ps.setLong(5, entity.getFileSize());
-            int result = ps.executeUpdate();
-            return result > 0;
-        } finally {
-            closeResources(null, ps, conn);
+        Integer docId = procedureCaller.executeInsertInsuranceDocument(
+                entity.getInsuranceId(),
+                entity.getFileName(),
+                entity.getFilePath(),
+                entity.getDocumentType(),
+                entity.getFileSize()
+        );
+        if (docId != null && docId > 0) {
+            entity.setId(docId);
+            return true;
         }
+        return false;
     }
 
     public int insertAndGetId(InsuranceDocument entity) throws SQLException {
-        String sql = "INSERT INTO insurance_documents (insurance_id, file_name, file_path, document_type, file_size) VALUES (?, ?, ?, ?, ?)";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
-            ps.setInt(1, entity.getInsuranceId());
-            ps.setString(2, entity.getFileName());
-            ps.setString(3, entity.getFilePath());
-            ps.setString(4, entity.getDocumentType());
-            ps.setLong(5, entity.getFileSize());
-            int affectedRows = ps.executeUpdate();
-
-            if (affectedRows == 0) {
-                throw new SQLException("Creating document failed, no rows affected.");
-            }
-
-            rs = ps.getGeneratedKeys();
-            if (rs.next()) {
-                return rs.getInt(1);
-            } else {
-                throw new SQLException("Creating document failed, no ID obtained.");
-            }
-        } finally {
-            closeResources(rs, ps, conn);
+        Integer docId = procedureCaller.executeInsertInsuranceDocumentWithReturn(
+                entity.getInsuranceId(),
+                entity.getFileName(),
+                entity.getFilePath(),
+                entity.getDocumentType(),
+                entity.getFileSize()
+        );
+        if (docId != null && docId > 0) {
+            entity.setId(docId);
+            return docId;
         }
+        return -1;
     }
 
     @Override
     public boolean update(InsuranceDocument entity) throws SQLException {
-        String sql = "UPDATE insurance_documents SET file_name = ?, file_path = ?, document_type = ?, file_size = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, entity.getFileName());
-            ps.setString(2, entity.getFilePath());
-            ps.setString(3, entity.getDocumentType());
-            ps.setLong(4, entity.getFileSize());
-            ps.setInt(5, entity.getId());
-            int result = ps.executeUpdate();
-            return result > 0;
-        } finally {
-            closeResources(null, ps, conn);
-        }
+        return procedureCaller.executeUpdateInsuranceDocument(
+                entity.getId(),
+                entity.getFileName(),
+                entity.getFilePath(),
+                entity.getDocumentType(),
+                entity.getFileSize()
+        );
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM insurance_documents WHERE id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, id);
-            int result = ps.executeUpdate();
-            return result > 0;
-        } finally {
-            closeResources(null, ps, conn);
-        }
+        return procedureCaller.executeDeleteInsuranceDocument(id);
     }
 
     public boolean deleteByInsuranceId(int insuranceId) throws SQLException {
-        String sql = "DELETE FROM insurance_documents WHERE insurance_id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, insuranceId);
-            int result = ps.executeUpdate();
-            return result > 0;
-        } finally {
-            closeResources(null, ps, conn);
-        }
+        return procedureCaller.executeDeleteInsuranceDocumentsByInsurance(insuranceId);
     }
 
     @Override

@@ -5,111 +5,130 @@
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.PartInventoryController">
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.PartInventoryController"
+            stylesheets="@../css/application.css" styleClass="border-pane">
 
     <top>
-        <VBox>
-            <fx:include source="MenuBarComponent.fxml"/>
-        </VBox>
+        <fx:include source="MenuBarComponent.fxml"/>
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="true">
-            <SplitPane dividerPositions="0.55">
-                <VBox spacing="10" style="-fx-padding: 10;">
-                    <Label text="Parts Inventory" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
+            <VBox spacing="20" alignment="TOP_CENTER"
+                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
 
-                    <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="30"/>
+                <Label text="Parts Inventory" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
+                <Label text="Manage workshop parts inventory" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
 
-                    <TableView fx:id="inventoryTable" prefHeight="400">
-                        <columns>
-                            <TableColumn fx:id="partNameColumn" text="Part Name" prefWidth="180"/>
-                            <TableColumn fx:id="partNumberColumn" text="Part Number" prefWidth="150"/>
-                            <TableColumn fx:id="quantityColumn" text="Quantity" prefWidth="100"/>
-                            <TableColumn fx:id="reorderLevelColumn" text="Reorder Level" prefWidth="100"/>
-                            <TableColumn fx:id="unitPriceColumn" text="Unit Price (M)" prefWidth="100"/>
-                            <TableColumn fx:id="stockStatusColumn" text="Status" prefWidth="100"/>
-                        </columns>
-                        <columnResizePolicy>
-                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                        </columnResizePolicy>
-                        <placeholder>
-                            <Label text="No parts found" style="-fx-text-fill: #7f8c8d;"/>
-                        </placeholder>
-                    </TableView>
+                <Separator/>
 
-                    <Pagination fx:id="inventoryPagination" pageCount="1" maxPageIndicatorCount="5"/>
+                <HBox spacing="20" alignment="CENTER">
+                    <!-- Left Panel - Inventory List -->
+                    <VBox spacing="10" alignment="CENTER" HBox.hgrow="ALWAYS">
+                        <VBox styleClass="profile-edit-card" alignment="CENTER">
+                            <Label text="Parts Inventory" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                    <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+                            <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="30"/>
 
-                    <HBox spacing="10">
-                        <Button fx:id="refreshButton" text="Refresh" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                        <Button fx:id="viewAlertsButton" text="View Alerts" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                        <Button fx:id="fadeButton" text="Animate" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
-                            <effect>
-                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                            </effect>
-                        </Button>
-                    </HBox>
-                </VBox>
+                            <TableView fx:id="inventoryTable" prefHeight="400" minHeight="300" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
+                                <columns>
+                                    <TableColumn fx:id="partNameColumn" text="Part Name" minWidth="150" maxWidth="200"/>
+                                    <TableColumn fx:id="partNumberColumn" text="Part Number" minWidth="120" maxWidth="160"/>
+                                    <TableColumn fx:id="quantityColumn" text="Quantity" minWidth="80" maxWidth="110"/>
+                                    <TableColumn fx:id="reorderLevelColumn" text="Reorder Level" minWidth="80" maxWidth="110"/>
+                                    <TableColumn fx:id="unitPriceColumn" text="Unit Price (M)" minWidth="90" maxWidth="110"/>
+                                    <TableColumn fx:id="stockStatusColumn" text="Status" minWidth="80" maxWidth="110"/>
+                                </columns>
+                                <placeholder>
+                                    <Label text="No parts found" styleClass="status-text"/>
+                                </placeholder>
+                            </TableView>
 
-                <VBox spacing="15" style="-fx-padding: 10;">
-                    <Label text="Part Details" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                            <HBox alignment="CENTER">
+                                <Pagination fx:id="inventoryPagination" pageCount="1" maxPageIndicatorCount="5"/>
+                            </HBox>
 
-                    <GridPane hgap="10" vgap="10">
-                        <Label text="Part Name:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <TextField fx:id="partNameField" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250"/>
+                            <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
-                        <Label text="Part Number:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <TextField fx:id="partNumberField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                            <HBox alignment="CENTER">
+                                <Button fx:id="refreshButton" text="Refresh" styleClass="button-info" prefWidth="100"/>
+                                <Button fx:id="viewAlertsButton" text="View Alerts" styleClass="button-warning" prefWidth="110">
+                                    <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                                </Button>
+                                <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100">
+                                    <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                                </Button>
+                            </HBox>
+                        </VBox>
+                    </VBox>
 
-                        <Label text="Quantity:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <TextField fx:id="quantityField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                    <!-- Right Panel - Part Details -->
+                    <VBox spacing="15" alignment="CENTER" HBox.hgrow="ALWAYS">
+                        <VBox styleClass="profile-edit-card" alignment="CENTER">
+                            <Label text="Part Details" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                        <Label text="Reorder Level:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <TextField fx:id="reorderLevelField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                            <GridPane hgap="10" vgap="10" alignment="CENTER">
+                                <columnConstraints>
+                                    <ColumnConstraints halignment="RIGHT" minWidth="100"/>
+                                    <ColumnConstraints minWidth="250"/>
+                                </columnConstraints>
 
-                        <Label text="Unit Price (M):" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <TextField fx:id="unitPriceField" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                                <Label text="Part Name:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <TextField fx:id="partNameField" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250"/>
 
-                        <Label text="Supplier:" GridPane.rowIndex="5" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <TextField fx:id="supplierField" GridPane.rowIndex="5" GridPane.columnIndex="1" promptText="Enter supplier name"/>
-                    </GridPane>
+                                <Label text="Part Number:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <TextField fx:id="partNumberField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-                    <HBox spacing="10">
-                        <Button fx:id="addButton" text="Add Part" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
-                            <effect>
-                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                            </effect>
-                        </Button>
-                        <Button fx:id="updateButton" text="Update" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                        <Button fx:id="deleteButton" text="Delete" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                        <Button fx:id="clearButton" text="Clear" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                    </HBox>
+                                <Label text="Quantity:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <TextField fx:id="quantityField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
-                    <Separator/>
+                                <Label text="Reorder Level:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <TextField fx:id="reorderLevelField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
 
-                    <GridPane hgap="10" vgap="10">
-                        <Label text="Total Inventory Value:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <Label fx:id="totalValueLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-font-weight: bold; -fx-text-fill: #27ae60;"/>
+                                <Label text="Unit Price (M):" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <TextField fx:id="unitPriceField" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
 
-                        <Label text="Low Stock Items:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <Label fx:id="lowStockCountLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-text-fill: #f39c12;"/>
+                                <Label text="Supplier:" GridPane.rowIndex="5" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <TextField fx:id="supplierField" GridPane.rowIndex="5" GridPane.columnIndex="1" promptText="Enter supplier name"/>
+                            </GridPane>
 
-                        <Label text="Out of Stock Items:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <Label fx:id="outOfStockCountLabel" GridPane.rowIndex="2" GridPane.columnIndex="1" style="-fx-text-fill: #e74c3c;"/>
-                    </GridPane>
+                            <HBox alignment="CENTER">
+                                <Button fx:id="addButton" text="Add Part" styleClass="button-success" prefWidth="110">
+                                    <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                                </Button>
+                                <Button fx:id="updateButton" text="Update" styleClass="button-info" prefWidth="90"/>
+                                <Button fx:id="deleteButton" text="Delete" styleClass="button-danger" prefWidth="90"/>
+                                <Button fx:id="clearButton" text="Clear" styleClass="button-secondary" prefWidth="90"/>
+                            </HBox>
 
-                    <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
-                </VBox>
-            </SplitPane>
+                            <Separator/>
+
+                            <GridPane hgap="10" vgap="10" alignment="CENTER">
+                                <Label text="Total Inventory Value:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <Label fx:id="totalValueLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-font-weight: bold; -fx-text-fill: #27ae60;"/>
+
+                                <Label text="Low Stock Items:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <Label fx:id="lowStockCountLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-text-fill: #f39c12;"/>
+
+                                <Label text="Out of Stock Items:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <Label fx:id="outOfStockCountLabel" GridPane.rowIndex="2" GridPane.columnIndex="1" style="-fx-text-fill: #e74c3c;"/>
+                            </GridPane>
+
+                            <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
+                        </VBox>
+                    </VBox>
+                </HBox>
+
+                <HBox alignment="CENTER">
+                    <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-secondary" prefWidth="150"/>
+                </HBox>
+
+            </VBox>
         </ScrollPane>
     </center>
 
     <bottom>
-        <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
-            <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;"/>
-        </HBox>
         <fx:include source="FooterComponent.fxml"/>
     </bottom>
 </BorderPane>

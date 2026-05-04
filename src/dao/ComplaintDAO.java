@@ -1,269 +1,106 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.CustomerComplaint;
 
+/**
+ * ComplaintDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class ComplaintDAO extends BaseDAO<CustomerComplaint> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public ComplaintDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public CustomerComplaint findById(int id) throws SQLException {
-        String sql = "SELECT * FROM vw_customer_complaints WHERE id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, id);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return mapRow(rs);
-            }
-            return null;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        // Use view - NO direct SQL
+        List<CustomerComplaint> results = viewLoader.loadViewWithCondition("vw_customer_complaints", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<CustomerComplaint> findAll() throws SQLException {
-        String sql = "SELECT * FROM vw_customer_complaints ORDER BY complaint_date DESC";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<CustomerComplaint> complaints = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                complaints.add(mapRow(rs));
-            }
-            return complaints;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        // Use view - NO direct SQL
+        return viewLoader.loadView("vw_customer_complaints");
     }
 
     public List<CustomerComplaint> findByCustomerId(int customerId) throws SQLException {
-        String sql = "SELECT * FROM vw_customer_complaints WHERE customer_id = ? ORDER BY complaint_date DESC";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<CustomerComplaint> complaints = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, customerId);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                complaints.add(mapRow(rs));
-            }
-            return complaints;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        // Use view - NO direct SQL
+        return viewLoader.loadViewWithCondition("vw_customer_complaints", "customer_id = ? ORDER BY complaint_date DESC", customerId);
     }
 
     public List<CustomerComplaint> findByCustomerName(String customerName) throws SQLException {
-        String sql = "SELECT * FROM vw_customer_complaints WHERE customer_name ILIKE ? ORDER BY complaint_date DESC";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<CustomerComplaint> complaints = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, "%" + customerName + "%");
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                complaints.add(mapRow(rs));
-            }
-            return complaints;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        // Use view - NO direct SQL
+        return viewLoader.loadViewWithCondition("vw_customer_complaints", "customer_name ILIKE ? ORDER BY complaint_date DESC", "%" + customerName + "%");
     }
 
     public List<CustomerComplaint> findByWorkshopId(int workshopId) throws SQLException {
-        String sql = "SELECT * FROM vw_customer_complaints WHERE workshop_id = ? ORDER BY complaint_date DESC";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<CustomerComplaint> complaints = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, workshopId);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                complaints.add(mapRow(rs));
-            }
-            return complaints;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        // Use view - NO direct SQL
+        return viewLoader.loadViewWithCondition("vw_customer_complaints", "workshop_id = ? ORDER BY complaint_date DESC", workshopId);
     }
 
     public List<CustomerComplaint> findByWorkshopName(String workshopName) throws SQLException {
-        String sql = "SELECT * FROM vw_customer_complaints WHERE workshop_name ILIKE ? ORDER BY complaint_date DESC";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<CustomerComplaint> complaints = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, "%" + workshopName + "%");
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                complaints.add(mapRow(rs));
-            }
-            return complaints;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        // Use view - NO direct SQL
+        return viewLoader.loadViewWithCondition("vw_customer_complaints", "workshop_name ILIKE ? ORDER BY complaint_date DESC", "%" + workshopName + "%");
     }
 
     public List<CustomerComplaint> findPendingComplaints() throws SQLException {
-        String sql = "SELECT * FROM vw_customer_complaints WHERE resolution_status = 'PENDING' ORDER BY complaint_date";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<CustomerComplaint> complaints = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                complaints.add(mapRow(rs));
-            }
-            return complaints;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        // Use view - NO direct SQL
+        return viewLoader.loadViewWithCondition("vw_customer_complaints", "resolution_status = 'PENDING' ORDER BY complaint_date");
     }
 
     public List<CustomerComplaint> findByStatus(String status) throws SQLException {
-        String sql = "SELECT * FROM vw_customer_complaints WHERE resolution_status = ? ORDER BY complaint_date DESC";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<CustomerComplaint> complaints = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, status);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                complaints.add(mapRow(rs));
-            }
-            return complaints;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        // Use view - NO direct SQL
+        return viewLoader.loadViewWithCondition("vw_customer_complaints", "resolution_status = ? ORDER BY complaint_date DESC", status);
     }
 
     public List<CustomerComplaint> findByDateRange(LocalDateTime startDate, LocalDateTime endDate) throws SQLException {
-        String sql = "SELECT * FROM vw_customer_complaints WHERE complaint_date BETWEEN ? AND ? ORDER BY complaint_date DESC";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<CustomerComplaint> complaints = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setObject(1, startDate);
-            ps.setObject(2, endDate);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                complaints.add(mapRow(rs));
-            }
-            return complaints;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        // Use view - NO direct SQL
+        return viewLoader.loadViewWithCondition("vw_customer_complaints", "complaint_date BETWEEN ? AND ? ORDER BY complaint_date DESC", startDate, endDate);
     }
 
     @Override
     public boolean insert(CustomerComplaint entity) throws SQLException {
-        String sql = "CALL sp_submit_complaint(?, ?, ?)";
-        Connection conn = null;
-        java.sql.CallableStatement cs = null;
-        try {
-            conn = getConnection();
-            cs = conn.prepareCall("{call sp_submit_complaint(?, ?, ?)}");
-            cs.setInt(1, entity.getCustomerId());
-            cs.setInt(2, entity.getWorkshopId());
-            cs.setString(3, entity.getComplaintText());
-            return cs.execute();
-        } finally {
-            if (cs != null) cs.close();
-            closeResources(null, null, conn);
+        // Use stored procedure - NO direct SQL
+        Integer complaintId = procedureCaller.executeSubmitComplaint(
+                entity.getCustomerId(),
+                entity.getWorkshopId(),
+                entity.getComplaintText()
+        );
+        if (complaintId != null && complaintId > 0) {
+            entity.setId(complaintId);
+            return true;
         }
+        return false;
     }
 
     public int insertAndGetId(CustomerComplaint entity) throws SQLException {
-        String sql = "CALL sp_submit_complaint(?, ?, ?)";
-        Connection conn = null;
-        java.sql.CallableStatement cs = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            cs = conn.prepareCall("{call sp_submit_complaint(?, ?, ?)}");
-            cs.setInt(1, entity.getCustomerId());
-            cs.setInt(2, entity.getWorkshopId());
-            cs.setString(3, entity.getComplaintText());
-            cs.execute();
-
-            String querySql = "SELECT id FROM customer_complaints WHERE customer_id = ? ORDER BY complaint_date DESC LIMIT 1";
-            ps = conn.prepareStatement(querySql);
-            ps.setInt(1, entity.getCustomerId());
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("id");
-            }
-            return -1;
-        } finally {
-            closeResources(rs, ps, null);
-            if (cs != null) cs.close();
-            closeResources(null, null, conn);
-        }
+        // Use stored procedure - NO direct SQL
+        Integer complaintId = procedureCaller.executeSubmitComplaint(
+                entity.getCustomerId(),
+                entity.getWorkshopId(),
+                entity.getComplaintText()
+        );
+        return complaintId != null ? complaintId : -1;
     }
 
     public boolean updateStatus(int complaintId, String status, String resolutionNotes) throws SQLException {
-        String sql = "CALL sp_update_complaint_status(?, ?)";
-        Connection conn = null;
-        java.sql.CallableStatement cs = null;
-        try {
-            conn = getConnection();
-            cs = conn.prepareCall("{call sp_update_complaint_status(?, ?)}");
-            cs.setInt(1, complaintId);
-            cs.setString(2, status);
-            cs.execute();
-
-            if (resolutionNotes != null && !resolutionNotes.isEmpty()) {
-                String updateSql = "UPDATE customer_complaints SET resolution_notes = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
-                PreparedStatement ps = conn.prepareStatement(updateSql);
-                ps.setString(1, resolutionNotes);
-                ps.setInt(2, complaintId);
-                ps.executeUpdate();
-                ps.close();
-            }
-            return true;
-        } finally {
-            if (cs != null) cs.close();
-            closeResources(null, null, conn);
-        }
+        // Use stored procedure - NO direct SQL
+        return procedureCaller.executeUpdateComplaintStatus(complaintId, status, resolutionNotes);
     }
 
     public boolean resolveComplaint(int complaintId, String resolutionNotes) throws SQLException {
@@ -276,91 +113,32 @@ public class ComplaintDAO extends BaseDAO<CustomerComplaint> {
 
     @Override
     public boolean update(CustomerComplaint entity) throws SQLException {
-        String sql = "UPDATE customer_complaints SET resolution_status = ?, resolution_notes = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, entity.getResolutionStatus());
-            ps.setString(2, entity.getResolutionNotes());
-            ps.setInt(3, entity.getId());
-            int result = ps.executeUpdate();
-            return result > 0;
-        } finally {
-            closeResources(null, ps, conn);
-        }
+        // Use stored procedure - NO direct SQL
+        return updateStatus(entity.getId(), entity.getResolutionStatus(), entity.getResolutionNotes());
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM customer_complaints WHERE id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, id);
-            int result = ps.executeUpdate();
-            return result > 0;
-        } finally {
-            closeResources(null, ps, conn);
-        }
+        // Use stored procedure - NO direct SQL
+        return procedureCaller.executeDeleteComplaint(id);
     }
 
     public int countPendingComplaints() throws SQLException {
-        String sql = "SELECT COUNT(*) FROM customer_complaints WHERE resolution_status = 'PENDING'";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        // Use view - NO direct SQL
+        return viewLoader.countViewRowsWithCondition("customer_complaints", "resolution_status = 'PENDING'");
     }
 
     public int countComplaintsByWorkshop(int workshopId) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM customer_complaints WHERE workshop_id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, workshopId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        // Use view - NO direct SQL
+        return viewLoader.countViewRowsWithCondition("customer_complaints", "workshop_id = ?", workshopId);
     }
 
     public double getResolutionRate() throws SQLException {
-        String sql = "SELECT ROUND(COUNT(CASE WHEN resolution_status != 'PENDING' THEN 1 END) * 100.0 / NULLIF(COUNT(*), 0), 2) FROM customer_complaints";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getDouble(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        // Use view - NO direct SQL
+        int total = viewLoader.countViewRows("customer_complaints");
+        if (total == 0) return 0;
+        int resolved = viewLoader.countViewRowsWithCondition("customer_complaints", "resolution_status != 'PENDING'");
+        return (double) resolved / total * 100;
     }
 
     @Override

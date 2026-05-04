@@ -13,17 +13,22 @@ import javafx.util.Duration;
 import utils.AlertUtil;
 import utils.SceneManager;
 import utils.SessionManager;
-import database.DatabaseConnection;
-import dao.SystemHealthDAO;
 import dao.AuditDAO;
+import dao.SystemHealthDAO;
+import dao.VehicleDAO;
+import dao.CustomerDAO;
+import dao.InsurancePolicyDAO;
+import dao.ViolationDAO;
+import dao.CustomerQueryDAO;
+import dao.WorkshopDAO;
+import dao.InsuranceClaimDAO;
+import dao.StolenVehicleDAO;
+import models.AuditLog;
+import models.SystemHealth;
 
-import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
 
 public class AdminController {
 
@@ -52,11 +57,11 @@ public class AdminController {
     @FXML private VBox pendingClaimsCard;
 
     // Recent Activity Table
-    @FXML private TableView<Map<String, Object>> recentActivityTable;
-    @FXML private TableColumn<Map<String, Object>, String> activityUserColumn;
-    @FXML private TableColumn<Map<String, Object>, String> activityActionColumn;
-    @FXML private TableColumn<Map<String, Object>, String> activityTimestampColumn;
-    @FXML private TableColumn<Map<String, Object>, String> activityIpColumn;
+    @FXML private TableView<AuditLog> recentActivityTable;
+    @FXML private TableColumn<AuditLog, String> activityUserColumn;
+    @FXML private TableColumn<AuditLog, String> activityActionColumn;
+    @FXML private TableColumn<AuditLog, String> activityTimestampColumn;
+    @FXML private TableColumn<AuditLog, String> activityIpColumn;
     @FXML private Button refreshButton;
     @FXML private Button fadeButton;
 
@@ -76,17 +81,37 @@ public class AdminController {
     @FXML private ProgressBar operationProgress;
     @FXML private Pagination activityPagination;
 
+    // DAO Instances
     private SystemHealthDAO systemHealthDAO;
     private AuditDAO auditDAO;
-    private ObservableList<Map<String, Object>> activityList;
-    private List<Map<String, Object>> fullActivityData;
+    private VehicleDAO vehicleDAO;
+    private CustomerDAO customerDAO;
+    private InsurancePolicyDAO policyDAO;
+    private ViolationDAO violationDAO;
+    private CustomerQueryDAO queryDAO;
+    private WorkshopDAO workshopDAO;
+    private InsuranceClaimDAO claimDAO;
+    private StolenVehicleDAO stolenVehicleDAO;
+
+    private ObservableList<AuditLog> activityList;
+    private List<AuditLog> fullActivityData;
     private int currentPage = 0;
     private int pageSize = 10;
 
     @FXML
     public void initialize() {
+        // Initialize DAOs
         systemHealthDAO = new SystemHealthDAO();
         auditDAO = new AuditDAO();
+        vehicleDAO = new VehicleDAO();
+        customerDAO = new CustomerDAO();
+        policyDAO = new InsurancePolicyDAO();
+        violationDAO = new ViolationDAO();
+        queryDAO = new CustomerQueryDAO();
+        workshopDAO = new WorkshopDAO();
+        claimDAO = new InsuranceClaimDAO();
+        stolenVehicleDAO = new StolenVehicleDAO();
+
         activityList = FXCollections.observableArrayList();
 
         setupTableColumns();
@@ -113,18 +138,13 @@ public class AdminController {
 
     private void setupTableColumns() {
         activityUserColumn.setCellValueFactory(cellData ->
-                new javafx.beans.property.SimpleStringProperty(getStringValue(cellData.getValue(), "username")));
+                cellData.getValue().usernameProperty());
         activityActionColumn.setCellValueFactory(cellData ->
-                new javafx.beans.property.SimpleStringProperty(getStringValue(cellData.getValue(), "action")));
+                cellData.getValue().actionProperty());
         activityTimestampColumn.setCellValueFactory(cellData ->
-                new javafx.beans.property.SimpleStringProperty(formatTimestamp(cellData.getValue().get("timestamp"))));
+                cellData.getValue().timestampProperty().asString());
         activityIpColumn.setCellValueFactory(cellData ->
-                new javafx.beans.property.SimpleStringProperty(getStringValue(cellData.getValue(), "ip_address")));
-
-        activityUserColumn.setStyle("-fx-alignment: CENTER-LEFT;");
-        activityActionColumn.setStyle("-fx-alignment: CENTER-LEFT;");
-        activityTimestampColumn.setStyle("-fx-alignment: CENTER;");
-        activityIpColumn.setStyle("-fx-alignment: CENTER;");
+                cellData.getValue().ipAddressProperty());
     }
 
     private void setupPagination() {
@@ -146,19 +166,6 @@ public class AdminController {
             activityList.setAll(fullActivityData.subList(start, end));
             recentActivityTable.setItems(activityList);
         }
-    }
-
-    private String getStringValue(Map<String, Object> map, String key) {
-        Object value = map.get(key);
-        return value != null ? value.toString() : "";
-    }
-
-    private String formatTimestamp(Object timestamp) {
-        if (timestamp instanceof java.sql.Timestamp) {
-            return ((java.sql.Timestamp) timestamp).toLocalDateTime()
-                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        }
-        return timestamp != null ? timestamp.toString() : "";
     }
 
     private void setupButtonHandlers() {
@@ -252,16 +259,11 @@ public class AdminController {
     }
 
     private void loadTotalVehicles() {
-        String sql = "SELECT COUNT(*) as count FROM vehicles";
-        try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                int count = rs.getInt("count");
-                if (totalVehiclesLabel != null) totalVehiclesLabel.setText(String.valueOf(count));
-                if (totalVehiclesSystemLabel != null) totalVehiclesSystemLabel.setText(String.valueOf(count));
-            }
-        } catch (SQLException e) {
+        try {
+            int count = vehicleDAO.countVehicles();
+            if (totalVehiclesLabel != null) totalVehiclesLabel.setText(String.valueOf(count));
+            if (totalVehiclesSystemLabel != null) totalVehiclesSystemLabel.setText(String.valueOf(count));
+        } catch (Exception e) {
             e.printStackTrace();
             if (totalVehiclesLabel != null) totalVehiclesLabel.setText("0");
             if (totalVehiclesSystemLabel != null) totalVehiclesSystemLabel.setText("0");
@@ -269,33 +271,21 @@ public class AdminController {
     }
 
     private void loadTotalCustomers() {
-        String sql = "SELECT COUNT(*) as count FROM customers";
-        try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                int count = rs.getInt("count");
-                if (totalCustomersLabel != null) totalCustomersLabel.setText(String.valueOf(count));
-            }
-        } catch (SQLException e) {
+        try {
+            int count = customerDAO.countCustomers();
+            if (totalCustomersLabel != null) totalCustomersLabel.setText(String.valueOf(count));
+        } catch (Exception e) {
             e.printStackTrace();
             if (totalCustomersLabel != null) totalCustomersLabel.setText("0");
         }
     }
 
     private void loadStolenVehicles() {
-        String sql = "SELECT COUNT(*) as count FROM vehicles v " +
-                "JOIN vehicle_status vs ON v.status_id = vs.id " +
-                "WHERE vs.status_name = 'stolen'";
-        try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                int count = rs.getInt("count");
-                if (stolenCountLabel != null) stolenCountLabel.setText(String.valueOf(count));
-                if (stolenVehiclesSystemLabel != null) stolenVehiclesSystemLabel.setText(String.valueOf(count));
-            }
-        } catch (SQLException e) {
+        try {
+            int count = stolenVehicleDAO.countActiveStolen();
+            if (stolenCountLabel != null) stolenCountLabel.setText(String.valueOf(count));
+            if (stolenVehiclesSystemLabel != null) stolenVehiclesSystemLabel.setText(String.valueOf(count));
+        } catch (Exception e) {
             e.printStackTrace();
             if (stolenCountLabel != null) stolenCountLabel.setText("0");
             if (stolenVehiclesSystemLabel != null) stolenVehiclesSystemLabel.setText("0");
@@ -303,105 +293,62 @@ public class AdminController {
     }
 
     private void loadActiveInsurance() {
-        String sql = "SELECT COUNT(*) as count FROM insurance_policies WHERE status = 'ACTIVE' AND end_date >= CURRENT_DATE";
-        try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                int count = rs.getInt("count");
-                if (activeInsuranceLabel != null) activeInsuranceLabel.setText(String.valueOf(count));
-            }
-        } catch (SQLException e) {
+        try {
+            int count = policyDAO.countActivePolicies();
+            if (activeInsuranceLabel != null) activeInsuranceLabel.setText(String.valueOf(count));
+        } catch (Exception e) {
             e.printStackTrace();
             if (activeInsuranceLabel != null) activeInsuranceLabel.setText("0");
         }
     }
 
     private void loadUnpaidFines() {
-        String sql = "SELECT COALESCE(SUM(fine_amount), 0) as total FROM violations WHERE payment_status = 'UNPAID'";
-        try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                double total = rs.getDouble("total");
-                if (unpaidFinesLabel != null) unpaidFinesLabel.setText(String.format("M%,.2f", total));
-            }
-        } catch (SQLException e) {
+        try {
+            double total = violationDAO.getTotalUnpaidFines();
+            if (unpaidFinesLabel != null) unpaidFinesLabel.setText(String.format("M%,.2f", total));
+        } catch (Exception e) {
             e.printStackTrace();
             if (unpaidFinesLabel != null) unpaidFinesLabel.setText("M0.00");
         }
     }
 
     private void loadPendingQueries() {
-        String sql = "SELECT COUNT(*) as count FROM customer_queries WHERE status = 'PENDING'";
-        try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                int count = rs.getInt("count");
-                if (pendingQueriesLabel != null) pendingQueriesLabel.setText(String.valueOf(count));
-            }
-        } catch (SQLException e) {
+        try {
+            int count = queryDAO.countPendingQueries();
+            if (pendingQueriesLabel != null) pendingQueriesLabel.setText(String.valueOf(count));
+        } catch (Exception e) {
             e.printStackTrace();
             if (pendingQueriesLabel != null) pendingQueriesLabel.setText("0");
         }
     }
 
     private void loadPendingWorkshops() {
-        String sql = "SELECT COUNT(*) as count FROM workshops WHERE is_approved = false OR is_approved IS NULL";
-        try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                int count = rs.getInt("count");
-                if (pendingWorkshopsLabel != null) pendingWorkshopsLabel.setText(String.valueOf(count));
-            }
-        } catch (SQLException e) {
+        try {
+            int count = workshopDAO.countPendingWorkshops();
+            if (pendingWorkshopsLabel != null) pendingWorkshopsLabel.setText(String.valueOf(count));
+        } catch (Exception e) {
             e.printStackTrace();
             if (pendingWorkshopsLabel != null) pendingWorkshopsLabel.setText("0");
         }
     }
 
     private void loadPendingClaims() {
-        String sql = "SELECT COUNT(*) as count FROM insurance_claims WHERE status = 'PENDING'";
-        try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                int count = rs.getInt("count");
-                if (pendingClaimsLabel != null) pendingClaimsLabel.setText(String.valueOf(count));
-            }
-        } catch (SQLException e) {
+        try {
+            int count = claimDAO.countPendingClaims();
+            if (pendingClaimsLabel != null) pendingClaimsLabel.setText(String.valueOf(count));
+        } catch (Exception e) {
             e.printStackTrace();
             if (pendingClaimsLabel != null) pendingClaimsLabel.setText("0");
         }
     }
 
     private void loadUserStatistics() {
-        String totalUsersSql = "SELECT COUNT(*) as count FROM users";
-        String activeUsersSql = "SELECT COUNT(*) as count FROM users WHERE is_active = true";
-        String inactiveUsersSql = "SELECT COUNT(*) as count FROM users WHERE is_active = false";
-
-        try (Connection conn = DatabaseConnection.getInstance().getConnection()) {
-            try (PreparedStatement ps = conn.prepareStatement(totalUsersSql);
-                 ResultSet rs = ps.executeQuery()) {
-                if (rs.next() && totalUsersLabel != null) {
-                    totalUsersLabel.setText(String.valueOf(rs.getInt("count")));
-                }
-            }
-            try (PreparedStatement ps = conn.prepareStatement(activeUsersSql);
-                 ResultSet rs = ps.executeQuery()) {
-                if (rs.next() && activeUsersLabel != null) {
-                    activeUsersLabel.setText(String.valueOf(rs.getInt("count")));
-                }
-            }
-            try (PreparedStatement ps = conn.prepareStatement(inactiveUsersSql);
-                 ResultSet rs = ps.executeQuery()) {
-                if (rs.next() && inactiveUsersLabel != null) {
-                    inactiveUsersLabel.setText(String.valueOf(rs.getInt("count")));
-                }
-            }
-        } catch (SQLException e) {
+        try {
+            SystemHealth health = systemHealthDAO.getSystemHealth();
+            if (totalUsersLabel != null) totalUsersLabel.setText(String.valueOf(health.getTotalUsers()));
+            if (activeUsersLabel != null) activeUsersLabel.setText(String.valueOf(health.getActiveUsers()));
+            if (inactiveUsersLabel != null) inactiveUsersLabel.setText(String.valueOf(health.getInactiveUsers()));
+        } catch (Exception e) {
             e.printStackTrace();
             if (totalUsersLabel != null) totalUsersLabel.setText("0");
             if (activeUsersLabel != null) activeUsersLabel.setText("0");
@@ -411,39 +358,26 @@ public class AdminController {
 
     private void loadSystemLoad() {
         try {
-            String sql = "SELECT " +
-                    "(SELECT COUNT(*) FROM vehicles) as vehicles, " +
-                    "(SELECT COUNT(*) FROM users) as users, " +
-                    "(SELECT COUNT(*) FROM violations WHERE payment_status = 'UNPAID') as unpaid";
-
-            try (Connection conn = DatabaseConnection.getInstance().getConnection();
-                 PreparedStatement ps = conn.prepareStatement(sql);
-                 ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    int vehicles = rs.getInt("vehicles");
-                    int users = rs.getInt("users");
-                    int unpaid = rs.getInt("unpaid");
-                    double load = Math.min(1.0, (vehicles / 5000.0) + (users / 1000.0) + (unpaid / 100.0));
-                    load = Math.min(1.0, load / 3.0);
-                    if (systemLoadProgress != null) systemLoadProgress.setProgress(load);
-                }
-            }
-        } catch (SQLException e) {
+            SystemHealth health = systemHealthDAO.getSystemHealth();
+            double load = Math.min(1.0, (health.getTotalVehicles() / 5000.0) +
+                    (health.getTotalUsers() / 1000.0) +
+                    (violationDAO.getTotalUnpaidFines() / 10000.0));
+            load = Math.min(1.0, load / 3.0);
+            if (systemLoadProgress != null) systemLoadProgress.setProgress(load);
+        } catch (Exception e) {
             e.printStackTrace();
             if (systemLoadProgress != null) systemLoadProgress.setProgress(0.3);
         }
     }
 
     private void checkDatabaseStatus() {
-        String sql = "SELECT 1";
-        try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next() && databaseStatusLabel != null) {
+        try {
+            systemHealthDAO.checkDatabaseStatus();
+            if (databaseStatusLabel != null) {
                 databaseStatusLabel.setText("Connected");
                 databaseStatusLabel.setStyle("-fx-text-fill: #27ae60; -fx-font-weight: bold;");
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             if (databaseStatusLabel != null) {
                 databaseStatusLabel.setText("Disconnected");
                 databaseStatusLabel.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold;");
@@ -465,39 +399,16 @@ public class AdminController {
         if (stolenVehiclesSystemLabel != null) stolenVehiclesSystemLabel.setText("0");
     }
 
-    private void setDefaultHealthValues() {
-        if (totalUsersLabel != null) totalUsersLabel.setText("0");
-        if (activeUsersLabel != null) activeUsersLabel.setText("0");
-        if (inactiveUsersLabel != null) inactiveUsersLabel.setText("0");
-    }
-
     private void loadRecentActivity() {
-        String sql = "SELECT a.action, a.timestamp, a.ip_address, u.username " +
-                "FROM audit_logs a " +
-                "JOIN users u ON a.user_id = u.id " +
-                "ORDER BY a.timestamp DESC LIMIT 200";
-
-        fullActivityData = new ArrayList<>();
-
-        try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                Map<String, Object> row = new HashMap<>();
-                row.put("username", rs.getString("username") != null ? rs.getString("username") : "System");
-                row.put("action", rs.getString("action"));
-                row.put("timestamp", rs.getTimestamp("timestamp"));
-                row.put("ip_address", rs.getString("ip_address") != null ? rs.getString("ip_address") : "127.0.0.1");
-                fullActivityData.add(row);
-            }
+        try {
+            fullActivityData = auditDAO.findAll();
 
             int totalPages = (int) Math.ceil((double) fullActivityData.size() / pageSize);
             if (activityPagination != null) activityPagination.setPageCount(Math.max(1, totalPages));
             updateTablePage();
             statusLabel.setText("Loaded " + fullActivityData.size() + " activity records");
 
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             statusLabel.setText("Error loading recent activity: " + e.getMessage());
         }

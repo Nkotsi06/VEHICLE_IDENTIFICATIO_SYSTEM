@@ -1,69 +1,70 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.Mechanic;
 
+/**
+ * MechanicDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class MechanicDAO extends BaseDAO<Mechanic> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public MechanicDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public Mechanic findById(int id) throws SQLException {
-        String sql = "SELECT * FROM vw_mechanics WHERE id = ?";
-        return executeQuerySingle(sql, id);
+        List<Mechanic> results = viewLoader.loadViewWithCondition("vw_mechanics", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<Mechanic> findAll() throws SQLException {
-        String sql = "SELECT * FROM vw_mechanics ORDER BY name";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_mechanics");
     }
 
     public List<Mechanic> findByWorkshopId(int workshopId) throws SQLException {
-        String sql = "SELECT * FROM vw_mechanics WHERE workshop_id = ? ORDER BY name";
-        return executeQuery(sql, workshopId);
+        return viewLoader.loadViewWithCondition("vw_mechanics", "workshop_id = ? ORDER BY name", workshopId);
     }
 
     public List<Mechanic> findBySpecialization(String specialization) throws SQLException {
-        String sql = "SELECT * FROM vw_mechanics WHERE specialization ILIKE ? ORDER BY name";
-        return executeQuery(sql, "%" + specialization + "%");
+        return viewLoader.loadViewWithCondition("vw_mechanics", "specialization ILIKE ? ORDER BY name", "%" + specialization + "%");
     }
 
     public int countByWorkshopId(int workshopId) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM mechanics WHERE workshop_id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, workshopId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.countViewRowsWithCondition("vw_mechanics", "workshop_id = ?", workshopId);
     }
 
     @Override
     public boolean insert(Mechanic entity) throws SQLException {
-        return executeProcedure("sp_add_mechanic",
+        Integer mechanicId = procedureCaller.executeAddMechanic(
                 entity.getWorkshopId(),
                 entity.getName(),
                 entity.getSpecialization(),
                 entity.getPhone()
         );
+        if (mechanicId != null && mechanicId > 0) {
+            entity.setId(mechanicId);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public boolean update(Mechanic entity) throws SQLException {
-        return executeProcedure("sp_update_mechanic",
+        return procedureCaller.executeUpdateMechanic(
                 entity.getId(),
                 entity.getWorkshopId(),
                 entity.getName(),
@@ -74,7 +75,7 @@ public class MechanicDAO extends BaseDAO<Mechanic> {
 
     @Override
     public boolean delete(int id) throws SQLException {
-        return executeProcedure("sp_delete_mechanic", id);
+        return procedureCaller.executeDeleteMechanic(id);
     }
 
     @Override

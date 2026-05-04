@@ -20,11 +20,22 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Controller for Police Report Generation
+ * Handles generating various police reports including stolen vehicles, violations, warrants, etc.
+ */
 public class PoliceReportController {
 
+    // ============================================
+    // FXML UI COMPONENTS
+    // ============================================
+
+    // Configuration Components
     @FXML private ComboBox<String> reportTypeComboBox;
     @FXML private DatePicker startDatePicker;
     @FXML private DatePicker endDatePicker;
+
+    // Buttons
     @FXML private Button generateButton;
     @FXML private Button exportButton;
     @FXML private Button printButton;
@@ -32,13 +43,20 @@ public class PoliceReportController {
     @FXML private Button clearButton;
     @FXML private Button fadeButton;
 
+    // Results Components
     @FXML private TableView<Map<String, Object>> reportTable;
     @FXML private TextArea reportSummaryArea;
     @FXML private Label recordCountLabel;
     @FXML private Label statusLabel;
+
+    // Progress Indicators
     @FXML private ProgressIndicator loadProgress;
     @FXML private ProgressBar operationProgress;
     @FXML private Pagination reportPagination;
+
+    // ============================================
+    // DAO INSTANCES & DATA MODELS
+    // ============================================
 
     private ReportGeneratorDAO reportDAO;
     private ObservableList<Map<String, Object>> reportData;
@@ -48,9 +66,17 @@ public class PoliceReportController {
     private int pageSize = 20;
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
+    // ============================================
+    // INITIALIZATION METHODS
+    // ============================================
+
+    /**
+     * Initializes the police report controller
+     * Verifies user role, sets up UI components, and configures report types
+     */
     @FXML
     public void initialize() {
-        // Check if user is POLICE
+        // Security check - only police officers can access this section
         if (!"POLICE".equals(SessionManager.getInstance().getUserRole())) {
             AlertUtil.showError("Access Denied", "Only police officers can access this report section.");
             SceneManager.getInstance().switchToDashboard();
@@ -70,6 +96,9 @@ public class PoliceReportController {
         reportTable.setItems(reportData);
     }
 
+    /**
+     * Configures available report types for police officers
+     */
     private void setupReportTypes() {
         reportTypeComboBox.getItems().addAll(
                 "Stolen Vehicles Report",
@@ -83,11 +112,17 @@ public class PoliceReportController {
         reportTypeComboBox.setValue("Stolen Vehicles Report");
     }
 
+    /**
+     * Sets up default date range (last month to today)
+     */
     private void setupDatePickers() {
         startDatePicker.setValue(LocalDate.now().minusMonths(1));
         endDatePicker.setValue(LocalDate.now());
     }
 
+    /**
+     * Configures pagination for report results
+     */
     private void setupPagination() {
         if (reportPagination != null) {
             reportPagination.currentPageIndexProperty().addListener((obs, old, newPage) -> {
@@ -97,6 +132,9 @@ public class PoliceReportController {
         }
     }
 
+    /**
+     * Updates the table to show current page of report data
+     */
     private void updateTablePage() {
         if (fullReportData == null || fullReportData.isEmpty()) {
             reportData.clear();
@@ -109,6 +147,9 @@ public class PoliceReportController {
         }
     }
 
+    /**
+     * Sets up button click handlers
+     */
     private void setupButtonHandlers() {
         generateButton.setOnAction(event -> handleGenerate());
         exportButton.setOnAction(event -> handleExport());
@@ -124,11 +165,65 @@ public class PoliceReportController {
         }
     }
 
+    /**
+     * Applies visual effects to buttons
+     */
+    private void applyVisualEffects() {
+        DropShadow dropShadow = new DropShadow();
+        dropShadow.setRadius(5.0);
+        dropShadow.setOffsetX(2.0);
+        dropShadow.setOffsetY(2.0);
+        dropShadow.setColor(Color.rgb(0, 0, 0, 0.3));
+
+        generateButton.setEffect(dropShadow);
+        exportButton.setEffect(dropShadow);
+        printButton.setEffect(dropShadow);
+        backButton.setEffect(dropShadow);
+
+        if (clearButton != null) clearButton.setEffect(dropShadow);
+        if (fadeButton != null) fadeButton.setEffect(dropShadow);
+
+        DropShadow tableShadow = new DropShadow();
+        tableShadow.setRadius(3.0);
+        tableShadow.setOffsetX(2.0);
+        tableShadow.setOffsetY(2.0);
+        tableShadow.setColor(Color.rgb(0, 0, 0, 0.2));
+        reportTable.setEffect(tableShadow);
+    }
+
+    /**
+     * Plays fade animation on the animate button
+     */
+    private void showFadeAnimation() {
+        if (fadeButton != null) {
+            FadeTransition fadeTransition = new FadeTransition(Duration.seconds(1.5), fadeButton);
+            fadeTransition.setFromValue(1.0);
+            fadeTransition.setToValue(0.2);
+            fadeTransition.setCycleCount(4);
+            fadeTransition.setAutoReverse(true);
+            fadeTransition.play();
+            statusLabel.setText("Fade animation played!");
+            AlertUtil.showInfo("Fade Animation", "Button fading animation completed!");
+
+            PauseTransition reset = new PauseTransition(Duration.seconds(2));
+            reset.setOnFinished(e -> statusLabel.setText("Ready"));
+            reset.play();
+        }
+    }
+
+    // ============================================
+    // REPORT GENERATION METHODS
+    // ============================================
+
+    /**
+     * Handles report generation based on selected type
+     */
     private void handleGenerate() {
         currentReportType = reportTypeComboBox.getValue();
         LocalDate startDate = startDatePicker.getValue();
         LocalDate endDate = endDatePicker.getValue();
 
+        // Validate date range for violation reports
         if ("Violations Report".equals(currentReportType)) {
             if (startDate == null || endDate == null) {
                 AlertUtil.showWarning("Date Required", "Please select both start and end dates.");
@@ -148,6 +243,7 @@ public class PoliceReportController {
             updateProgress(0.4);
             List<Map<String, Object>> data = null;
 
+            // Route to appropriate report generator based on type
             switch (currentReportType) {
                 case "Stolen Vehicles Report":
                     data = reportDAO.generateStolenVehicleReport();
@@ -219,48 +315,81 @@ public class PoliceReportController {
         }
     }
 
+    /**
+     * Displays stolen vehicle report in table
+     * @param data List of report data rows
+     */
     private void displayStolenVehicleReport(List<Map<String, Object>> data) {
         setupTableColumns(new String[]{"registration_number", "make", "model", "reported_date", "case_number", "assigned_officer", "status"},
                 new String[]{"Registration", "Make", "Model", "Reported Date", "Case Number", "Officer", "Status"});
         centerTableColumns();
     }
 
+    /**
+     * Displays violation report in table
+     * @param data List of report data rows
+     */
     private void displayViolationReport(List<Map<String, Object>> data) {
         setupTableColumns(new String[]{"registration_number", "make", "model", "violation_type", "violation_date", "fine_amount", "payment_status", "officer_name"},
                 new String[]{"Registration", "Make", "Model", "Violation", "Date", "Fine (M)", "Status", "Officer"});
         centerTableColumns();
     }
 
+    /**
+     * Displays warrants report in table
+     * @param data List of report data rows
+     */
     private void displayWarrantsReport(List<Map<String, Object>> data) {
         setupTableColumns(new String[]{"registration_number", "violation_type", "issue_date", "expiry_date", "judge_name", "status"},
                 new String[]{"Registration", "Violation", "Issue Date", "Expiry Date", "Judge", "Status"});
         centerTableColumns();
     }
 
+    /**
+     * Displays BOLO alerts report in table
+     * @param data List of report data rows
+     */
     private void displayBOLOAlertsReport(List<Map<String, Object>> data) {
         setupTableColumns(new String[]{"registration_number", "message", "priority", "alert_date", "expiry_date", "status"},
                 new String[]{"Registration", "BOLO Message", "Priority", "Alert Date", "Expiry Date", "Status"});
         centerTableColumns();
     }
 
+    /**
+     * Displays geofence alerts report in table
+     * @param data List of report data rows
+     */
     private void displayGeofenceAlertsReport(List<Map<String, Object>> data) {
         setupTableColumns(new String[]{"zone_name", "registration_number", "alert_type", "alert_timestamp", "is_notified"},
                 new String[]{"Zone", "Vehicle", "Alert Type", "Timestamp", "Notified"});
         centerTableColumns();
     }
 
+    /**
+     * Displays officer activity report in table
+     * @param data List of report data rows
+     */
     private void displayOfficerActivityReport(List<Map<String, Object>> data) {
         setupTableColumns(new String[]{"officer_name", "action", "registration_number", "timestamp"},
                 new String[]{"Officer", "Action", "Vehicle", "Timestamp"});
         centerTableColumns();
     }
 
+    /**
+     * Displays expired documents report in table
+     * @param data List of report data rows
+     */
     private void displayExpiredDocumentsReport(List<Map<String, Object>> data) {
         setupTableColumns(new String[]{"registration_number", "document_type", "expiry_date", "days_remaining", "expiry_status"},
                 new String[]{"Registration", "Document Type", "Expiry Date", "Days Remaining", "Status"});
         centerTableColumns();
     }
 
+    /**
+     * Dynamically creates table columns based on data keys
+     * @param columnKeys Array of keys to extract from data
+     * @param columnHeaders Array of column header names
+     */
     @SuppressWarnings("unchecked")
     private void setupTableColumns(String[] columnKeys, String[] columnHeaders) {
         reportTable.getColumns().clear();
@@ -278,12 +407,21 @@ public class PoliceReportController {
         }
     }
 
+    /**
+     * Centers all table columns for better visual appearance
+     */
     private void centerTableColumns() {
         for (TableColumn<?, ?> column : reportTable.getColumns()) {
             column.setStyle("-fx-alignment: CENTER;");
         }
     }
 
+    /**
+     * Formats cell values for display (currency, dates, etc.)
+     * @param value The raw value from database
+     * @param key The column key to determine formatting
+     * @return Formatted string representation
+     */
     private String formatCellValue(Object value, String key) {
         if (value == null) return "";
         if (value instanceof Number) {
@@ -301,6 +439,14 @@ public class PoliceReportController {
         return value.toString();
     }
 
+    /**
+     * Generates summary text for the report
+     * @param reportType Type of report generated
+     * @param startDate Start date (if applicable)
+     * @param endDate End date (if applicable)
+     * @param rowCount Number of records in report
+     * @return Formatted summary text
+     */
     private String generateSummaryText(String reportType, LocalDate startDate, LocalDate endDate, int rowCount) {
         StringBuilder sb = new StringBuilder();
         sb.append("Police Report Generated Successfully\n");
@@ -316,6 +462,13 @@ public class PoliceReportController {
         return sb.toString();
     }
 
+    // ============================================
+    // EXPORT AND PRINT METHODS
+    // ============================================
+
+    /**
+     * Handles exporting report to CSV file
+     */
     private void handleExport() {
         if (fullReportData == null || fullReportData.isEmpty()) {
             AlertUtil.showWarning("No Data", "Please generate a report first.");
@@ -344,6 +497,9 @@ public class PoliceReportController {
         }
     }
 
+    /**
+     * Handles printing the report summary
+     */
     private void handlePrint() {
         String content = reportSummaryArea.getText();
         if (content == null || content.isEmpty()) {
@@ -354,6 +510,9 @@ public class PoliceReportController {
         statusLabel.setText("Print job sent");
     }
 
+    /**
+     * Clears all form fields and report results
+     */
     private void clearForm() {
         reportTypeComboBox.setValue("Stolen Vehicles Report");
         startDatePicker.setValue(LocalDate.now().minusMonths(1));
@@ -370,46 +529,14 @@ public class PoliceReportController {
         AlertUtil.showSuccess("Form cleared successfully.");
     }
 
-    private void applyVisualEffects() {
-        DropShadow dropShadow = new DropShadow();
-        dropShadow.setRadius(5.0);
-        dropShadow.setOffsetX(2.0);
-        dropShadow.setOffsetY(2.0);
-        dropShadow.setColor(Color.rgb(0, 0, 0, 0.3));
+    // ============================================
+    // UI PROGRESS METHODS
+    // ============================================
 
-        generateButton.setEffect(dropShadow);
-        exportButton.setEffect(dropShadow);
-        printButton.setEffect(dropShadow);
-        backButton.setEffect(dropShadow);
-
-        if (clearButton != null) clearButton.setEffect(dropShadow);
-        if (fadeButton != null) fadeButton.setEffect(dropShadow);
-
-        DropShadow tableShadow = new DropShadow();
-        tableShadow.setRadius(3.0);
-        tableShadow.setOffsetX(2.0);
-        tableShadow.setOffsetY(2.0);
-        tableShadow.setColor(Color.rgb(0, 0, 0, 0.2));
-        reportTable.setEffect(tableShadow);
-    }
-
-    private void showFadeAnimation() {
-        if (fadeButton != null) {
-            FadeTransition fadeTransition = new FadeTransition(Duration.seconds(1.5), fadeButton);
-            fadeTransition.setFromValue(1.0);
-            fadeTransition.setToValue(0.2);
-            fadeTransition.setCycleCount(4);
-            fadeTransition.setAutoReverse(true);
-            fadeTransition.play();
-            statusLabel.setText("Fade animation played!");
-            AlertUtil.showInfo("Fade Animation", "Button fading animation completed!");
-
-            PauseTransition reset = new PauseTransition(Duration.seconds(2));
-            reset.setOnFinished(e -> statusLabel.setText("Ready"));
-            reset.play();
-        }
-    }
-
+    /**
+     * Shows/hides operation progress bar
+     * @param show true to show, false to hide
+     */
     private void showOperationProgress(boolean show) {
         if (loadProgress != null) loadProgress.setVisible(show);
         if (operationProgress != null) {
@@ -418,12 +545,19 @@ public class PoliceReportController {
         }
     }
 
+    /**
+     * Updates progress bar value
+     * @param progress value between 0 and 1
+     */
     private void updateProgress(double progress) {
         if (operationProgress != null) {
             operationProgress.setProgress(progress);
         }
     }
 
+    /**
+     * Hides progress indicators after a short delay
+     */
     private void hideProgressAfterDelay() {
         PauseTransition delay = new PauseTransition(Duration.seconds(1.5));
         delay.setOnFinished(event -> {

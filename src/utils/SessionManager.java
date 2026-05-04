@@ -1,10 +1,22 @@
 package utils;
 
 import java.time.LocalDateTime;
+import java.util.logging.Logger;
 
+/**
+ * SessionManager manages the current user session across the application.
+ * Stores user information, role, and module-specific IDs.
+ * Implements Singleton pattern for global access.
+ *
+ * @author Vehicle Identification System Team
+ * @version 1.0
+ */
 public class SessionManager {
 
+    private static final Logger LOGGER = Logger.getLogger(SessionManager.class.getName());
     private static SessionManager instance;
+
+    // Session data
     private int userId;
     private String username;
     private String userRole;
@@ -13,15 +25,32 @@ public class SessionManager {
     private String phone;
     private String address;
     private LocalDateTime loginTime;
+
+    // Role-specific IDs
     private int customerId;
     private int workshopId;
     private int insuranceProviderId;
     private int policeOfficerId;
+
+    // Police-specific fields
     private String badgeNumber;
     private String rank;
 
-    private SessionManager() {}
+    /**
+     * Private constructor for singleton pattern.
+     */
+    private SessionManager() {
+        this.customerId = -1;
+        this.workshopId = -1;
+        this.insuranceProviderId = -1;
+        this.policeOfficerId = -1;
+    }
 
+    /**
+     * Gets the singleton instance of SessionManager.
+     *
+     * @return the SessionManager instance
+     */
     public static synchronized SessionManager getInstance() {
         if (instance == null) {
             instance = new SessionManager();
@@ -29,6 +58,15 @@ public class SessionManager {
         return instance;
     }
 
+    /**
+     * Creates a new user session.
+     *
+     * @param userId   the user ID
+     * @param username the username
+     * @param role     the user role
+     * @param fullName the user's full name
+     * @param email    the user's email
+     */
     public void createSession(int userId, String username, String role, String fullName, String email) {
         this.userId = userId;
         this.username = username;
@@ -36,12 +74,19 @@ public class SessionManager {
         this.fullName = fullName;
         this.email = email;
         this.loginTime = LocalDateTime.now();
+
+        // Reset role-specific IDs
         this.customerId = -1;
         this.workshopId = -1;
         this.insuranceProviderId = -1;
         this.policeOfficerId = -1;
+
+        LOGGER.info("Session created for user: " + username + " (Role: " + role + ")");
     }
 
+    /**
+     * Clears the current session (logout).
+     */
     public void clearSession() {
         this.userId = 0;
         this.username = null;
@@ -57,37 +102,99 @@ public class SessionManager {
         this.policeOfficerId = -1;
         this.badgeNumber = null;
         this.rank = null;
+
+        LOGGER.info("Session cleared");
     }
 
+    /**
+     * Checks if a user is logged in.
+     *
+     * @return true if logged in, false otherwise
+     */
     public boolean isLoggedIn() {
         return userId > 0 && username != null && userRole != null;
     }
 
+    /**
+     * Checks if the current user has a specific role.
+     *
+     * @param role the role to check
+     * @return true if user has the role, false otherwise
+     */
     public boolean hasRole(String role) {
         return userRole != null && userRole.equals(role);
     }
 
+    /**
+     * Checks if the current user is an admin.
+     *
+     * @return true if admin, false otherwise
+     */
     public boolean isAdmin() {
         return "ADMIN".equals(userRole);
     }
 
+    /**
+     * Checks if the current user is police.
+     *
+     * @return true if police, false otherwise
+     */
     public boolean isPolice() {
         return "POLICE".equals(userRole);
     }
 
+    /**
+     * Checks if the current user is a customer.
+     *
+     * @return true if customer, false otherwise
+     */
     public boolean isCustomer() {
         return "CUSTOMER".equals(userRole);
     }
 
+    /**
+     * Checks if the current user is a workshop.
+     *
+     * @return true if workshop, false otherwise
+     */
     public boolean isWorkshop() {
         return "WORKSHOP".equals(userRole);
     }
 
+    /**
+     * Checks if the current user is insurance.
+     *
+     * @return true if insurance, false otherwise
+     */
     public boolean isInsurance() {
         return "INSURANCE".equals(userRole);
     }
 
-    // Getters and Setters
+    /**
+     * Gets the session duration in minutes.
+     *
+     * @return session duration in minutes, or 0 if not logged in
+     */
+    public long getSessionDurationMinutes() {
+        if (loginTime == null) return 0;
+        return java.time.Duration.between(loginTime, LocalDateTime.now()).toMinutes();
+    }
+
+    /**
+     * Validates if the session has expired (e.g., after 8 hours).
+     *
+     * @return true if expired, false otherwise
+     */
+    public boolean isSessionExpired() {
+        if (loginTime == null) return true;
+        long hours = java.time.Duration.between(loginTime, LocalDateTime.now()).toHours();
+        return hours >= 8; // 8-hour session timeout
+    }
+
+    // ============================================
+    // GETTERS AND SETTERS
+    // ============================================
+
     public int getUserId() { return userId; }
     public String getUsername() { return username; }
     public String getUserRole() { return userRole; }

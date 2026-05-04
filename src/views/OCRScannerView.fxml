@@ -6,125 +6,124 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.OCRDocumentScannerController">
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.OCRDocumentScannerController"
+            stylesheets="@../css/application.css" styleClass="border-pane">
 
     <top>
-        <VBox>
-            <fx:include source="MenuBarComponent.fxml"/>
-        </VBox>
+        <fx:include source="MenuBarComponent.fxml"/>
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="true">
-            <VBox spacing="20" style="-fx-padding: 20;">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
+            <VBox spacing="20" alignment="TOP_CENTER"
+                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
 
-                <Label text="OCR Document Scanner" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                <Label text="OCR Document Scanner" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
                 <Label text="Upload insurance or vehicle documents for automatic data extraction using Optical Character Recognition"
-                       style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d; -fx-wrap-text: true;"/>
+                       styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity" wrapText="true"/>
 
                 <Separator/>
 
                 <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
 
-                <TitledPane text="Document Upload" expanded="true" style="-fx-font-weight: bold;">
-                    <VBox spacing="10" style="-fx-padding: 10;">
-                        <HBox spacing="10" alignment="CENTER_LEFT">
-                            <Button fx:id="uploadButton" text="Upload Document" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
-                                <graphic>
-                                    <Label text="📄" style="-fx-font-size: 16px;"/>
-                                </graphic>
-                                <effect>
-                                    <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                                </effect>
+                <!-- Document Upload Section -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="900" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Document Upload" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+
+                        <HBox spacing="10" alignment="CENTER">
+                            <Button fx:id="uploadButton" text="Upload Document" styleClass="button-primary" prefWidth="150">
+                                <graphic><Label text="📄" style="-fx-font-size: 14px;"/></graphic>
+                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
                             </Button>
-                            <Label fx:id="fileNameLabel" text="No file selected" style="-fx-text-fill: #7f8c8d;"/>
-                            <Button fx:id="fadeButton" text="Animate" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
-                                <effect>
-                                    <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                                </effect>
+                            <Label fx:id="fileNameLabel" text="No file selected" styleClass="status-text"/>
+                            <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100">
+                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
                             </Button>
                         </HBox>
                     </VBox>
-                </TitledPane>
+                </HBox>
 
                 <ProgressBar fx:id="scanProgressBar" prefWidth="Infinity" progress="0" visible="false"/>
 
-                <SplitPane dividerPositions="0.4">
-
+                <!-- Document Preview and Extraction -->
+                <HBox spacing="20" alignment="CENTER">
                     <!-- Left Panel - Document Preview -->
-                    <VBox spacing="10" alignment="CENTER" style="-fx-padding: 10;">
-                        <Label text="Document Preview" style="-fx-size: 14px; -fx-font-weight: bold;"/>
-                        <ImageView fx:id="documentImageView" fitWidth="300" fitHeight="250" preserveRatio="true"
-                                   style="-fx-border-color: #dddddd; -fx-border-width: 2; -fx-border-radius: 10; -fx-background-color: #f8f9fa;"/>
-                        <Button fx:id="scanButton" text="Scan Document" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" disable="true">
-                            <effect>
-                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                            </effect>
-                        </Button>
+                    <VBox spacing="10" alignment="CENTER" HBox.hgrow="ALWAYS">
+                        <VBox styleClass="profile-edit-card" alignment="CENTER">
+                            <Label text="Document Preview" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+                            <ImageView fx:id="documentImageView" fitWidth="300" fitHeight="250" preserveRatio="true"
+                                       styleClass="profile-card"/>
+                            <Button fx:id="scanButton" text="Scan Document" styleClass="button-warning" prefWidth="150" disable="true">
+                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                            </Button>
+                        </VBox>
                     </VBox>
 
                     <!-- Right Panel - Extracted Data -->
-                    <VBox spacing="10" style="-fx-padding: 10;">
-                        <Label text="Extracted Data" style="-fx-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                    <VBox spacing="10" alignment="CENTER" HBox.hgrow="ALWAYS">
+                        <VBox styleClass="profile-edit-card" alignment="CENTER">
+                            <Label text="Extracted Data" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                        <GridPane hgap="10" vgap="8">
-                            <Label text="Document Type:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <ComboBox fx:id="documentTypeComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250">
-                                <items>
-                                    <FXCollections fx:factory="observableArrayList">
-                                        <String fx:value="Insurance Policy"/>
-                                        <String fx:value="Vehicle Registration"/>
-                                        <String fx:value="Driver's License"/>
-                                        <String fx:value="Roadworthy Certificate"/>
-                                        <String fx:value="ID Document"/>
-                                    </FXCollections>
-                                </items>
-                            </ComboBox>
+                            <GridPane hgap="10" vgap="8" alignment="CENTER">
+                                <columnConstraints>
+                                    <ColumnConstraints halignment="RIGHT" minWidth="120"/>
+                                    <ColumnConstraints minWidth="200"/>
+                                </columnConstraints>
 
-                            <Label text="Document Number:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <TextField fx:id="documentNumberField" GridPane.rowIndex="1" GridPane.columnIndex="1" promptText="Auto-extracted"/>
+                                <Label text="Document Type:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <ComboBox fx:id="documentTypeComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250"/>
 
-                            <Label text="Issue Date:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <DatePicker fx:id="issueDatePicker" GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="200"/>
+                                <Label text="Document Number:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <TextField fx:id="documentNumberField" GridPane.rowIndex="1" GridPane.columnIndex="1" promptText="Auto-extracted"/>
 
-                            <Label text="Expiry Date:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <DatePicker fx:id="expiryDatePicker" GridPane.rowIndex="3" GridPane.columnIndex="1" prefWidth="200"/>
+                                <Label text="Issue Date:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <DatePicker fx:id="issueDatePicker" GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="200"/>
 
-                            <Label text="Vehicle Registration:" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <TextField fx:id="vehicleRegField" GridPane.rowIndex="4" GridPane.columnIndex="1" promptText="Auto-extracted"/>
+                                <Label text="Expiry Date:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <DatePicker fx:id="expiryDatePicker" GridPane.rowIndex="3" GridPane.columnIndex="1" prefWidth="200"/>
 
-                            <Label text="Owner Name:" GridPane.rowIndex="5" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <TextField fx:id="ownerNameField" GridPane.rowIndex="5" GridPane.columnIndex="1" promptText="Auto-extracted"/>
+                                <Label text="Vehicle Registration:" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <TextField fx:id="vehicleRegField" GridPane.rowIndex="4" GridPane.columnIndex="1" promptText="Auto-extracted"/>
 
-                            <Label text="Insurance Provider:" GridPane.rowIndex="6" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <TextField fx:id="providerField" GridPane.rowIndex="6" GridPane.columnIndex="1" promptText="Auto-extracted"/>
-                        </GridPane>
+                                <Label text="Owner Name:" GridPane.rowIndex="5" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <TextField fx:id="ownerNameField" GridPane.rowIndex="5" GridPane.columnIndex="1" promptText="Auto-extracted"/>
 
-                        <Button fx:id="importButton" text="Import to System" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" disable="true">
-                            <effect>
-                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                            </effect>
-                        </Button>
+                                <Label text="Insurance Provider:" GridPane.rowIndex="6" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <TextField fx:id="providerField" GridPane.rowIndex="6" GridPane.columnIndex="1" promptText="Auto-extracted"/>
+                            </GridPane>
+
+                            <Button fx:id="importButton" text="Import to System" styleClass="button-success" prefWidth="150" disable="true">
+                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                            </Button>
+                        </VBox>
                     </VBox>
-                </SplitPane>
+                </HBox>
 
-                <TitledPane text="Raw Extracted Text" expanded="true" style="-fx-font-weight: bold;">
-                    <TextArea fx:id="rawTextArea" prefHeight="120" editable="false" wrapText="true"
-                              style="-fx-background-color: #1e1e1e; -fx-text-fill: #e0e0e0; -fx-font-family: monospace;"/>
-                </TitledPane>
+                <!-- Raw Extracted Text -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="1000" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Raw Extracted Text" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+                        <TextArea fx:id="rawTextArea" prefHeight="120" editable="false" wrapText="true"
+                                  style="-fx-background-color: #1e1e1e; -fx-text-fill: #e0e0e0; -fx-font-family: monospace;" maxWidth="Infinity"/>
+                    </VBox>
+                </HBox>
 
                 <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
-                <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+                <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
+
+                <HBox alignment="CENTER">
+                    <Button fx:id="clearButton" text="Clear" styleClass="button-secondary" prefWidth="100"/>
+                    <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-primary" prefWidth="150"/>
+                </HBox>
+
             </VBox>
         </ScrollPane>
     </center>
 
     <bottom>
-        <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
-            <Button fx:id="clearButton" text="Clear" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 100;"/>
-            <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;"/>
-        </HBox>
         <fx:include source="FooterComponent.fxml"/>
     </bottom>
 </BorderPane>

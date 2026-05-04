@@ -10,18 +10,18 @@
             stylesheets="@../css/application.css" styleClass="border-pane">
 
     <top>
-        <VBox>
-            <fx:include source="MenuBarComponent.fxml"/>
-        </VBox>
+        <fx:include source="MenuBarComponent.fxml"/>
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
-            <VBox spacing="20" styleClass="dashboard-container" alignment="TOP_CENTER">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
+            <VBox spacing="20" alignment="TOP_CENTER"
+                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
 
                 <!-- Title -->
-                <Label text="Administrator Profile" styleClass="label-title"/>
-                <Label text="Manage your administrator account" styleClass="label-subtitle"/>
+                <Label text="Administrator Profile" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
+                <Label text="Manage your administrator account" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
 
                 <Separator/>
 
@@ -31,13 +31,13 @@
                 <HBox spacing="30" alignment="CENTER">
 
                     <!-- Left Panel - Profile Photo -->
-                    <VBox spacing="15" styleClass="profile-card" HBox.hgrow="NEVER" prefWidth="300" alignment="CENTER">
+                    <VBox spacing="15" styleClass="profile-card" prefWidth="300" alignment="CENTER">
                         <ImageView fx:id="profileImageView" fitHeight="150" fitWidth="150" styleClass="profile-image-circle"/>
                         <Button fx:id="uploadPhotoButton" text="Upload Photo" styleClass="button-info" maxWidth="160"/>
 
                         <Separator/>
 
-                        <Label text="Account Information" styleClass="section-title"/>
+                        <Label text="Account Information" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
                         <GridPane hgap="10" vgap="8" alignment="CENTER">
                             <Label text="Username:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
@@ -53,7 +53,7 @@
 
                     <!-- Right Panel - Editable Information -->
                     <VBox spacing="15" styleClass="profile-edit-card" HBox.hgrow="ALWAYS">
-                        <Label text="Personal Information" styleClass="section-title"/>
+                        <Label text="Personal Information" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
                         <GridPane hgap="15" vgap="12" alignment="CENTER">
                             <Label text="Full Name:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
@@ -71,14 +71,16 @@
 
                         <Separator/>
 
-                        <Label text="Security" styleClass="section-title"/>
+                        <Label text="Security" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                        <Button fx:id="changePasswordButton" text="Change Password" styleClass="button-warning" prefWidth="150"/>
+                        <HBox alignment="CENTER">
+                            <Button fx:id="changePasswordButton" text="Change Password" styleClass="button-warning" prefWidth="150"/>
+                        </HBox>
 
                         <Separator/>
 
                         <!-- Action Buttons -->
-                        <HBox spacing="15" alignment="CENTER_RIGHT">
+                        <HBox spacing="15" alignment="CENTER">
                             <Button fx:id="saveButton" text="Save Changes" styleClass="button-success" prefWidth="120"/>
                             <Button fx:id="cancelButton" text="Cancel" styleClass="button-secondary" prefWidth="100"/>
                             <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-primary" prefWidth="150"/>
@@ -90,7 +92,7 @@
                 <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
                 <!-- Status Label -->
-                <Label fx:id="statusLabel" styleClass="status-text"/>
+                <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
 
             </VBox>
         </ScrollPane>

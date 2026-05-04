@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class AdminProfileController {
@@ -98,14 +97,12 @@ public class AdminProfileController {
 
         departmentField.setText("System Administration");
 
-        // Format last login
         if (currentUser.getLastLogin() != null) {
             lastLoginLabel.setText(currentUser.getLastLogin().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         } else {
             lastLoginLabel.setText("Never");
         }
 
-        // Load profile image if exists
         loadProfileImage();
     }
 
@@ -129,13 +126,11 @@ public class AdminProfileController {
 
     private void setDefaultProfileImage() {
         try {
-            // Try to load default avatar from resources
             InputStream defaultImageStream = getClass().getResourceAsStream("/images/default-avatar.png");
             if (defaultImageStream != null) {
                 Image defaultImage = new Image(defaultImageStream);
                 profileImageView.setImage(defaultImage);
             } else {
-                // Create colored circle as fallback
                 profileImageView.setImage(null);
                 profileImageView.setStyle("-fx-background-color: #006400; -fx-background-radius: 75;");
             }
@@ -154,7 +149,6 @@ public class AdminProfileController {
     }
 
     private void applyVisualEffects() {
-        // Drop shadow for buttons
         DropShadow dropShadow = new DropShadow();
         dropShadow.setRadius(5.0);
         dropShadow.setOffsetX(2.0);
@@ -234,21 +228,18 @@ public class AdminProfileController {
         updateStatus("Saving profile changes...");
 
         try {
-            // Update user basic info fields
             currentUser.setFullName(fullNameField.getText().trim());
             currentUser.setEmail(emailField.getText().trim());
             currentUser.setPhone(phoneField.getText().trim());
 
             updateProgress(0.4);
 
-            // First update basic user info in database
             boolean success = userDAO.update(currentUser);
             updateProgress(0.6);
 
             if (success) {
                 updateStatus("Basic info saved successfully");
 
-                // Then save profile image if a new one was selected
                 if (selectedPhotoFile != null) {
                     String imagePath = saveProfileImage(selectedPhotoFile);
                     if (imagePath != null) {
@@ -266,7 +257,6 @@ public class AdminProfileController {
 
                 updateProgress(0.9);
 
-                // Update session information
                 SessionManager.getInstance().setFullName(currentUser.getFullName());
                 SessionManager.getInstance().setEmail(currentUser.getEmail());
 
@@ -275,7 +265,6 @@ public class AdminProfileController {
                 updateStatus("Profile saved successfully");
                 selectedPhotoFile = null;
 
-                // Reload profile to refresh image
                 loadProfileImage();
             } else {
                 AlertUtil.showError("Update Failed", "Failed to update profile information.");
@@ -321,24 +310,19 @@ public class AdminProfileController {
 
     private String saveProfileImage(File imageFile) {
         try {
-            // Create directory if it doesn't exist
             String userHome = System.getProperty("user.home");
             String appDir = userHome + File.separator + "VehicleIdentificationSystem" + File.separator + "profiles" + File.separator;
             File dir = new File(appDir);
 
-            System.out.println("Creating directory: " + appDir);
-
             if (!dir.exists()) {
                 boolean created = dir.mkdirs();
                 if (!created) {
-                    System.err.println("Failed to create directory: " + appDir);
                     appDir = "profiles" + File.separator;
                     dir = new File(appDir);
                     dir.mkdirs();
                 }
             }
 
-            // Generate unique filename
             String extension = "";
             String fileName = imageFile.getName();
             int lastDot = fileName.lastIndexOf(".");
@@ -352,17 +336,13 @@ public class AdminProfileController {
             String destinationPath = appDir + uniqueFileName;
             File destinationFile = new File(destinationPath);
 
-            // Copy file
             try (InputStream in = Files.newInputStream(imageFile.toPath())) {
                 Files.copy(in, destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
 
-            System.out.println("Image saved to: " + destinationPath);
-
             if (destinationFile.exists() && destinationFile.length() > 0) {
                 return destinationPath;
             } else {
-                System.err.println("File was not created successfully");
                 return null;
             }
 
@@ -377,7 +357,6 @@ public class AdminProfileController {
         if (statusLabel != null) {
             statusLabel.setText(message);
         }
-        System.out.println("Status: " + message);
     }
 
     private void showLoadProgress(boolean show) {

@@ -1,58 +1,64 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.VehicleDocument;
 
+/**
+ * VehicleDocumentDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class VehicleDocumentDAO extends BaseDAO<VehicleDocument> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public VehicleDocumentDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public VehicleDocument findById(int id) throws SQLException {
-        String sql = "SELECT * FROM vw_vehicle_documents WHERE id = ?";
-        return executeQuerySingle(sql, id);
+        List<VehicleDocument> results = viewLoader.loadViewWithCondition("vw_vehicle_documents", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<VehicleDocument> findAll() throws SQLException {
-        String sql = "SELECT * FROM vw_vehicle_documents ORDER BY expiry_date";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_vehicle_documents");
     }
 
     public List<VehicleDocument> findByVehicleId(int vehicleId) throws SQLException {
-        String sql = "SELECT * FROM vw_vehicle_documents WHERE vehicle_id = ? ORDER BY expiry_date";
-        return executeQuery(sql, vehicleId);
+        return viewLoader.loadViewWithCondition("vw_vehicle_documents", "vehicle_id = ? ORDER BY expiry_date", vehicleId);
     }
 
     public List<VehicleDocument> findByRegistrationNumber(String registrationNumber) throws SQLException {
-        String sql = "SELECT vd.* FROM vw_vehicle_documents vd " +
-                "WHERE vd.registration_number = ? ORDER BY vd.expiry_date";
-        return executeQuery(sql, registrationNumber);
+        return viewLoader.loadViewWithCondition("vw_vehicle_documents", "registration_number = ? ORDER BY expiry_date", registrationNumber);
     }
 
     public List<VehicleDocument> findExpiredDocuments() throws SQLException {
-        String sql = "SELECT * FROM vw_expired_documents ORDER BY expiry_date";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_expired_documents");
     }
 
     public List<VehicleDocument> findExpiringDocuments(int daysThreshold) throws SQLException {
-        String sql = "SELECT * FROM vw_vehicle_document_expiry WHERE days_remaining BETWEEN 0 AND ? ORDER BY expiry_date";
-        return executeQuery(sql, daysThreshold);
+        return viewLoader.loadViewWithCondition("vw_vehicle_document_expiry", "days_remaining BETWEEN 0 AND ? ORDER BY expiry_date", daysThreshold);
     }
 
     public List<VehicleDocument> findByDocumentType(String documentType) throws SQLException {
-        String sql = "SELECT * FROM vw_vehicle_documents WHERE document_type = ? ORDER BY expiry_date";
-        return executeQuery(sql, documentType);
+        return viewLoader.loadViewWithCondition("vw_vehicle_documents", "document_type = ? ORDER BY expiry_date", documentType);
     }
 
     @Override
     public boolean insert(VehicleDocument entity) throws SQLException {
-        String sql = "INSERT INTO vehicle_documents (vehicle_id, document_type, document_number, issue_date, expiry_date, document_file_path, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        int result = executeUpdate(sql,
+        Integer docId = procedureCaller.executeInsertVehicleDocument(
                 entity.getVehicleId(),
                 entity.getDocumentType(),
                 entity.getDocumentNumber(),
@@ -61,12 +67,15 @@ public class VehicleDocumentDAO extends BaseDAO<VehicleDocument> {
                 entity.getDocumentFilePath(),
                 entity.getStatus()
         );
-        return result > 0;
+        if (docId != null && docId > 0) {
+            entity.setId(docId);
+            return true;
+        }
+        return false;
     }
 
     public int insertAndGetId(VehicleDocument entity) throws SQLException {
-        String sql = "INSERT INTO vehicle_documents (vehicle_id, document_type, document_number, issue_date, expiry_date, document_file_path, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        return executeUpdateWithGeneratedKeys(sql,
+        return procedureCaller.executeInsertVehicleDocument(
                 entity.getVehicleId(),
                 entity.getDocumentType(),
                 entity.getDocumentNumber(),
@@ -79,35 +88,27 @@ public class VehicleDocumentDAO extends BaseDAO<VehicleDocument> {
 
     @Override
     public boolean update(VehicleDocument entity) throws SQLException {
-        String sql = "UPDATE vehicle_documents SET document_number = ?, issue_date = ?, expiry_date = ?, document_file_path = ?, status = ? WHERE id = ?";
-        int result = executeUpdate(sql,
+        return procedureCaller.executeUpdateVehicleDocument(
+                entity.getId(),
                 entity.getDocumentNumber(),
                 entity.getIssueDate(),
                 entity.getExpiryDate(),
                 entity.getDocumentFilePath(),
-                entity.getStatus(),
-                entity.getId()
+                entity.getStatus()
         );
-        return result > 0;
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM vehicle_documents WHERE id = ?";
-        int result = executeUpdate(sql, id);
-        return result > 0;
+        return procedureCaller.executeDeleteVehicleDocument(id);
     }
 
     public boolean deleteByVehicleId(int vehicleId) throws SQLException {
-        String sql = "DELETE FROM vehicle_documents WHERE vehicle_id = ?";
-        int result = executeUpdate(sql, vehicleId);
-        return result > 0;
+        return procedureCaller.executeDeleteVehicleDocumentsByVehicle(vehicleId);
     }
 
     public boolean updateStatus(int documentId, String status) throws SQLException {
-        String sql = "UPDATE vehicle_documents SET status = ? WHERE id = ?";
-        int result = executeUpdate(sql, status, documentId);
-        return result > 0;
+        return procedureCaller.executeUpdateVehicleDocumentStatus(documentId, status);
     }
 
     @Override

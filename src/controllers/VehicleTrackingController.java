@@ -13,9 +13,17 @@ import utils.ValidationUtil;
 import dao.VehicleDAO;
 import dao.StolenVehicleDAO;
 import models.Vehicle;
-import models.StolenVehicle;  // ADDED: Missing import
+import models.StolenVehicle;
 
+/**
+ * Controller for Vehicle Tracking
+ * Allows police officers to track vehicle locations and send alerts
+ */
 public class VehicleTrackingController {
+
+    // ============================================
+    // FXML UI COMPONENTS
+    // ============================================
 
     @FXML private TextField registrationField;
     @FXML private Button trackButton;
@@ -36,10 +44,21 @@ public class VehicleTrackingController {
     @FXML private ProgressIndicator loadProgress;
     @FXML private ProgressBar operationProgress;
 
+    // ============================================
+    // DAO INSTANCES & DATA MODELS
+    // ============================================
+
     private VehicleDAO vehicleDAO;
     private StolenVehicleDAO stolenVehicleDAO;
     private Vehicle currentVehicle;
 
+    // ============================================
+    // INITIALIZATION METHODS
+    // ============================================
+
+    /**
+     * Initializes the controller - sets up DAOs and UI components
+     */
     @FXML
     public void initialize() {
         vehicleDAO = new VehicleDAO();
@@ -47,11 +66,16 @@ public class VehicleTrackingController {
 
         setupButtonHandlers();
         applyVisualEffects();
+
+        // Hide tracking details initially
         trackingDetailsBox.setVisible(false);
         trackingDetailsBox.setExpanded(false);
         statusMessageLabel.setText("Ready");
     }
 
+    /**
+     * Applies drop shadow visual effects to buttons
+     */
     private void applyVisualEffects() {
         DropShadow dropShadow = new DropShadow();
         dropShadow.setRadius(5.0);
@@ -66,6 +90,9 @@ public class VehicleTrackingController {
         if (fadeButton != null) fadeButton.setEffect(dropShadow);
     }
 
+    /**
+     * Sets up button click handlers
+     */
     private void setupButtonHandlers() {
         trackButton.setOnAction(event -> handleTrack());
         locateButton.setOnAction(event -> handleLocate());
@@ -74,6 +101,9 @@ public class VehicleTrackingController {
         if (fadeButton != null) fadeButton.setOnAction(event -> showFadeAnimation());
     }
 
+    /**
+     * Plays fade animation on the animate button
+     */
     private void showFadeAnimation() {
         if (fadeButton != null) {
             FadeTransition fadeTransition = new FadeTransition(Duration.seconds(1.5), fadeButton);
@@ -89,6 +119,13 @@ public class VehicleTrackingController {
         }
     }
 
+    // ============================================
+    // BUSINESS LOGIC METHODS
+    // ============================================
+
+    /**
+     * Handles tracking a vehicle by registration number
+     */
     private void handleTrack() {
         String registrationNumber = registrationField.getText().trim();
 
@@ -102,10 +139,12 @@ public class VehicleTrackingController {
         updateProgress(0.3);
 
         try {
+            // Search for vehicle in database
             currentVehicle = vehicleDAO.findByRegistrationNumber(registrationNumber);
             updateProgress(0.8);
 
             if (currentVehicle != null) {
+                // Display vehicle information
                 trackingDetailsBox.setVisible(true);
                 trackingDetailsBox.setExpanded(true);
 
@@ -114,6 +153,7 @@ public class VehicleTrackingController {
                         " (" + currentVehicle.getYear() + ")");
                 statusLabel.setText(currentVehicle.getStatusName());
 
+                // Display location if available
                 if (currentVehicle.getCurrentLocationLat() != null && currentVehicle.getCurrentLocationLng() != null) {
                     lastLocationLabel.setText(String.format("Lat: %.6f, Lng: %.6f",
                             currentVehicle.getCurrentLocationLat(), currentVehicle.getCurrentLocationLng()));
@@ -145,6 +185,9 @@ public class VehicleTrackingController {
         }
     }
 
+    /**
+     * Checks if the tracked vehicle has been reported stolen
+     */
     private void checkStolenStatus() {
         if (currentVehicle != null) {
             try {
@@ -161,6 +204,9 @@ public class VehicleTrackingController {
         }
     }
 
+    /**
+     * Displays location information for the tracked vehicle
+     */
     private void handleLocate() {
         if (currentVehicle == null) {
             AlertUtil.showWarning("No Vehicle", "Please track a vehicle first.");
@@ -173,6 +219,9 @@ public class VehicleTrackingController {
                 "Last Updated: " + lastUpdatedLabel.getText());
     }
 
+    /**
+     * Sends an alert message for the tracked vehicle
+     */
     private void handleSendAlert() {
         if (currentVehicle == null) {
             AlertUtil.showWarning("No Vehicle", "Please track a vehicle first.");
@@ -191,6 +240,7 @@ public class VehicleTrackingController {
 
         if (confirmed) {
             try {
+                // In production, this would send to all police units
                 String fullMessage = "ALERT: " + alertMessage + " - Vehicle: " + currentVehicle.getRegistrationNumber();
                 AlertUtil.showSuccess("Alert sent successfully to all police units.");
                 alertMessageArea.clear();
@@ -203,6 +253,14 @@ public class VehicleTrackingController {
         }
     }
 
+    // ============================================
+    // UI PROGRESS METHODS
+    // ============================================
+
+    /**
+     * Shows/hides operation progress bar
+     * @param show true to show, false to hide
+     */
     private void showOperationProgress(boolean show) {
         if (operationProgress != null) {
             operationProgress.setVisible(show);
@@ -210,10 +268,17 @@ public class VehicleTrackingController {
         }
     }
 
+    /**
+     * Updates progress bar value
+     * @param progress value between 0 and 1
+     */
     private void updateProgress(double progress) {
         if (operationProgress != null) operationProgress.setProgress(progress);
     }
 
+    /**
+     * Hides progress indicators after a short delay
+     */
     private void hideProgressAfterDelay() {
         PauseTransition delay = new PauseTransition(Duration.seconds(1.5));
         delay.setOnFinished(event -> {

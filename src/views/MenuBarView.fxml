@@ -2,7 +2,8 @@
 
 <?import javafx.scene.control.*?>
 
-<MenuBar xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MenuBarComponentController">
+<MenuBar xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MenuBarComponentController"
+         stylesheets="@../css/application.css" styleClass="main-menu-bar">
     <Menu text="File">
         <MenuItem fx:id="exitMenuItem" text="Exit"/>
     </Menu>

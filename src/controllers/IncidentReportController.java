@@ -20,7 +20,16 @@ import models.Vehicle;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * Controller for Incident Report Management
+ * Handles creating, updating, and deleting police incident reports
+ * Includes accident, theft, vandalism, and hit-and-run reports
+ */
 public class IncidentReportController {
+
+    // ============================================
+    // FXML UI COMPONENTS - TABLE
+    // ============================================
 
     @FXML private TableView<PoliceReport> reportsTable;
     @FXML private TableColumn<PoliceReport, String> caseNumberColumn;
@@ -29,12 +38,20 @@ public class IncidentReportController {
     @FXML private TableColumn<PoliceReport, String> reportDateColumn;
     @FXML private TableColumn<PoliceReport, String> officerColumn;
 
+    // ============================================
+    // FORM COMPONENTS
+    // ============================================
+
     @FXML private ComboBox<Vehicle> vehicleComboBox;
     @FXML private ComboBox<String> reportTypeComboBox;
     @FXML private TextField caseNumberField;
     @FXML private DatePicker reportDatePicker;
     @FXML private TextField locationField;
     @FXML private TextArea descriptionArea;
+
+    // ============================================
+    // BUTTONS
+    // ============================================
 
     @FXML private Button createButton;
     @FXML private Button updateButton;
@@ -43,15 +60,31 @@ public class IncidentReportController {
     @FXML private Button backButton;
     @FXML private Button fadeButton;
 
+    // ============================================
+    // PROGRESS INDICATORS
+    // ============================================
+
     @FXML private ProgressIndicator loadProgress;
     @FXML private ProgressBar operationProgress;
     @FXML private Label statusLabel;
+
+    // ============================================
+    // DAO INSTANCES & DATA MODELS
+    // ============================================
 
     private PoliceReportDAO reportDAO;
     private VehicleDAO vehicleDAO;
     private ObservableList<PoliceReport> reportList;
     private PoliceReport selectedReport;
 
+    // ============================================
+    // INITIALIZATION METHODS
+    // ============================================
+
+    /**
+     * Initializes the incident report controller
+     * Sets up DAOs, table columns, loads data, and configures UI
+     */
     @FXML
     public void initialize() {
         reportDAO = new PoliceReportDAO();
@@ -69,6 +102,9 @@ public class IncidentReportController {
         statusLabel.setText("Ready");
     }
 
+    /**
+     * Configures table columns with cell value factories
+     */
     private void setupTableColumns() {
         caseNumberColumn.setCellValueFactory(cellData -> cellData.getValue().caseNumberProperty());
         vehicleColumn.setCellValueFactory(cellData -> cellData.getValue().registrationNumberProperty());
@@ -76,6 +112,7 @@ public class IncidentReportController {
         reportDateColumn.setCellValueFactory(cellData -> cellData.getValue().reportDateProperty().asString());
         officerColumn.setCellValueFactory(cellData -> cellData.getValue().officerNameProperty());
 
+        // Center align columns
         caseNumberColumn.setStyle("-fx-alignment: CENTER;");
         vehicleColumn.setStyle("-fx-alignment: CENTER-LEFT;");
         reportTypeColumn.setStyle("-fx-alignment: CENTER;");
@@ -86,10 +123,16 @@ public class IncidentReportController {
         reportsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
+    /**
+     * Configures combo boxes with available options
+     */
     private void setupComboBoxes() {
         reportTypeComboBox.getItems().addAll("ACCIDENT", "THEFT", "STOLEN", "RECOVERED", "VIOLATION");
     }
 
+    /**
+     * Loads all vehicles into the combo box
+     */
     private void loadVehicles() {
         try {
             List<Vehicle> vehicles = vehicleDAO.findAll();
@@ -100,6 +143,9 @@ public class IncidentReportController {
         }
     }
 
+    /**
+     * Loads all incident reports from database
+     */
     private void loadReports() {
         showProgress(true);
         statusLabel.setText("Loading reports...");
@@ -117,6 +163,9 @@ public class IncidentReportController {
         }
     }
 
+    /**
+     * Sets up button click handlers with animations
+     */
     private void setupButtonHandlers() {
         createButton.setOnAction(event -> handleCreate());
         updateButton.setOnAction(event -> handleUpdate());
@@ -125,6 +174,7 @@ public class IncidentReportController {
         backButton.setOnAction(event -> SceneManager.getInstance().switchToPoliceView());
         if (fadeButton != null) fadeButton.setOnAction(event -> showFadeAnimation());
 
+        // Table selection listener
         reportsTable.getSelectionModel().selectedItemProperty().addListener((obs, old, newVal) -> {
             if (newVal != null) {
                 selectedReport = newVal;
@@ -133,6 +183,9 @@ public class IncidentReportController {
         });
     }
 
+    /**
+     * Applies visual effects to buttons
+     */
     private void applyVisualEffects() {
         DropShadow dropShadow = new DropShadow();
         dropShadow.setRadius(5.0);
@@ -148,6 +201,9 @@ public class IncidentReportController {
         if (fadeButton != null) fadeButton.setEffect(dropShadow);
     }
 
+    /**
+     * Plays fade animation on the animate button
+     */
     private void showFadeAnimation() {
         if (fadeButton != null) {
             FadeTransition fadeTransition = new FadeTransition(Duration.seconds(1.5), fadeButton);
@@ -163,6 +219,10 @@ public class IncidentReportController {
         }
     }
 
+    /**
+     * Displays selected report details in the form
+     * @param report The police report to display
+     */
     private void displayReportDetails(PoliceReport report) {
         try {
             Vehicle vehicle = vehicleDAO.findById(report.getVehicleId());
@@ -178,9 +238,31 @@ public class IncidentReportController {
         descriptionArea.setText(report.getDescription() != null ? report.getDescription() : "");
     }
 
+    /**
+     * Clears all form fields
+     */
+    private void clearForm() {
+        vehicleComboBox.getSelectionModel().clearSelection();
+        reportTypeComboBox.setValue(null);
+        caseNumberField.clear();
+        reportDatePicker.setValue(LocalDate.now());
+        locationField.clear();
+        descriptionArea.clear();
+        selectedReport = null;
+        reportsTable.getSelectionModel().clearSelection();
+    }
+
+    // ============================================
+    // CRUD OPERATIONS
+    // ============================================
+
+    /**
+     * Handles creating a new incident report
+     */
     private void handleCreate() {
         Vehicle selectedVehicle = vehicleComboBox.getSelectionModel().getSelectedItem();
 
+        // Input validation
         if (selectedVehicle == null) {
             AlertUtil.showWarning("Validation Error", "Please select a vehicle.");
             return;
@@ -201,6 +283,7 @@ public class IncidentReportController {
         updateProgress(0.3);
 
         try {
+            // Create and populate report object
             PoliceReport report = new PoliceReport();
             report.setVehicleId(selectedVehicle.getId());
             report.setReportDate(reportDatePicker.getValue());
@@ -233,6 +316,9 @@ public class IncidentReportController {
         }
     }
 
+    /**
+     * Handles updating an existing incident report
+     */
     private void handleUpdate() {
         if (selectedReport == null) {
             AlertUtil.showWarning("No Selection", "Please select a report to update.");
@@ -250,6 +336,7 @@ public class IncidentReportController {
         updateProgress(0.5);
 
         try {
+            // Update report object with form values
             selectedReport.setVehicleId(selectedVehicle.getId());
             selectedReport.setReportDate(reportDatePicker.getValue());
             selectedReport.setReportType(reportTypeComboBox.getValue());
@@ -279,6 +366,9 @@ public class IncidentReportController {
         }
     }
 
+    /**
+     * Handles deleting an incident report
+     */
     private void handleDelete() {
         if (selectedReport == null) {
             AlertUtil.showWarning("No Selection", "Please select a report to delete.");
@@ -313,21 +403,22 @@ public class IncidentReportController {
         }
     }
 
-    private void clearForm() {
-        vehicleComboBox.getSelectionModel().clearSelection();
-        reportTypeComboBox.setValue(null);
-        caseNumberField.clear();
-        reportDatePicker.setValue(LocalDate.now());
-        locationField.clear();
-        descriptionArea.clear();
-        selectedReport = null;
-        reportsTable.getSelectionModel().clearSelection();
-    }
+    // ============================================
+    // UI PROGRESS METHODS
+    // ============================================
 
+    /**
+     * Shows/hides load progress indicator
+     * @param show true to show, false to hide
+     */
     private void showProgress(boolean show) {
         if (loadProgress != null) loadProgress.setVisible(show);
     }
 
+    /**
+     * Shows/hides operation progress bar
+     * @param show true to show, false to hide
+     */
     private void showOperationProgress(boolean show) {
         if (operationProgress != null) {
             operationProgress.setVisible(show);
@@ -335,14 +426,24 @@ public class IncidentReportController {
         }
     }
 
+    /**
+     * Updates progress bar value
+     * @param progress value between 0 and 1
+     */
     private void updateProgress(double progress) {
         if (operationProgress != null) operationProgress.setProgress(progress);
     }
 
+    /**
+     * Hides load progress indicator
+     */
     private void hideProgress() {
         if (loadProgress != null) loadProgress.setVisible(false);
     }
 
+    /**
+     * Hides progress indicators after a short delay
+     */
     private void hideProgressAfterDelay() {
         PauseTransition delay = new PauseTransition(Duration.seconds(1));
         delay.setOnFinished(event -> {

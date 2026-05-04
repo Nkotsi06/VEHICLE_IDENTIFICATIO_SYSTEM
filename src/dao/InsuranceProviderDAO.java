@@ -4,53 +4,64 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.InsuranceProvider;
 
+/**
+ * InsuranceProviderDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class InsuranceProviderDAO extends BaseDAO<InsuranceProvider> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public InsuranceProviderDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public InsuranceProvider findById(int id) throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_providers WHERE id = ?";
-        return executeQuerySingle(sql, id);
+        List<InsuranceProvider> results = viewLoader.loadViewWithCondition("vw_insurance_providers", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     public InsuranceProvider findByUserId(int userId) throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_providers WHERE user_id = ?";
-        return executeQuerySingle(sql, userId);
+        List<InsuranceProvider> results = viewLoader.loadViewWithCondition("vw_insurance_providers", "user_id = ?", userId);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     public InsuranceProvider findByName(String name) throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_providers WHERE name = ?";
-        return executeQuerySingle(sql, name);
+        List<InsuranceProvider> results = viewLoader.loadViewWithCondition("vw_insurance_providers", "name = ?", name);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     public List<InsuranceProvider> findByNamePattern(String namePattern) throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_providers WHERE name ILIKE ? ORDER BY name";
-        String searchPattern = "%" + namePattern + "%";
-        return executeQuery(sql, searchPattern);
+        String pattern = "%" + namePattern + "%";
+        return viewLoader.loadViewWithCondition("vw_insurance_providers", "name ILIKE ? ORDER BY name", pattern);
     }
 
     @Override
     public List<InsuranceProvider> findAll() throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_providers ORDER BY name";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_insurance_providers");
     }
 
     public List<InsuranceProvider> findActiveProviders() throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_providers WHERE status = 'ACTIVE' ORDER BY name";
-        return executeQuery(sql);
+        return viewLoader.loadViewWithCondition("vw_insurance_providers", "status = 'ACTIVE' ORDER BY name");
     }
 
     public List<InsuranceProvider> findByRating(double minRating) throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_providers WHERE rating >= ? ORDER BY rating DESC";
-        return executeQuery(sql, minRating);
+        return viewLoader.loadViewWithCondition("vw_insurance_providers", "rating >= ? ORDER BY rating DESC", minRating);
     }
 
     @Override
     public boolean insert(InsuranceProvider entity) throws SQLException {
-        String sql = "INSERT INTO insurance_providers (user_id, name, registration_number, license_number, contact_phone, contact_email, address, rating, coverage_details, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        int result = executeUpdate(sql,
-                entity.getUserId() > 0 ? entity.getUserId() : null,
+        return procedureCaller.executeInsertInsuranceProvider(
+                entity.getUserId(),
                 entity.getName(),
                 entity.getRegistrationNumber(),
                 entity.getLicenseNumber(),
@@ -59,15 +70,14 @@ public class InsuranceProviderDAO extends BaseDAO<InsuranceProvider> {
                 entity.getAddress(),
                 entity.getRating(),
                 entity.getCoverageDetails(),
-                entity.getStatus() != null ? entity.getStatus() : "ACTIVE"
+                entity.getStatus()
         );
-        return result > 0;
     }
 
     @Override
     public boolean update(InsuranceProvider entity) throws SQLException {
-        String sql = "UPDATE insurance_providers SET name = ?, registration_number = ?, license_number = ?, contact_phone = ?, contact_email = ?, address = ?, rating = ?, coverage_details = ?, status = ? WHERE id = ?";
-        int result = executeUpdate(sql,
+        return procedureCaller.executeUpdateInsuranceProvider(
+                entity.getId(),
                 entity.getName(),
                 entity.getRegistrationNumber(),
                 entity.getLicenseNumber(),
@@ -76,23 +86,17 @@ public class InsuranceProviderDAO extends BaseDAO<InsuranceProvider> {
                 entity.getAddress(),
                 entity.getRating(),
                 entity.getCoverageDetails(),
-                entity.getStatus(),
-                entity.getId()
+                entity.getStatus()
         );
-        return result > 0;
     }
 
     public boolean updateStatus(int providerId, String status) throws SQLException {
-        String sql = "UPDATE insurance_providers SET status = ? WHERE id = ?";
-        int result = executeUpdate(sql, status, providerId);
-        return result > 0;
+        return procedureCaller.executeUpdateInsuranceProviderStatus(providerId, status);
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM insurance_providers WHERE id = ?";
-        int result = executeUpdate(sql, id);
-        return result > 0;
+        return procedureCaller.executeDeleteInsuranceProvider(id);
     }
 
     @Override

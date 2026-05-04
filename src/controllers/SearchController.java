@@ -2,8 +2,7 @@ package controllers;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -248,9 +247,9 @@ public class SearchController {
                     new SimpleStringProperty(cellData.getValue().getMake()));
             searchModelColumn.setCellValueFactory(cellData ->
                     new SimpleStringProperty(cellData.getValue().getModel()));
-            // FIXED: Use SimpleIntegerProperty for Integer column
+            // FIXED: Use SimpleObjectProperty for Integer column
             searchYearColumn.setCellValueFactory(cellData ->
-                    new SimpleIntegerProperty(cellData.getValue().getYear()));
+                    new SimpleObjectProperty<>(cellData.getValue().getYear()));
             searchStatusColumn.setCellValueFactory(cellData ->
                     new SimpleStringProperty(cellData.getValue().getStatusName()));
         }
@@ -271,9 +270,9 @@ public class SearchController {
                     new SimpleStringProperty(cellData.getValue().getRegistrationNumber()));
             searchViolationTypeColumn.setCellValueFactory(cellData ->
                     new SimpleStringProperty(cellData.getValue().getViolationType()));
-            // FIXED: Use SimpleDoubleProperty for Double column
+            // FIXED: Use SimpleObjectProperty for Double column
             searchFineColumn.setCellValueFactory(cellData ->
-                    new SimpleDoubleProperty(cellData.getValue().getFineAmount()));
+                    new SimpleObjectProperty<>(cellData.getValue().getFineAmount()));
             searchPaymentColumn.setCellValueFactory(cellData ->
                     new SimpleStringProperty(cellData.getValue().getPaymentStatus()));
         }

@@ -5,105 +5,116 @@
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.VehicleTrackingController">
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.VehicleTrackingController"
+            stylesheets="@../css/application.css" styleClass="border-pane">
 
     <top>
-        <VBox>
-            <fx:include source="MenuBarComponent.fxml"/>
-        </VBox>
+        <fx:include source="MenuBarComponent.fxml"/>
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="true">
-            <VBox spacing="20" style="-fx-padding: 20;">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
+            <VBox spacing="20" alignment="TOP_CENTER"
+                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
 
-                <Label text="Vehicle Tracking" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-                <Label text="Track and monitor vehicle locations" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+                <Label text="Vehicle Tracking" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
+                <Label text="Track and monitor vehicle locations" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
 
                 <Separator/>
 
                 <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
 
-                <TitledPane text="Search Vehicle" expanded="true" style="-fx-font-weight: bold;">
-                    <HBox spacing="10" alignment="CENTER" style="-fx-padding: 10;">
-                        <TextField fx:id="registrationField" promptText="Enter Registration Number" HBox.hgrow="ALWAYS"/>
-                        <Button fx:id="trackButton" text="Track" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
-                            <effect>
-                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                            </effect>
-                        </Button>
-                        <Button fx:id="fadeButton" text="Animate" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
-                            <effect>
-                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                            </effect>
-                        </Button>
-                    </HBox>
-                </TitledPane>
+                <!-- Search Vehicle -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="800" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Search Vehicle" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+
+                        <HBox spacing="10" alignment="CENTER">
+                            <TextField fx:id="registrationField" promptText="Enter Registration Number" prefWidth="400" HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="trackButton" text="Track" styleClass="button-primary" prefWidth="100">
+                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                            </Button>
+                            <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100">
+                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                            </Button>
+                        </HBox>
+                    </VBox>
+                </HBox>
 
                 <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
-                <TitledPane fx:id="trackingDetailsBox" text="Vehicle Information" expanded="false" style="-fx-font-weight: bold;">
-                    <VBox spacing="15" style="-fx-padding: 15;">
-                        <GridPane hgap="15" vgap="10">
+                <!-- Vehicle Information -->
+                <HBox alignment="CENTER">
+                    <VBox fx:id="trackingDetailsBox" spacing="15" styleClass="profile-edit-card" maxWidth="800" alignment="CENTER">
+                        <Label text="Vehicle Information" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+
+                        <GridPane hgap="15" vgap="10" alignment="CENTER">
+                            <columnConstraints>
+                                <ColumnConstraints halignment="RIGHT" minWidth="100"/>
+                                <ColumnConstraints minWidth="200"/>
+                            </columnConstraints>
+
                             <Label text="Registration:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <Label fx:id="registrationInfoLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+                            <Label fx:id="registrationInfoLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" styleClass="status-text"/>
 
                             <Label text="Vehicle:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <Label fx:id="vehicleInfoLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+                            <Label fx:id="vehicleInfoLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" styleClass="status-text"/>
 
                             <Label text="Status:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
                             <Label fx:id="statusLabel" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
                             <Label text="Last Location:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <Label fx:id="lastLocationLabel" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                            <Label fx:id="lastLocationLabel" GridPane.rowIndex="3" GridPane.columnIndex="1" styleClass="status-text"/>
 
                             <Label text="Last Updated:" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <Label fx:id="lastUpdatedLabel" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                            <Label fx:id="lastUpdatedLabel" GridPane.rowIndex="4" GridPane.columnIndex="1" styleClass="status-text"/>
                         </GridPane>
 
                         <Separator/>
 
-                        <Label text="Location History" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+                        <Label text="Location History" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                        <TableView fx:id="locationHistoryTable" prefHeight="200">
+                        <TableView fx:id="locationHistoryTable" prefHeight="200" minHeight="150" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
                             <columns>
-                                <TableColumn fx:id="historyDateColumn" text="Date" prefWidth="150"/>
-                                <TableColumn fx:id="historyLocationColumn" text="Location" prefWidth="200"/>
-                                <TableColumn fx:id="historySourceColumn" text="Source" prefWidth="150"/>
+                                <TableColumn fx:id="historyDateColumn" text="Date" minWidth="120" maxWidth="160"/>
+                                <TableColumn fx:id="historyLocationColumn" text="Location" minWidth="180"/>
+                                <TableColumn fx:id="historySourceColumn" text="Source" minWidth="120" maxWidth="160"/>
                             </columns>
-                            <columnResizePolicy>
-                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                            </columnResizePolicy>
+                            <placeholder>
+                                <Label text="No location history available" styleClass="status-text"/>
+                            </placeholder>
                         </TableView>
 
-                        <Pagination fx:id="historyPagination" pageCount="1" maxPageIndicatorCount="5"/>
+                        <HBox alignment="CENTER">
+                            <Pagination fx:id="historyPagination" pageCount="1" maxPageIndicatorCount="5"/>
+                        </HBox>
 
                         <Separator/>
 
-                        <Label text="Send Alert" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+                        <Label text="Send Alert" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
                         <TextArea fx:id="alertMessageArea" promptText="Enter alert message..." prefHeight="80"/>
 
-                        <HBox spacing="10">
-                            <Button fx:id="alertButton" text="Send Alert" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 100;">
-                                <effect>
-                                    <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                                </effect>
+                        <HBox alignment="CENTER">
+                            <Button fx:id="alertButton" text="Send Alert" styleClass="button-danger" prefWidth="100">
+                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
                             </Button>
-                            <Button fx:id="locateButton" text="Locate on Map" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 120;"/>
+                            <Button fx:id="locateButton" text="Locate on Map" styleClass="button-success" prefWidth="120"/>
                         </HBox>
                     </VBox>
-                </TitledPane>
+                </HBox>
 
-                <Label fx:id="statusMessageLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+                <Label fx:id="statusMessageLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
+
+                <HBox alignment="CENTER">
+                    <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-secondary" prefWidth="150"/>
+                </HBox>
+
             </VBox>
         </ScrollPane>
     </center>
 
     <bottom>
-        <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
-            <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-        </HBox>
         <fx:include source="FooterComponent.fxml"/>
     </bottom>
-
 </BorderPane>

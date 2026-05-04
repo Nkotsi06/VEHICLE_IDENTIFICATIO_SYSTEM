@@ -5,117 +5,111 @@
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.InsuranceController">
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.InsuranceController"
+            stylesheets="@../css/application.css" styleClass="border-pane">
 
     <top>
-        <VBox>
-            <fx:include source="MenuBarComponent.fxml"/>
-        </VBox>
+        <fx:include source="MenuBarComponent.fxml"/>
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="true">
-            <VBox spacing="20" style="-fx-padding: 20;">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
+            <VBox spacing="20" alignment="TOP_CENTER"
+                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
 
                 <!-- Welcome Section -->
-                <Label fx:id="welcomeLabel" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-                <Label text="Insurance Provider Dashboard" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+                <Label fx:id="welcomeLabel" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
+                <Label text="Insurance Provider Dashboard" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
 
                 <Separator/>
 
                 <!-- Progress Indicator -->
                 <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
 
-                <!-- Pagination for Cards -->
-                <Pagination fx:id="cardPagination" pageCount="1" maxPageIndicatorCount="3">
-                    <pageFactory>
-                        <!-- Statistics Cards Row 1 -->
-                        <HBox spacing="15" alignment="CENTER">
-                            <VBox fx:id="activePoliciesCard" style="-fx-background-color: #3498db; -fx-background-radius: 8; -fx-padding: 15; -fx-alignment: CENTER;" HBox.hgrow="ALWAYS">
-                                <Label text="Active Policies" style="-fx-text-fill: white; -fx-font-size: 12px;"/>
-                                <Label fx:id="activePoliciesLabel" text="0" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;"/>
-                            </VBox>
+                <!-- Statistics Cards Row -->
+                <HBox spacing="15" alignment="CENTER" wrap="True">
+                    <VBox fx:id="activePoliciesCard" styleClass="dashboard-card" alignment="CENTER" HBox.hgrow="ALWAYS">
+                        <Label text="Active Policies" styleClass="card-title"/>
+                        <Label fx:id="activePoliciesLabel" text="0" styleClass="card-value"/>
+                    </VBox>
 
-                            <VBox fx:id="pendingClaimsCard" style="-fx-background-color: #e74c3c; -fx-background-radius: 8; -fx-padding: 15; -fx-alignment: CENTER;" HBox.hgrow="ALWAYS">
-                                <Label text="Pending Claims" style="-fx-text-fill: white; -fx-font-size: 12px;"/>
-                                <Label fx:id="pendingClaimsLabel" text="0" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;"/>
-                            </VBox>
+                    <VBox fx:id="pendingClaimsCard" styleClass="dashboard-card" alignment="CENTER" HBox.hgrow="ALWAYS">
+                        <Label text="Pending Claims" styleClass="card-title"/>
+                        <Label fx:id="pendingClaimsLabel" text="0" styleClass="card-value"/>
+                    </VBox>
 
-                            <VBox fx:id="expiredPoliciesCard" style="-fx-background-color: #e67e22; -fx-background-radius: 8; -fx-padding: 15; -fx-alignment: CENTER;" HBox.hgrow="ALWAYS">
-                                <Label text="Expired Policies" style="-fx-text-fill: white; -fx-font-size: 12px;"/>
-                                <Label fx:id="expiredPoliciesLabel" text="0" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;"/>
-                            </VBox>
+                    <VBox fx:id="expiredPoliciesCard" styleClass="dashboard-card" alignment="CENTER" HBox.hgrow="ALWAYS">
+                        <Label text="Expired Policies" styleClass="card-title"/>
+                        <Label fx:id="expiredPoliciesLabel" text="0" styleClass="card-value"/>
+                    </VBox>
 
-                            <VBox fx:id="totalPremiumCard" style="-fx-background-color: #2ecc71; -fx-background-radius: 8; -fx-padding: 15; -fx-alignment: CENTER;" HBox.hgrow="ALWAYS">
-                                <Label text="Total Premium" style="-fx-text-fill: white; -fx-font-size: 12px;"/>
-                                <Label fx:id="totalPremiumLabel" text="M0.00" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;"/>
-                            </VBox>
+                    <VBox fx:id="totalPremiumCard" styleClass="dashboard-card" alignment="CENTER" HBox.hgrow="ALWAYS">
+                        <Label text="Total Premium" styleClass="card-title"/>
+                        <Label fx:id="totalPremiumLabel" text="M0.00" styleClass="card-value"/>
+                    </VBox>
 
-                            <VBox fx:id="expiringSoonCard" style="-fx-background-color: #f39c12; -fx-background-radius: 8; -fx-padding: 15; -fx-alignment: CENTER;" HBox.hgrow="ALWAYS">
-                                <Label text="Expiring Soon" style="-fx-text-fill: white; -fx-font-size: 12px;"/>
-                                <Label fx:id="expiringSoonLabel" text="0" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;"/>
-                            </VBox>
+                    <VBox fx:id="expiringSoonCard" styleClass="dashboard-card" alignment="CENTER" HBox.hgrow="ALWAYS">
+                        <Label text="Expiring Soon" styleClass="card-title"/>
+                        <Label fx:id="expiringSoonLabel" text="0" styleClass="card-value"/>
+                    </VBox>
 
-                            <VBox fx:id="unreadNotificationsCard" style="-fx-background-color: #9b59b6; -fx-background-radius: 8; -fx-padding: 15; -fx-alignment: CENTER;" HBox.hgrow="ALWAYS">
-                                <Label text="Notifications" style="-fx-text-fill: white; -fx-font-size: 12px;"/>
-                                <Label fx:id="unreadNotificationsLabel" text="0" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;"/>
-                            </VBox>
-                        </HBox>
-                    </pageFactory>
-                </Pagination>
+                    <VBox fx:id="unreadNotificationsCard" styleClass="dashboard-card" alignment="CENTER" HBox.hgrow="ALWAYS">
+                        <Label text="Notifications" styleClass="card-title"/>
+                        <Label fx:id="unreadNotificationsLabel" text="0" styleClass="card-value"/>
+                    </VBox>
+                </HBox>
 
                 <Separator/>
 
                 <!-- Progress Bar -->
                 <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
-                <!-- Recent Policies Table with Pagination -->
+                <!-- Recent Policies Table -->
                 <TitledPane text="Recent Policies" expanded="true" style="-fx-font-weight: bold;">
                     <VBox spacing="10" style="-fx-padding: 10;">
-                        <TableView fx:id="policiesTable" prefHeight="250">
+                        <TableView fx:id="policiesTable" prefHeight="250" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
                             <columns>
-                                <TableColumn fx:id="policyNumberColumn" text="Policy Number" prefWidth="150"/>
-                                <TableColumn fx:id="vehicleRegColumn" text="Vehicle Registration" prefWidth="130"/>
-                                <TableColumn fx:id="providerNameColumn" text="Provider" prefWidth="150"/>
-                                <TableColumn fx:id="startDateColumn" text="Start Date" prefWidth="100"/>
-                                <TableColumn fx:id="endDateColumn" text="End Date" prefWidth="100"/>
-                                <TableColumn fx:id="policyStatusColumn" text="Status" prefWidth="80"/>
+                                <TableColumn fx:id="policyNumberColumn" text="Policy Number" minWidth="120" maxWidth="160"/>
+                                <TableColumn fx:id="vehicleRegColumn" text="Vehicle Registration" minWidth="110" maxWidth="140"/>
+                                <TableColumn fx:id="providerNameColumn" text="Provider" minWidth="120" maxWidth="160"/>
+                                <TableColumn fx:id="startDateColumn" text="Start Date" minWidth="90" maxWidth="110"/>
+                                <TableColumn fx:id="endDateColumn" text="End Date" minWidth="90" maxWidth="110"/>
+                                <TableColumn fx:id="policyStatusColumn" text="Status" minWidth="70" maxWidth="90"/>
                             </columns>
-                            <columnResizePolicy>
-                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                            </columnResizePolicy>
                             <placeholder>
-                                <Label text="No policies found" style="-fx-text-fill: #7f8c8d;"/>
+                                <Label text="No policies found" styleClass="status-text"/>
                             </placeholder>
                         </TableView>
-                        <Pagination fx:id="policiesPagination" pageCount="1" maxPageIndicatorCount="5"/>
+                        <HBox alignment="CENTER">
+                            <Pagination fx:id="policiesPagination" pageCount="1" maxPageIndicatorCount="5"/>
+                        </HBox>
                     </VBox>
                 </TitledPane>
 
-                <!-- Recent Claims Table with Pagination -->
+                <!-- Recent Claims Table -->
                 <TitledPane text="Recent Claims" expanded="true" style="-fx-font-weight: bold;">
                     <VBox spacing="10" style="-fx-padding: 10;">
-                        <TableView fx:id="claimsTable" prefHeight="200">
+                        <TableView fx:id="claimsTable" prefHeight="200" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
                             <columns>
-                                <TableColumn fx:id="claimIdColumn" text="Claim ID" prefWidth="80"/>
-                                <TableColumn fx:id="claimPolicyNumberColumn" text="Policy Number" prefWidth="130"/>
-                                <TableColumn fx:id="claimDateColumn" text="Claim Date" prefWidth="100"/>
-                                <TableColumn fx:id="claimAmountColumn" text="Amount (M)" prefWidth="100"/>
-                                <TableColumn fx:id="claimStatusColumn" text="Status" prefWidth="100"/>
+                                <TableColumn fx:id="claimIdColumn" text="Claim ID" minWidth="70" maxWidth="90"/>
+                                <TableColumn fx:id="claimPolicyNumberColumn" text="Policy Number" minWidth="110" maxWidth="140"/>
+                                <TableColumn fx:id="claimDateColumn" text="Claim Date" minWidth="90" maxWidth="110"/>
+                                <TableColumn fx:id="claimAmountColumn" text="Amount (M)" minWidth="90" maxWidth="110"/>
+                                <TableColumn fx:id="claimStatusColumn" text="Status" minWidth="80" maxWidth="110"/>
                             </columns>
-                            <columnResizePolicy>
-                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                            </columnResizePolicy>
                             <placeholder>
-                                <Label text="No claims found" style="-fx-text-fill: #7f8c8d;"/>
+                                <Label text="No claims found" styleClass="status-text"/>
                             </placeholder>
                         </TableView>
-                        <Pagination fx:id="claimsPagination" pageCount="1" maxPageIndicatorCount="5"/>
+                        <HBox alignment="CENTER">
+                            <Pagination fx:id="claimsPagination" pageCount="1" maxPageIndicatorCount="5"/>
+                        </HBox>
                     </VBox>
                 </TitledPane>
 
                 <!-- Status Label -->
-                <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+                <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
 
             </VBox>
         </ScrollPane>

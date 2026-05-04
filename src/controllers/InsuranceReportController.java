@@ -14,6 +14,7 @@ import utils.SceneManager;
 import utils.SessionManager;
 import utils.ExportUtil;
 import utils.CurrencyUtil;
+import dao.ReportGeneratorDAO;
 import dao.InsurancePolicyDAO;
 import dao.InsuranceClaimDAO;
 import dao.InsuranceProviderDAO;
@@ -25,6 +26,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.ArrayList;
 
 public class InsuranceReportController {
 
@@ -46,6 +48,7 @@ public class InsuranceReportController {
     @FXML private ProgressBar operationProgress;
     @FXML private Pagination reportPagination;
 
+    private ReportGeneratorDAO reportDAO;
     private InsurancePolicyDAO policyDAO;
     private InsuranceClaimDAO claimDAO;
     private InsuranceProviderDAO providerDAO;
@@ -59,6 +62,7 @@ public class InsuranceReportController {
 
     @FXML
     public void initialize() {
+        reportDAO = new ReportGeneratorDAO();
         policyDAO = new InsurancePolicyDAO();
         claimDAO = new InsuranceClaimDAO();
         providerDAO = new InsuranceProviderDAO();
@@ -92,8 +96,8 @@ public class InsuranceReportController {
                 "Expiring Policies Report",
                 "Claims Report",
                 "Premium Collection Report",
-                "Policy Renewal Report",
-                "Monthly Summary Report"
+                "Expired Documents Report",
+                "Audit Logs Report"
         );
         reportTypeComboBox.setValue("Active Policies Report");
     }
@@ -184,42 +188,58 @@ public class InsuranceReportController {
         try {
             updateProgress(0.4);
             List<Map<String, Object>> data = null;
+            String[] columnKeys = null;
+            String[] columnHeaders = null;
 
             switch (currentReportType) {
                 case "Active Policies Report":
-                    data = generateActivePoliciesReport();
-                    displayReport(data, new String[]{"policy_number", "vehicle_registration", "vehicle_make", "vehicle_model", "start_date", "end_date", "premium", "coverage_amount"},
-                            new String[]{"Policy #", "Vehicle", "Make", "Model", "Start Date", "End Date", "Premium", "Coverage"});
+                    if (providerId > 0) {
+                        List<InsurancePolicy> policies = policyDAO.findByProviderId(providerId);
+                        data = convertPoliciesToMap(policies, true);
+                    } else {
+                        List<InsurancePolicy> policies = policyDAO.findActivePolicies();
+                        data = convertPoliciesToMap(policies, true);
+                    }
+                    columnKeys = new String[]{"policy_number", "registration_number", "vehicle_make", "vehicle_model", "start_date", "end_date", "premium", "coverage_amount"};
+                    columnHeaders = new String[]{"Policy #", "Vehicle", "Make", "Model", "Start Date", "End Date", "Premium", "Coverage"};
                     break;
 
                 case "Expiring Policies Report":
-                    data = generateExpiringPoliciesReport();
-                    displayReport(data, new String[]{"policy_number", "vehicle_registration", "vehicle_make", "vehicle_model", "end_date", "days_remaining", "premium"},
-                            new String[]{"Policy #", "Vehicle", "Make", "Model", "Expiry Date", "Days Left", "Premium"});
+                    List<InsurancePolicy> expiringPolicies = policyDAO.findExpiringPolicies(90);
+                    data = convertPoliciesToMap(expiringPolicies, false);
+                    columnKeys = new String[]{"policy_number", "registration_number", "vehicle_make", "vehicle_model", "end_date", "days_remaining", "premium"};
+                    columnHeaders = new String[]{"Policy #", "Vehicle", "Make", "Model", "Expiry Date", "Days Left", "Premium"};
                     break;
 
                 case "Claims Report":
-                    data = generateClaimsReport(startDate, endDate);
-                    displayReport(data, new String[]{"claim_number", "policy_number", "vehicle_registration", "claim_date", "claim_amount", "status", "approved_amount"},
-                            new String[]{"Claim #", "Policy #", "Vehicle", "Claim Date", "Amount", "Status", "Approved"});
+                    if (providerId > 0) {
+                        List<InsuranceClaim> claims = claimDAO.findByProviderId(providerId);
+                        data = convertClaimsToMap(claims, startDate, endDate);
+                    } else {
+                        List<InsuranceClaim> claims = claimDAO.findByDateRange(startDate, endDate);
+                        data = convertClaimsToMap(claims, startDate, endDate);
+                    }
+                    columnKeys = new String[]{"claim_id", "policy_number", "registration_number", "claim_date", "claim_amount", "status", "approved_amount"};
+                    columnHeaders = new String[]{"Claim #", "Policy #", "Vehicle", "Claim Date", "Amount", "Status", "Approved"};
                     break;
 
                 case "Premium Collection Report":
-                    data = generatePremiumCollectionReport(startDate, endDate);
-                    displayReport(data, new String[]{"policy_number", "vehicle_registration", "premium", "payment_date", "receipt_number", "status"},
-                            new String[]{"Policy #", "Vehicle", "Premium", "Payment Date", "Receipt #", "Status"});
+                    // Use ReportGeneratorDAO for financial data
+                    data = reportDAO.generateFinancialReport(startDate, endDate);
+                    columnKeys = new String[]{"transaction_type", "transaction_date", "amount", "reference"};
+                    columnHeaders = new String[]{"Transaction Type", "Date", "Amount", "Reference"};
                     break;
 
-                case "Policy Renewal Report":
-                    data = generatePolicyRenewalReport();
-                    displayReport(data, new String[]{"policy_number", "vehicle_registration", "current_end_date", "suggested_renewal_date", "premium", "status"},
-                            new String[]{"Policy #", "Vehicle", "Current End Date", "Renewal Date", "Premium", "Status"});
+                case "Expired Documents Report":
+                    data = reportDAO.generateExpiredDocumentsReport();
+                    columnKeys = new String[]{"registration_number", "document_type", "expiry_date", "days_remaining", "expiry_status"};
+                    columnHeaders = new String[]{"Registration", "Document Type", "Expiry Date", "Days Remaining", "Status"};
                     break;
 
-                case "Monthly Summary Report":
-                    data = generateMonthlySummaryReport();
-                    displayReport(data, new String[]{"month", "new_policies", "renewals", "total_premium", "claims_filed", "claims_paid"},
-                            new String[]{"Month", "New Policies", "Renewals", "Total Premium", "Claims Filed", "Claims Paid"});
+                case "Audit Logs Report":
+                    data = reportDAO.generateAuditLogsReport();
+                    columnKeys = new String[]{"username", "action", "timestamp", "ip_address"};
+                    columnHeaders = new String[]{"User", "Action", "Timestamp", "IP Address"};
                     break;
 
                 default:
@@ -235,6 +255,8 @@ public class InsuranceReportController {
                 int totalPages = (int) Math.ceil((double) data.size() / pageSize);
                 if (reportPagination != null) reportPagination.setPageCount(Math.max(1, totalPages));
                 updateTablePage();
+
+                displayReport(columnKeys, columnHeaders);
 
                 double total = calculateTotal(data);
                 int rowCount = data.size();
@@ -264,62 +286,48 @@ public class InsuranceReportController {
         }
     }
 
-    private List<Map<String, Object>> generateActivePoliciesReport() throws Exception {
-        List<InsurancePolicy> policies = policyDAO.findByProviderId(providerId);
-        List<Map<String, Object>> result = new java.util.ArrayList<>();
-
-        for (InsurancePolicy policy : policies) {
-            if ("ACTIVE".equals(policy.getStatus())) {
-                Map<String, Object> row = new HashMap<>();
-                row.put("policy_number", policy.getPolicyNumber());
-                row.put("vehicle_registration", policy.getRegistrationNumber());
-                row.put("vehicle_make", policy.getVehicleMake());
-                row.put("vehicle_model", policy.getVehicleModel());
-                row.put("start_date", policy.getStartDate());
-                row.put("end_date", policy.getEndDate());
-                row.put("premium", policy.getPremium());
-                row.put("coverage_amount", policy.getCoverageAmount());
-                result.add(row);
-            }
-        }
-        return result;
-    }
-
-    private List<Map<String, Object>> generateExpiringPoliciesReport() throws Exception {
-        List<InsurancePolicy> policies = policyDAO.findByProviderId(providerId);
-        List<Map<String, Object>> result = new java.util.ArrayList<>();
+    private List<Map<String, Object>> convertPoliciesToMap(List<InsurancePolicy> policies, boolean includeStartDate) {
+        List<Map<String, Object>> result = new ArrayList<>();
         LocalDate today = LocalDate.now();
 
         for (InsurancePolicy policy : policies) {
-            if (policy.getEndDate() != null && policy.getEndDate().isBefore(today.plusDays(90))) {
-                long daysRemaining = java.time.temporal.ChronoUnit.DAYS.between(today, policy.getEndDate());
-                Map<String, Object> row = new HashMap<>();
-                row.put("policy_number", policy.getPolicyNumber());
-                row.put("vehicle_registration", policy.getRegistrationNumber());
-                row.put("vehicle_make", policy.getVehicleMake());
-                row.put("vehicle_model", policy.getVehicleModel());
-                row.put("end_date", policy.getEndDate());
-                row.put("days_remaining", daysRemaining);
-                row.put("premium", policy.getPremium());
-                result.add(row);
+            Map<String, Object> row = new HashMap<>();
+            row.put("policy_number", policy.getPolicyNumber());
+            row.put("registration_number", policy.getRegistrationNumber());
+            row.put("vehicle_make", policy.getVehicleMake() != null ? policy.getVehicleMake() : "");
+            row.put("vehicle_model", policy.getVehicleModel() != null ? policy.getVehicleModel() : "");
+
+            if (includeStartDate && policy.getStartDate() != null) {
+                row.put("start_date", policy.getStartDate().format(formatter));
             }
+
+            if (policy.getEndDate() != null) {
+                row.put("end_date", policy.getEndDate().format(formatter));
+                long daysRemaining = java.time.temporal.ChronoUnit.DAYS.between(today, policy.getEndDate());
+                row.put("days_remaining", Math.max(0, daysRemaining));
+            }
+
+            row.put("premium", policy.getPremium());
+            row.put("coverage_amount", policy.getCoverageAmount());
+            row.put("status", policy.getStatus());
+
+            result.add(row);
         }
         return result;
     }
 
-    private List<Map<String, Object>> generateClaimsReport(LocalDate startDate, LocalDate endDate) throws Exception {
-        List<InsuranceClaim> claims = claimDAO.findByProviderId(providerId);
-        List<Map<String, Object>> result = new java.util.ArrayList<>();
+    private List<Map<String, Object>> convertClaimsToMap(List<InsuranceClaim> claims, LocalDate startDate, LocalDate endDate) {
+        List<Map<String, Object>> result = new ArrayList<>();
 
         for (InsuranceClaim claim : claims) {
             if (claim.getClaimDate() != null &&
                     !claim.getClaimDate().isBefore(startDate) &&
                     !claim.getClaimDate().isAfter(endDate)) {
                 Map<String, Object> row = new HashMap<>();
-                row.put("claim_number", claim.getId());
+                row.put("claim_id", claim.getId());
                 row.put("policy_number", claim.getPolicyNumber());
-                row.put("vehicle_registration", claim.getRegistrationNumber());
-                row.put("claim_date", claim.getClaimDate());
+                row.put("registration_number", claim.getRegistrationNumber());
+                row.put("claim_date", claim.getClaimDate().format(formatter));
                 row.put("claim_amount", claim.getClaimAmount());
                 row.put("status", claim.getStatus());
                 row.put("approved_amount", claim.getApprovedAmount() != null ? claim.getApprovedAmount() : 0);
@@ -329,79 +337,7 @@ public class InsuranceReportController {
         return result;
     }
 
-    private List<Map<String, Object>> generatePremiumCollectionReport(LocalDate startDate, LocalDate endDate) throws Exception {
-        // This would query payments table - simplified for now
-        List<Map<String, Object>> result = new java.util.ArrayList<>();
-        List<InsurancePolicy> policies = policyDAO.findByProviderId(providerId);
-
-        for (InsurancePolicy policy : policies) {
-            if ("ACTIVE".equals(policy.getStatus())) {
-                Map<String, Object> row = new HashMap<>();
-                row.put("policy_number", policy.getPolicyNumber());
-                row.put("vehicle_registration", policy.getRegistrationNumber());
-                row.put("premium", policy.getPremium());
-                row.put("payment_date", policy.getStartDate());
-                row.put("receipt_number", "REC-" + policy.getId());
-                row.put("status", "PAID");
-                result.add(row);
-            }
-        }
-        return result;
-    }
-
-    private List<Map<String, Object>> generatePolicyRenewalReport() throws Exception {
-        List<InsurancePolicy> policies = policyDAO.findByProviderId(providerId);
-        List<Map<String, Object>> result = new java.util.ArrayList<>();
-        LocalDate today = LocalDate.now();
-
-        for (InsurancePolicy policy : policies) {
-            if (policy.getEndDate() != null && policy.getEndDate().isBefore(today.plusDays(60))) {
-                Map<String, Object> row = new HashMap<>();
-                row.put("policy_number", policy.getPolicyNumber());
-                row.put("vehicle_registration", policy.getRegistrationNumber());
-                row.put("current_end_date", policy.getEndDate().format(formatter));
-                row.put("suggested_renewal_date", policy.getEndDate().plusDays(1).format(formatter));
-                row.put("premium", policy.getPremium());
-                row.put("status", policy.getStatus());
-                result.add(row);
-            }
-        }
-        return result;
-    }
-
-    private List<Map<String, Object>> generateMonthlySummaryReport() throws Exception {
-        List<InsurancePolicy> policies = policyDAO.findByProviderId(providerId);
-        List<Map<String, Object>> result = new java.util.ArrayList<>();
-        Map<String, Map<String, Object>> monthlyData = new HashMap<>();
-
-        for (InsurancePolicy policy : policies) {
-            String month = policy.getStartDate().format(DateTimeFormatter.ofPattern("MMM yyyy"));
-
-            monthlyData.computeIfAbsent(month, k -> {
-                Map<String, Object> row = new HashMap<>();
-                row.put("month", month);
-                row.put("new_policies", 0);
-                row.put("renewals", 0);
-                row.put("total_premium", 0.0);
-                row.put("claims_filed", 0);
-                row.put("claims_paid", 0);
-                return row;
-            });
-
-            Map<String, Object> row = monthlyData.get(month);
-            int newCount = (int) row.get("new_policies");
-            double premium = (double) row.get("total_premium");
-            row.put("new_policies", newCount + 1);
-            row.put("total_premium", premium + policy.getPremium());
-        }
-
-        result.addAll(monthlyData.values());
-        result.sort((a, b) -> ((String) a.get("month")).compareTo((String) b.get("month")));
-        return result;
-    }
-
-    @SuppressWarnings("unchecked")
-    private void displayReport(List<Map<String, Object>> data, String[] columnKeys, String[] columnHeaders) {
+    private void displayReport(String[] columnKeys, String[] columnHeaders) {
         reportTable.getColumns().clear();
 
         for (int i = 0; i < columnKeys.length; i++) {
@@ -429,9 +365,6 @@ public class InsuranceReportController {
                 return days + " days";
             }
             return value.toString();
-        }
-        if (value instanceof LocalDate) {
-            return ((LocalDate) value).format(formatter);
         }
         return value.toString();
     }

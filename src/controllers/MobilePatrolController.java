@@ -1,13 +1,7 @@
 package controllers;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
 import utils.AlertUtil;
 import utils.SceneManager;
 import utils.SessionManager;
@@ -21,8 +15,18 @@ import models.BOLOAlert;
 
 import java.util.List;
 
+/**
+ * Controller for Mobile Patrol Integration
+ * Coordinates and tracks mobile police patrol units in real-time
+ * Provides location updates, BOLO alerts, and stolen vehicle detection
+ */
 public class MobilePatrolController {
 
+    // ============================================
+    // FXML UI COMPONENTS
+    // ============================================
+
+    // Selection and Control Components
     @FXML private ComboBox<PoliceUnit> unitComboBox;
     @FXML private Button syncButton;
     @FXML private Button locateButton;
@@ -30,10 +34,12 @@ public class MobilePatrolController {
     @FXML private Button refreshButton;
     @FXML private Button backButton;
 
+    // Status Display Labels
     @FXML private Label unitStatusLabel;
     @FXML private Label unitLocationLabel;
     @FXML private Label lastSyncLabel;
 
+    // Tables and Lists
     @FXML private TableView<StolenVehicle> nearbyStolenTable;
     @FXML private TableColumn<StolenVehicle, String> regColumn;
     @FXML private TableColumn<StolenVehicle, String> makeColumn;
@@ -43,14 +49,23 @@ public class MobilePatrolController {
     @FXML private ListView<String> boloAlertsList;
     @FXML private ListView<String> pendingSyncList;
 
+    // Location Update Fields
     @FXML private TextField latitudeField;
     @FXML private TextField longitudeField;
     @FXML private Button updateLocationButton;
+
+    // ============================================
+    // DAO INSTANCES
+    // ============================================
 
     private PoliceUnitDAO unitDAO;
     private MobilePatrolSyncDAO syncDAO;
     private StolenVehicleDAO stolenDAO;
     private BOLOAlertDAO boloDAO;
+
+    // ============================================
+    // INITIALIZATION METHODS
+    // ============================================
 
     @FXML
     public void initialize() {
@@ -77,11 +92,17 @@ public class MobilePatrolController {
 
     private void loadUnits() {
         try {
+            // PoliceUnitDAO has findAvailableUnits() method - confirmed
             List<PoliceUnit> units = unitDAO.findAvailableUnits();
             unitComboBox.getItems().setAll(units);
+
+            if (!units.isEmpty()) {
+                unitComboBox.getSelectionModel().selectFirst();
+                loadUnitData();
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            AlertUtil.showError("Load Failed", "Failed to load police units.");
+            AlertUtil.showError("Load Failed", "Failed to load police units: " + e.getMessage());
         }
     }
 
@@ -96,19 +117,29 @@ public class MobilePatrolController {
         unitComboBox.setOnAction(event -> loadUnitData());
     }
 
+    // ============================================
+    // UNIT DATA LOADING METHODS
+    // ============================================
+
     private void loadUnitData() {
         PoliceUnit selectedUnit = unitComboBox.getSelectionModel().getSelectedItem();
         if (selectedUnit != null) {
+            // Display unit status
             unitStatusLabel.setText("Status: " + selectedUnit.getStatus());
-            if (selectedUnit.getCurrentLocationLat() != null) {
+
+            // Display location if available
+            if (selectedUnit.getCurrentLocationLat() != null && selectedUnit.getCurrentLocationLat() != 0) {
                 unitLocationLabel.setText(String.format("Location: %.6f, %.6f",
                         selectedUnit.getCurrentLocationLat(), selectedUnit.getCurrentLocationLng()));
             } else {
                 unitLocationLabel.setText("Location: Not available");
             }
+
+            // Display last sync time
             lastSyncLabel.setText("Last Update: " +
                     (selectedUnit.getLastLocationUpdate() != null ? selectedUnit.getLastLocationUpdate().toString() : "Never"));
 
+            // Load related data
             loadNearbyStolen(selectedUnit);
             loadBOLOAlerts();
             loadPendingSync(selectedUnit);
@@ -119,11 +150,14 @@ public class MobilePatrolController {
         try {
             nearbyStolenTable.getItems().clear();
 
-            if (unit.getCurrentLocationLat() != null && unit.getCurrentLocationLng() != null) {
+            if (unit.getCurrentLocationLat() != null && unit.getCurrentLocationLng() != null &&
+                    unit.getCurrentLocationLat() != 0 && unit.getCurrentLocationLng() != 0) {
+
+                // Find stolen vehicles within 10km radius
                 List<StolenVehicle> nearbyStolen = stolenDAO.findNearbyStolen(
                         unit.getCurrentLocationLat(), unit.getCurrentLocationLng(), 10.0);
 
-                if (nearbyStolen != null) {
+                if (nearbyStolen != null && !nearbyStolen.isEmpty()) {
                     for (StolenVehicle vehicle : nearbyStolen) {
                         double distance = calculateDistance(
                                 unit.getCurrentLocationLat(), unit.getCurrentLocationLng(),
@@ -141,7 +175,7 @@ public class MobilePatrolController {
     }
 
     private double calculateDistance(Double lat1, Double lng1, Double lat2, Double lng2) {
-        if (lat1 == null || lng1 == null || lat2 == null || lng2 == null) {
+        if (lat1 == null || lng1 == null || lat2 == null || lng2 == null || lat1 == 0 || lng1 == 0) {
             return 999.0;
         }
         double earthRadius = 6371;
@@ -195,6 +229,10 @@ public class MobilePatrolController {
         }
     }
 
+    // ============================================
+    // REFRESH AND SYNC METHODS
+    // ============================================
+
     private void refreshData() {
         loadUnits();
         PoliceUnit selected = unitComboBox.getSelectionModel().getSelectedItem();
@@ -223,9 +261,13 @@ public class MobilePatrolController {
 
         } catch (Exception e) {
             e.printStackTrace();
-            AlertUtil.showError("Sync Error", "An error occurred during synchronization.");
+            AlertUtil.showError("Sync Error", "An error occurred during synchronization: " + e.getMessage());
         }
     }
+
+    // ============================================
+    // LOCATION AND ALERT METHODS
+    // ============================================
 
     private void handleLocate() {
         PoliceUnit selectedUnit = unitComboBox.getSelectionModel().getSelectedItem();
@@ -269,7 +311,7 @@ public class MobilePatrolController {
 
             } catch (Exception e) {
                 e.printStackTrace();
-                AlertUtil.showError("Alert Error", "An error occurred while sending alert.");
+                AlertUtil.showError("Alert Error", "An error occurred while sending alert: " + e.getMessage());
             }
         }
     }
@@ -293,6 +335,7 @@ public class MobilePatrolController {
             double lat = Double.parseDouble(latText);
             double lng = Double.parseDouble(lngText);
 
+            // Validate coordinate ranges
             if (lat < -90 || lat > 90) {
                 AlertUtil.showWarning("Invalid Latitude", "Latitude must be between -90 and 90.");
                 return;
@@ -319,7 +362,7 @@ public class MobilePatrolController {
             AlertUtil.showError("Invalid Input", "Please enter valid numeric coordinates.");
         } catch (Exception e) {
             e.printStackTrace();
-            AlertUtil.showError("Update Error", "An error occurred while updating location.");
+            AlertUtil.showError("Update Error", "An error occurred while updating location: " + e.getMessage());
         }
     }
 }

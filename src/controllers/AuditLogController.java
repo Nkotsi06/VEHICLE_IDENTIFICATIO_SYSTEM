@@ -11,8 +11,12 @@ import utils.SceneManager;
 import utils.ValidationUtil;
 import dao.AuditDAO;
 import models.AuditLog;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class AuditLogController {
 
@@ -37,6 +41,7 @@ public class AuditLogController {
     @FXML private ProgressBar operationProgress;
 
     private AuditDAO auditDAO;
+    private List<AuditLog> allLogs;
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @FXML
@@ -66,10 +71,9 @@ public class AuditLogController {
         showLoadProgress(true);
 
         try {
-            java.util.List<AuditLog> logs = auditDAO.findAll();
-            auditTable.getItems().setAll(logs);
-            totalCountLabel.setText("Total: " + logs.size());
-            System.out.println("Loaded " + logs.size() + " audit logs");
+            allLogs = auditDAO.findAll();
+            auditTable.getItems().setAll(allLogs);
+            totalCountLabel.setText("Total: " + allLogs.size());
         } catch (Exception e) {
             e.printStackTrace();
             AlertUtil.showError("Load Failed", "Failed to load audit logs: " + e.getMessage());
@@ -82,8 +86,8 @@ public class AuditLogController {
         actionFilterComboBox.getItems().addAll("ALL", "LOGIN", "LOGOUT", "CREATE", "UPDATE", "DELETE", "SEARCH", "EXPORT");
         actionFilterComboBox.setValue("ALL");
 
-        startDatePicker.setValue(LocalDateTime.now().minusDays(30).toLocalDate());
-        endDatePicker.setValue(LocalDateTime.now().toLocalDate());
+        startDatePicker.setValue(LocalDate.now().minusDays(30));
+        endDatePicker.setValue(LocalDate.now());
     }
 
     private void setupButtonHandlers() {
@@ -99,7 +103,7 @@ public class AuditLogController {
     }
 
     private void handleSearch() {
-        String searchTerm = searchField.getText().trim();
+        String searchTerm = searchField.getText().trim().toLowerCase();
         String actionFilter = actionFilterComboBox.getValue();
         LocalDateTime startDate = startDatePicker.getValue() != null ?
                 startDatePicker.getValue().atStartOfDay() : null;
@@ -109,23 +113,30 @@ public class AuditLogController {
         showLoadProgress(true);
 
         try {
-            java.util.List<AuditLog> results = auditDAO.findAll();
+            List<AuditLog> results = allLogs;
 
             if (ValidationUtil.isNotEmpty(searchTerm)) {
-                String lowerSearch = searchTerm.toLowerCase();
-                results.removeIf(log -> !log.getUsername().toLowerCase().contains(lowerSearch) &&
-                        !log.getAction().toLowerCase().contains(lowerSearch));
+                results = results.stream()
+                        .filter(log -> log.getUsername().toLowerCase().contains(searchTerm) ||
+                                log.getAction().toLowerCase().contains(searchTerm))
+                        .collect(Collectors.toList());
             }
 
             if (!"ALL".equals(actionFilter)) {
-                results.removeIf(log -> !log.getAction().contains(actionFilter));
+                results = results.stream()
+                        .filter(log -> log.getAction().equals(actionFilter))
+                        .collect(Collectors.toList());
             }
 
             if (startDate != null) {
-                results.removeIf(log -> log.getTimestamp().isBefore(startDate));
+                results = results.stream()
+                        .filter(log -> log.getTimestamp() != null && log.getTimestamp().isAfter(startDate))
+                        .collect(Collectors.toList());
             }
             if (endDate != null) {
-                results.removeIf(log -> log.getTimestamp().isAfter(endDate));
+                results = results.stream()
+                        .filter(log -> log.getTimestamp() != null && log.getTimestamp().isBefore(endDate))
+                        .collect(Collectors.toList());
             }
 
             auditTable.getItems().setAll(results);

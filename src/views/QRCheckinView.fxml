@@ -6,96 +6,126 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.QRCheckinController">
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.QRCheckinController"
+            stylesheets="@../css/application.css" styleClass="border-pane">
 
     <top>
-        <VBox>
-            <fx:include source="MenuBarComponent.fxml"/>
-        </VBox>
+        <fx:include source="MenuBarComponent.fxml"/>
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="true">
-            <VBox spacing="20" style="-fx-padding: 20;" alignment="CENTER">
-                <Label text="QR Code Vehicle Check-in" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-                <Label text="Scan QR code for quick vehicle check-in" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
+            <VBox spacing="20" alignment="TOP_CENTER"
+                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
+
+                <Label text="QR Code Vehicle Check-in" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
+                <Label text="Scan QR code for quick vehicle check-in" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
 
                 <Separator/>
 
                 <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
 
-                <TitledPane text="Scan QR Code" expanded="true" style="-fx-font-weight: bold;">
-                    <VBox spacing="15" style="-fx-padding: 15;" alignment="CENTER">
-                        <HBox spacing="10" alignment="CENTER">
-                            <TextField fx:id="qrCodeField" promptText="Scan or enter QR code" HBox.hgrow="ALWAYS" prefWidth="300"/>
-                            <Button fx:id="scanButton" text="Scan" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
-                                <effect>
-                                    <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                                </effect>
+                <!-- QR Scan Section -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="800" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Scan QR Code" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+
+                        <HBox spacing="15" alignment="CENTER">
+                            <TextField fx:id="qrCodeField" promptText="Scan or enter QR code" prefWidth="400" HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="scanButton" text="Scan" styleClass="button-primary" prefWidth="100">
+                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
                             </Button>
-                            <Button fx:id="manualEntryButton" text="Manual Entry" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                            <Button fx:id="fadeButton" text="Animate" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                            <Button fx:id="manualEntryButton" text="Manual Entry" styleClass="button-info" prefWidth="110">
+                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                            </Button>
+                            <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100">
+                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                            </Button>
                         </HBox>
                     </VBox>
-                </TitledPane>
+                </HBox>
 
                 <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
-                <TitledPane text="Vehicle Information" expanded="false" style="-fx-font-weight: bold;">
-                    <HBox spacing="30" alignment="CENTER" style="-fx-padding: 20;">
-                        <ImageView fx:id="qrImageView" fitWidth="150" fitHeight="150" style="-fx-border-color: #dddddd; -fx-border-width: 2; -fx-border-radius: 10;"/>
-                        <VBox spacing="15">
-                            <GridPane hgap="15" vgap="10">
-                                <Label text="Registration:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                                <Label fx:id="registrationLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+                <!-- Vehicle Information Section -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="900" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Vehicle Information" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                                <Label text="Make/Model:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                                <Label fx:id="vehicleInfoLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+                        <HBox spacing="30" alignment="CENTER">
+                            <ImageView fx:id="qrImageView" fitWidth="150" fitHeight="150" styleClass="profile-card"/>
+                            <VBox spacing="15" HBox.hgrow="ALWAYS" alignment="CENTER">
+                                <GridPane hgap="15" vgap="10" alignment="CENTER">
+                                    <columnConstraints>
+                                        <ColumnConstraints halignment="RIGHT" minWidth="100"/>
+                                        <ColumnConstraints minWidth="200"/>
+                                    </columnConstraints>
 
-                                <Label text="Owner:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                                <Label fx:id="ownerInfoLabel" GridPane.rowIndex="2" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+                                    <Label text="Registration:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                    <Label fx:id="registrationLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" styleClass="status-text"/>
 
-                                <Label text="Status:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                                <Label fx:id="statusLabel" GridPane.rowIndex="3" GridPane.columnIndex="1" style="-fx-text-fill: #f39c12; -fx-font-weight: bold;"/>
-                            </GridPane>
-                        </VBox>
-                    </HBox>
-                </TitledPane>
+                                    <Label text="Make/Model:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                    <Label fx:id="vehicleInfoLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" styleClass="status-text"/>
 
-                <TitledPane text="Service Details" expanded="false" style="-fx-font-weight: bold;">
-                    <GridPane hgap="15" vgap="12" style="-fx-padding: 15;">
-                        <Label text="Service Type:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <ComboBox fx:id="serviceTypeComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="200"/>
+                                    <Label text="Owner:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                    <Label fx:id="ownerInfoLabel" GridPane.rowIndex="2" GridPane.columnIndex="1" styleClass="status-text"/>
 
-                        <Label text="Cost (M):" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <TextField fx:id="costField" GridPane.rowIndex="1" GridPane.columnIndex="1" promptText="Enter cost"/>
-
-                        <Label text="Odometer (km):" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <TextField fx:id="odometerField" GridPane.rowIndex="2" GridPane.columnIndex="1" promptText="Enter odometer reading"/>
-
-                        <Label text="Mechanic:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <ComboBox fx:id="mechanicComboBox" GridPane.rowIndex="3" GridPane.columnIndex="1" prefWidth="200"/>
-                    </GridPane>
-                </TitledPane>
-
-                <HBox spacing="15" alignment="CENTER">
-                    <Button fx:id="checkinButton" text="Complete Check-in" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;" disable="true">
-                        <effect>
-                            <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                        </effect>
-                    </Button>
-                    <Button fx:id="clearButton" text="Clear" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 100;"/>
+                                    <Label text="Status:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                    <Label fx:id="statusLabel" GridPane.rowIndex="3" GridPane.columnIndex="1" style="-fx-text-fill: #f39c12; -fx-font-weight: bold;"/>
+                                </GridPane>
+                            </VBox>
+                        </HBox>
+                    </VBox>
                 </HBox>
 
-                <Label fx:id="messageLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+                <!-- Service Details Section -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="900" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Service Details" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+
+                        <GridPane hgap="15" vgap="12" alignment="CENTER">
+                            <columnConstraints>
+                                <ColumnConstraints halignment="RIGHT" minWidth="100"/>
+                                <ColumnConstraints minWidth="200"/>
+                            </columnConstraints>
+
+                            <Label text="Service Type:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="serviceTypeComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="200"/>
+
+                            <Label text="Cost (M):" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="costField" GridPane.rowIndex="1" GridPane.columnIndex="1" promptText="Enter cost"/>
+
+                            <Label text="Odometer (km):" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="odometerField" GridPane.rowIndex="2" GridPane.columnIndex="1" promptText="Enter odometer reading"/>
+
+                            <Label text="Mechanic:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="mechanicComboBox" GridPane.rowIndex="3" GridPane.columnIndex="1" prefWidth="200"/>
+                        </GridPane>
+                    </VBox>
+                </HBox>
+
+                <!-- Action Buttons -->
+                <HBox alignment="CENTER">
+                    <Button fx:id="checkinButton" text="Complete Check-in" styleClass="button-success" prefWidth="150" disable="true">
+                        <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                    </Button>
+                    <Button fx:id="clearButton" text="Clear" styleClass="button-secondary" prefWidth="100">
+                        <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                    </Button>
+                </HBox>
+
+                <Label fx:id="messageLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
+
+                <HBox alignment="CENTER">
+                    <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-secondary" prefWidth="150"/>
+                </HBox>
+
             </VBox>
         </ScrollPane>
     </center>
 
     <bottom>
-        <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
-            <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;"/>
-        </HBox>
         <fx:include source="FooterComponent.fxml"/>
     </bottom>
 </BorderPane>

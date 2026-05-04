@@ -1,25 +1,43 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.InsuranceClaim;
 import models.InsurancePayment;
 import models.InsurancePolicy;
 import models.InsuranceProvider;
 import models.InsuranceVerification;
 
+/**
+ * InsuranceDAO - Facade that uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class InsuranceDAO extends BaseDAO<InsurancePolicy> {
 
-    private InsurancePolicyDAO policyDAO = new InsurancePolicyDAO();
-    private InsuranceClaimDAO claimDAO = new InsuranceClaimDAO();
-    private InsuranceProviderDAO providerDAO = new InsuranceProviderDAO();
-    private InsurancePaymentDAO paymentDAO = new InsurancePaymentDAO();
-    private InsuranceVerificationDAO verificationDAO = new InsuranceVerificationDAO();
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+    private final InsurancePolicyDAO policyDAO;
+    private final InsuranceClaimDAO claimDAO;
+    private final InsuranceProviderDAO providerDAO;
+    private final InsurancePaymentDAO paymentDAO;
+    private final InsuranceVerificationDAO verificationDAO;
+
+    public InsuranceDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+        this.policyDAO = new InsurancePolicyDAO();
+        this.claimDAO = new InsuranceClaimDAO();
+        this.providerDAO = new InsuranceProviderDAO();
+        this.paymentDAO = new InsurancePaymentDAO();
+        this.verificationDAO = new InsuranceVerificationDAO();
+    }
 
     @Override
     public InsurancePolicy findById(int id) throws SQLException {
@@ -53,36 +71,7 @@ public class InsuranceDAO extends BaseDAO<InsurancePolicy> {
     }
 
     public int insertAndGetId(InsurancePolicy entity) throws SQLException {
-        String sql = "CALL sp_add_insurance_policy(?, ?, ?, ?, ?, ?, ?, ?)";
-        Connection conn = null;
-        java.sql.CallableStatement cs = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            cs = conn.prepareCall("{call sp_add_insurance_policy(?, ?, ?, ?, ?, ?, ?, ?)}");
-            cs.setInt(1, entity.getVehicleId());
-            cs.setInt(2, entity.getProviderId());
-            cs.setString(3, entity.getPolicyNumber());
-            cs.setDate(4, java.sql.Date.valueOf(entity.getStartDate()));
-            cs.setDate(5, java.sql.Date.valueOf(entity.getEndDate()));
-            cs.setDouble(6, entity.getPremium());
-            cs.setDouble(7, entity.getCoverageAmount());
-            cs.setString(8, entity.getStatus());
-            cs.execute();
-
-            String querySql = "SELECT id FROM insurance_policies WHERE policy_number = ?";
-            ps = conn.prepareStatement(querySql);
-            ps.setString(1, entity.getPolicyNumber());
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("id");
-            }
-            return -1;
-        } finally {
-            closeResources(rs, ps, conn);
-            if (cs != null) cs.close();
-        }
+        return policyDAO.insertAndGetId(entity);
     }
 
     @Override
@@ -91,15 +80,11 @@ public class InsuranceDAO extends BaseDAO<InsurancePolicy> {
     }
 
     public boolean renewPolicy(int policyId, double newPremium) throws SQLException {
-        String sql = "CALL sp_create_policy_renewal(?, ?, ?)";
-        int result = executeUpdate(sql, policyId, LocalDate.now().plusYears(1), newPremium);
-        return result >= 0;
+        return procedureCaller.executeCreatePolicyRenewal(policyId, LocalDate.now().plusYears(1), newPremium);
     }
 
     public boolean processRenewalPayment(int renewalId) throws SQLException {
-        String sql = "CALL sp_process_renewal_payment(?)";
-        int result = executeUpdate(sql, renewalId);
-        return result >= 0;
+        return procedureCaller.executeProcessRenewalPayment(renewalId);
     }
 
     @Override
@@ -166,51 +151,12 @@ public class InsuranceDAO extends BaseDAO<InsurancePolicy> {
     }
 
     public double calculateNoClaimBonus(int policyId) throws SQLException {
-        String sql = "CALL sp_calculate_no_claim_bonus(?)";
-        executeUpdate(sql, policyId);
-
-        String querySql = "SELECT bonus_percentage FROM vw_no_claim_bonus WHERE policy_id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(querySql);
-            ps.setInt(1, policyId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getDouble("bonus_percentage");
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        procedureCaller.executeCalculateNoClaimBonus(policyId);
+        return viewLoader.getNoClaimBonusPercentage(policyId);
     }
 
     public double calculateRiskPremium(int vehicleId) throws SQLException {
-        String sql = "SELECT * FROM vw_risk_assessment WHERE vehicle_id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, vehicleId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                String riskCategory = rs.getString("risk_category");
-                switch (riskCategory) {
-                    case "LOW": return 1000.00;
-                    case "MEDIUM": return 1500.00;
-                    case "HIGH": return 2500.00;
-                    case "CRITICAL": return 4000.00;
-                    default: return 1200.00;
-                }
-            }
-            return 1200.00;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return procedureCaller.executeCalculateRiskPremium(vehicleId);
     }
 
     public int countActivePolicies() throws SQLException {
@@ -218,7 +164,6 @@ public class InsuranceDAO extends BaseDAO<InsurancePolicy> {
     }
 
     // Helper method - NOT an override
-    // Remove the @Override annotation
     public InsurancePolicy mapRow(ResultSet rs) throws SQLException {
         return policyDAO.mapRow(rs);
     }

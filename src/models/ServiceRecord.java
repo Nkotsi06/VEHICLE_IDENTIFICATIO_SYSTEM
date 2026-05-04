@@ -1,6 +1,7 @@
 package models;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
@@ -10,7 +11,15 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
+/**
+ * ServiceRecord model representing vehicle service history.
+ *
+ * @author Vehicle Identification System Team
+ * @version 1.0
+ */
 public class ServiceRecord extends BaseEntity {
+
+    // Core fields
     private int id;
     private int vehicleId;
     private String registrationNumber;
@@ -27,6 +36,22 @@ public class ServiceRecord extends BaseEntity {
     private int odometerReading;
     private String status;
 
+    // Service type constants
+    public static final String TYPE_OIL_CHANGE = "OIL_CHANGE";
+    public static final String TYPE_TUNE_UP = "TUNE_UP";
+    public static final String TYPE_BRAKE_REPAIR = "BRAKE_REPAIR";
+    public static final String TYPE_ENGINE_REPAIR = "ENGINE_REPAIR";
+    public static final String TYPE_TRANSMISSION = "TRANSMISSION";
+    public static final String TYPE_TIRE_REPLACEMENT = "TIRE_REPLACEMENT";
+    public static final String TYPE_BATTERY_REPLACEMENT = "BATTERY_REPLACEMENT";
+    public static final String TYPE_GENERAL_INSPECTION = "GENERAL_INSPECTION";
+
+    // Status constants
+    public static final String STATUS_PENDING = "PENDING";
+    public static final String STATUS_IN_PROGRESS = "IN_PROGRESS";
+    public static final String STATUS_COMPLETED = "COMPLETED";
+    public static final String STATUS_CANCELLED = "CANCELLED";
+
     // JavaFX Properties for TableView binding
     private final StringProperty registrationNumberProperty = new SimpleStringProperty();
     private final StringProperty makeProperty = new SimpleStringProperty();
@@ -38,11 +63,36 @@ public class ServiceRecord extends BaseEntity {
     private final DoubleProperty costProperty = new SimpleDoubleProperty();
     private final IntegerProperty odometerReadingProperty = new SimpleIntegerProperty();
     private final StringProperty statusProperty = new SimpleStringProperty();
+    private final StringProperty formattedCostProperty = new SimpleStringProperty();
+    private final StringProperty statusDisplayProperty = new SimpleStringProperty();
+    private final StringProperty statusColorProperty = new SimpleStringProperty();
 
+    /**
+     * Default constructor.
+     */
     public ServiceRecord() {
         super();
+        this.status = STATUS_COMPLETED;
+
+        statusProperty.set(STATUS_COMPLETED);
+        updateStatusDisplay();
+
+        statusProperty.addListener((obs, oldVal, newVal) -> updateStatusDisplay());
+        costProperty.addListener((obs, oldVal, newVal) -> updateFormattedCost());
+
+        updateFormattedCost();
     }
 
+    /**
+     * Constructor for creating a new service record.
+     *
+     * @param vehicleId     the vehicle ID
+     * @param workshopId    the workshop ID
+     * @param serviceDate   the service date
+     * @param serviceType   the service type
+     * @param description   the service description
+     * @param cost          the service cost
+     */
     public ServiceRecord(int vehicleId, int workshopId, LocalDate serviceDate,
                          String serviceType, String description, double cost) {
         this();
@@ -53,11 +103,46 @@ public class ServiceRecord extends BaseEntity {
         this.description = description;
         this.cost = cost;
 
-        // Update properties
         serviceDateProperty.set(serviceDate);
         serviceTypeProperty.set(serviceType);
         costProperty.set(cost);
     }
+
+    // ============================================
+    // PRIVATE UPDATE METHODS
+    // ============================================
+
+    private void updateFormattedCost() {
+        formattedCostProperty.set(String.format("M%,.2f", cost));
+    }
+
+    private void updateStatusDisplay() {
+        switch (status) {
+            case STATUS_PENDING:
+                statusDisplayProperty.set("Pending");
+                statusColorProperty.set("#FFC107");
+                break;
+            case STATUS_IN_PROGRESS:
+                statusDisplayProperty.set("In Progress");
+                statusColorProperty.set("#2196F3");
+                break;
+            case STATUS_COMPLETED:
+                statusDisplayProperty.set("Completed");
+                statusColorProperty.set("#4CAF50");
+                break;
+            case STATUS_CANCELLED:
+                statusDisplayProperty.set("Cancelled");
+                statusColorProperty.set("#9E9E9E");
+                break;
+            default:
+                statusDisplayProperty.set(status);
+                statusColorProperty.set("#9E9E9E");
+        }
+    }
+
+    // ============================================
+    // GETTERS AND SETTERS WITH PROPERTY UPDATES
+    // ============================================
 
     public int getVehicleId() {
         return vehicleId;
@@ -208,7 +293,6 @@ public class ServiceRecord extends BaseEntity {
         return odometerReadingProperty;
     }
 
-    // Status field - for workshop dashboard
     public String getStatus() {
         return status;
     }
@@ -222,22 +306,76 @@ public class ServiceRecord extends BaseEntity {
         return statusProperty;
     }
 
-    // Helper method to calculate status based on service date
+    public String getFormattedCost() {
+        return formattedCostProperty.get();
+    }
+
+    public StringProperty formattedCostProperty() {
+        return formattedCostProperty;
+    }
+
+    public String getStatusDisplay() {
+        return statusDisplayProperty.get();
+    }
+
+    public StringProperty statusDisplayProperty() {
+        return statusDisplayProperty;
+    }
+
+    public String getStatusColor() {
+        return statusColorProperty.get();
+    }
+
+    public StringProperty statusColorProperty() {
+        return statusColorProperty;
+    }
+
+    // ============================================
+    // BUSINESS LOGIC METHODS
+    // ============================================
+
+    public String getFormattedServiceDate() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        return serviceDate != null ? serviceDate.format(formatter) : "";
+    }
+
+    public String getServiceTypeDisplay() {
+        switch (serviceType) {
+            case TYPE_OIL_CHANGE: return "Oil Change";
+            case TYPE_TUNE_UP: return "Tune Up";
+            case TYPE_BRAKE_REPAIR: return "Brake Repair";
+            case TYPE_ENGINE_REPAIR: return "Engine Repair";
+            case TYPE_TRANSMISSION: return "Transmission";
+            case TYPE_TIRE_REPLACEMENT: return "Tire Replacement";
+            case TYPE_BATTERY_REPLACEMENT: return "Battery Replacement";
+            case TYPE_GENERAL_INSPECTION: return "General Inspection";
+            default: return serviceType != null ? serviceType.replace("_", " ") : "Unknown";
+        }
+    }
+
     public void calculateStatus() {
         if (serviceDate != null) {
             LocalDate today = LocalDate.now();
             if (serviceDate.equals(today)) {
-                status = "TODAY";
+                status = STATUS_IN_PROGRESS;
             } else if (serviceDate.isAfter(today)) {
-                status = "SCHEDULED";
+                status = STATUS_PENDING;
             } else {
-                status = "COMPLETED";
+                status = STATUS_COMPLETED;
             }
         } else {
-            status = "PENDING";
+            status = STATUS_PENDING;
         }
         statusProperty.set(status);
     }
+
+    public boolean isCompleted() {
+        return STATUS_COMPLETED.equals(status);
+    }
+
+    // ============================================
+    // OVERRIDE METHODS
+    // ============================================
 
     @Override
     public int getId() {
@@ -251,6 +389,33 @@ public class ServiceRecord extends BaseEntity {
 
     @Override
     public String toString() {
-        return serviceType + " - " + serviceDate + " - $" + cost;
+        return getServiceTypeDisplay() + " - " + getFormattedServiceDate() + " - " + getFormattedCost();
+    }
+
+    /**
+     * Creates a copy of this service record.
+     *
+     * @return a new ServiceRecord instance
+     */
+    public ServiceRecord copy() {
+        ServiceRecord copy = new ServiceRecord();
+        copy.setId(this.id);
+        copy.setVehicleId(this.vehicleId);
+        copy.setRegistrationNumber(this.registrationNumber);
+        copy.setMake(this.make);
+        copy.setModel(this.model);
+        copy.setWorkshopId(this.workshopId);
+        copy.setWorkshopName(this.workshopName);
+        copy.setMechanicId(this.mechanicId);
+        copy.setMechanicName(this.mechanicName);
+        copy.setServiceDate(this.serviceDate);
+        copy.setServiceType(this.serviceType);
+        copy.setDescription(this.description);
+        copy.setCost(this.cost);
+        copy.setOdometerReading(this.odometerReading);
+        copy.setStatus(this.status);
+        copy.setCreatedAt(this.getCreatedAt());
+        copy.setUpdatedAt(this.getUpdatedAt());
+        return copy;
     }
 }

@@ -1,11 +1,8 @@
 package controllers;
 
 import javafx.animation.PauseTransition;
-import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.effect.DropShadow;
-import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import utils.AlertUtil;
 import utils.SceneManager;
@@ -15,17 +12,24 @@ import dao.ViolationDAO;
 import dao.VehicleDAO;
 import models.Warrant;
 import models.Violation;
-import models.Vehicle;
 import java.util.List;
 
+/**
+ * Controller for Warrant Management
+ * Handles issuing and executing warrants for vehicle violations
+ */
 public class WarrantController {
+
+    // ============================================
+    // FXML UI COMPONENTS
+    // ============================================
 
     @FXML private TableView<Warrant> warrantsTable;
     @FXML private TableColumn<Warrant, String> vehicleColumn;
     @FXML private TableColumn<Warrant, String> issueDateColumn;
     @FXML private TableColumn<Warrant, String> expiryDateColumn;
     @FXML private TableColumn<Warrant, String> judgeColumn;
-    @FXML private TableColumn<Warrant, String> warrantStatusColumn;  // Fixed - was "statusColumn"
+    @FXML private TableColumn<Warrant, String> warrantStatusColumn;
 
     @FXML private ComboBox<Violation> violationComboBox;
     @FXML private TextField judgeNameField;
@@ -43,6 +47,10 @@ public class WarrantController {
     @FXML private Pagination warrantsPagination;
     @FXML private Label statusLabel;
 
+    // ============================================
+    // DAO INSTANCES & DATA MODELS
+    // ============================================
+
     private WarrantDAO warrantDAO;
     private ViolationDAO violationDAO;
     private VehicleDAO vehicleDAO;
@@ -51,6 +59,14 @@ public class WarrantController {
     private int currentPage = 0;
     private int pageSize = 20;
 
+    // ============================================
+    // INITIALIZATION METHODS
+    // ============================================
+
+    /**
+     * Initializes the controller - sets up DAOs, table columns, loads data
+     * Called automatically after FXML is loaded
+     */
     @FXML
     public void initialize() {
         warrantDAO = new WarrantDAO();
@@ -64,11 +80,15 @@ public class WarrantController {
         setupTableSelection();
         setupPagination();
 
+        // Set default dates
         issueDatePicker.setValue(java.time.LocalDate.now());
         expiryDatePicker.setValue(java.time.LocalDate.now().plusMonths(3));
         statusLabel.setText("Ready");
     }
 
+    /**
+     * Configures table columns with cell value factories
+     */
     private void setupTableColumns() {
         vehicleColumn.setCellValueFactory(cellData -> cellData.getValue().registrationNumberProperty());
         issueDateColumn.setCellValueFactory(cellData -> cellData.getValue().issueDateProperty().asString());
@@ -77,6 +97,9 @@ public class WarrantController {
         warrantStatusColumn.setCellValueFactory(cellData -> cellData.getValue().statusProperty());
     }
 
+    /**
+     * Configures pagination for the warrants table
+     */
     private void setupPagination() {
         if (warrantsPagination != null) {
             warrantsPagination.currentPageIndexProperty().addListener((obs, old, newPage) -> {
@@ -86,6 +109,9 @@ public class WarrantController {
         }
     }
 
+    /**
+     * Updates the table to show current page of warrants
+     */
     private void updateTablePage() {
         if (fullWarrantList == null || fullWarrantList.isEmpty()) return;
         int start = currentPage * pageSize;
@@ -95,6 +121,13 @@ public class WarrantController {
         }
     }
 
+    // ============================================
+    // DATA LOADING METHODS
+    // ============================================
+
+    /**
+     * Loads all unpaid violations into the combo box
+     */
     private void loadViolations() {
         try {
             List<Violation> violations = violationDAO.findUnpaidViolations();
@@ -104,6 +137,9 @@ public class WarrantController {
         }
     }
 
+    /**
+     * Loads all warrants from database with progress indicator
+     */
     private void loadWarrants() {
         showProgress(true);
         statusLabel.setText("Loading warrants...");
@@ -123,6 +159,13 @@ public class WarrantController {
         }
     }
 
+    // ============================================
+    // EVENT HANDLERS
+    // ============================================
+
+    /**
+     * Sets up button click handlers
+     */
     private void setupButtonHandlers() {
         issueButton.setOnAction(event -> handleIssue());
         executeButton.setOnAction(event -> handleExecute());
@@ -130,6 +173,9 @@ public class WarrantController {
         backButton.setOnAction(event -> SceneManager.getInstance().switchToPoliceView());
     }
 
+    /**
+     * Sets up table selection listener to display selected warrant details
+     */
     private void setupTableSelection() {
         warrantsTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
@@ -138,9 +184,17 @@ public class WarrantController {
         });
     }
 
+    // ============================================
+    // BUSINESS LOGIC METHODS
+    // ============================================
+
+    /**
+     * Handles issuing a new warrant for a selected violation
+     */
     private void handleIssue() {
         Violation selectedViolation = violationComboBox.getSelectionModel().getSelectedItem();
 
+        // Validation checks
         if (selectedViolation == null) {
             AlertUtil.showWarning("Validation Error", "Please select a violation.");
             return;
@@ -188,6 +242,9 @@ public class WarrantController {
         }
     }
 
+    /**
+     * Handles executing an active warrant
+     */
     private void handleExecute() {
         if (selectedWarrant == null) {
             AlertUtil.showWarning("No Selection", "Please select a warrant to execute.");
@@ -228,6 +285,9 @@ public class WarrantController {
         }
     }
 
+    /**
+     * Clears all form fields and resets selections
+     */
     private void clearForm() {
         violationComboBox.getSelectionModel().clearSelection();
         judgeNameField.clear();
@@ -238,6 +298,14 @@ public class WarrantController {
         warrantsTable.getSelectionModel().clearSelection();
     }
 
+    // ============================================
+    // UI PROGRESS METHODS
+    // ============================================
+
+    /**
+     * Shows/hides progress indicators
+     * @param show true to show, false to hide
+     */
     private void showProgress(boolean show) {
         if (loadProgress != null) loadProgress.setVisible(show);
         if (operationProgress != null) {
@@ -246,6 +314,9 @@ public class WarrantController {
         }
     }
 
+    /**
+     * Hides progress indicators after a short delay
+     */
     private void hideProgressAfterDelay() {
         PauseTransition delay = new PauseTransition(Duration.seconds(1));
         delay.setOnFinished(event -> {

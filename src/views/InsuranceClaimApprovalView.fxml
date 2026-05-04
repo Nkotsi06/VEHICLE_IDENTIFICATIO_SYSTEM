@@ -5,105 +5,117 @@
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.InsuranceClaimApprovalController">
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.InsuranceClaimApprovalController"
+            stylesheets="@../css/application.css" styleClass="border-pane">
 
     <top>
-        <VBox>
-            <fx:include source="MenuBarComponent.fxml"/>
-        </VBox>
+        <fx:include source="MenuBarComponent.fxml"/>
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="true">
-            <SplitPane dividerPositions="0.5">
-                <VBox spacing="10" style="-fx-padding: 10;">
-                    <Label text="Pending Claims" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
+            <VBox spacing="20" alignment="TOP_CENTER"
+                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
 
-                    <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="30"/>
+                <Label text="Claim Approval" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
+                <Label text="Review and process insurance claims" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
 
-                    <TableView fx:id="pendingClaimsTable" prefHeight="400">
-                        <columns>
-                            <TableColumn fx:id="claimIdColumn" text="Claim ID" prefWidth="80"/>
-                            <TableColumn fx:id="policyNumberColumn" text="Policy #" prefWidth="120"/>
-                            <TableColumn fx:id="vehicleColumn" text="Vehicle" prefWidth="150"/>
-                            <TableColumn fx:id="claimAmountColumn" text="Amount Claimed (M)" prefWidth="120"/>
-                            <TableColumn fx:id="claimDateColumn" text="Claim Date" prefWidth="100"/>
-                            <TableColumn fx:id="priorityColumn" text="Priority" prefWidth="80"/>
-                        </columns>
-                        <columnResizePolicy>
-                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                        </columnResizePolicy>
-                        <placeholder>
-                            <Label text="No pending claims" style="-fx-text-fill: #7f8c8d;"/>
-                        </placeholder>
-                    </TableView>
+                <Separator/>
 
-                    <Pagination fx:id="claimsPagination" pageCount="1" maxPageIndicatorCount="5"/>
+                <HBox spacing="20" alignment="CENTER">
+                    <!-- Left Panel - Pending Claims -->
+                    <VBox spacing="10" alignment="CENTER" HBox.hgrow="ALWAYS">
+                        <VBox styleClass="profile-edit-card" alignment="CENTER">
+                            <Label text="Pending Claims" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                    <HBox spacing="10">
-                        <Button fx:id="refreshButton" text="Refresh" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                        <Button fx:id="fadeButton" text="Animate" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
-                            <effect>
-                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                            </effect>
-                        </Button>
-                    </HBox>
-                </VBox>
+                            <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="30"/>
 
-                <VBox spacing="15" style="-fx-padding: 10;">
-                    <Label text="Claim Review" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                            <TableView fx:id="pendingClaimsTable" prefHeight="400" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
+                                <columns>
+                                    <TableColumn fx:id="claimIdColumn" text="Claim ID" minWidth="70" maxWidth="90"/>
+                                    <TableColumn fx:id="policyNumberColumn" text="Policy #" minWidth="100" maxWidth="130"/>
+                                    <TableColumn fx:id="vehicleColumn" text="Vehicle" minWidth="120" maxWidth="160"/>
+                                    <TableColumn fx:id="claimAmountColumn" text="Amount (M)" minWidth="100" maxWidth="130"/>
+                                    <TableColumn fx:id="claimDateColumn" text="Claim Date" minWidth="90" maxWidth="110"/>
+                                    <TableColumn fx:id="priorityColumn" text="Priority" minWidth="70" maxWidth="90"/>
+                                </columns>
+                                <placeholder>
+                                    <Label text="No pending claims" styleClass="status-text"/>
+                                </placeholder>
+                            </TableView>
 
-                    <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+                            <HBox alignment="CENTER">
+                                <Pagination fx:id="claimsPagination" pageCount="1" maxPageIndicatorCount="5"/>
+                            </HBox>
 
-                    <TitledPane text="Claim Details" expanded="true" style="-fx-font-weight: bold;">
-                        <GridPane hgap="15" vgap="8" style="-fx-padding: 10;">
-                            <Label text="Claim ID:" style="-fx-font-weight: bold;"/>
-                            <Label fx:id="claimIdLabel"/>
-                            <Label text="Policy Holder:" style="-fx-font-weight: bold;"/>
-                            <Label fx:id="policyHolderLabel"/>
-                            <Label text="Incident Date:" style="-fx-font-weight: bold;"/>
-                            <Label fx:id="incidentDateLabel"/>
-                            <Label text="Incident Location:" style="-fx-font-weight: bold;"/>
-                            <Label fx:id="incidentLocationLabel"/>
-                        </GridPane>
-                    </TitledPane>
+                            <HBox alignment="CENTER">
+                                <Button fx:id="refreshButton" text="Refresh" styleClass="button-info" prefWidth="100"/>
+                                <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100">
+                                    <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                                </Button>
+                            </HBox>
+                        </VBox>
+                    </VBox>
 
-                    <Label text="Claim Description:" style="-fx-font-weight: bold;"/>
-                    <TextArea fx:id="descriptionArea" prefHeight="80" editable="false"/>
+                    <!-- Right Panel - Claim Review -->
+                    <VBox spacing="15" alignment="CENTER" HBox.hgrow="ALWAYS">
+                        <VBox styleClass="profile-edit-card" alignment="CENTER">
+                            <Label text="Claim Review" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                    <Label text="Supporting Documents:" style="-fx-font-weight: bold;"/>
-                    <ListView fx:id="documentsList" prefHeight="80"/>
+                            <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
-                    <Separator/>
+                            <TitledPane text="Claim Details" expanded="true" style="-fx-font-weight: bold;">
+                                <GridPane hgap="15" vgap="8" alignment="CENTER">
+                                    <Label text="Claim ID:" style="-fx-font-weight: bold;"/>
+                                    <Label fx:id="claimIdLabel"/>
+                                    <Label text="Policy Holder:" style="-fx-font-weight: bold;"/>
+                                    <Label fx:id="policyHolderLabel"/>
+                                    <Label text="Incident Date:" style="-fx-font-weight: bold;"/>
+                                    <Label fx:id="incidentDateLabel"/>
+                                    <Label text="Incident Location:" style="-fx-font-weight: bold;"/>
+                                    <Label fx:id="incidentLocationLabel"/>
+                                </GridPane>
+                            </TitledPane>
 
-                    <GridPane hgap="15" vgap="10">
-                        <Label text="Approved Amount (M):" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <TextField fx:id="approvedAmountField" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="150"/>
+                            <Label text="Claim Description:" style="-fx-font-weight: bold;" alignment="CENTER" maxWidth="Infinity"/>
+                            <TextArea fx:id="descriptionArea" prefHeight="80" editable="false"/>
 
-                        <Label text="Rejection Reason:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <TextArea fx:id="rejectionReasonArea" GridPane.rowIndex="1" GridPane.columnIndex="1" prefHeight="60"/>
-                    </GridPane>
+                            <Label text="Supporting Documents:" style="-fx-font-weight: bold;" alignment="CENTER" maxWidth="Infinity"/>
+                            <ListView fx:id="documentsList" prefHeight="80" maxWidth="Infinity"/>
 
-                    <HBox spacing="10">
-                        <Button fx:id="approveButton" text="Approve Claim" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
-                            <effect>
-                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                            </effect>
-                        </Button>
-                        <Button fx:id="rejectButton" text="Reject Claim" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                        <Button fx:id="requestInfoButton" text="Request Info" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                    </HBox>
+                            <Separator/>
 
-                    <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
-                </VBox>
-            </SplitPane>
+                            <GridPane hgap="15" vgap="10" alignment="CENTER">
+                                <Label text="Approved Amount (M):" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <TextField fx:id="approvedAmountField" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="150"/>
+
+                                <Label text="Rejection Reason:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <TextArea fx:id="rejectionReasonArea" GridPane.rowIndex="1" GridPane.columnIndex="1" prefHeight="60"/>
+                            </GridPane>
+
+                            <HBox alignment="CENTER">
+                                <Button fx:id="approveButton" text="Approve Claim" styleClass="button-success">
+                                    <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                                </Button>
+                                <Button fx:id="rejectButton" text="Reject Claim" styleClass="button-danger"/>
+                                <Button fx:id="requestInfoButton" text="Request Info" styleClass="button-warning"/>
+                            </HBox>
+
+                            <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
+                        </VBox>
+                    </VBox>
+                </HBox>
+
+                <HBox alignment="CENTER">
+                    <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-secondary" prefWidth="150"/>
+                </HBox>
+
+            </VBox>
         </ScrollPane>
     </center>
 
     <bottom>
-        <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
-            <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;"/>
-        </HBox>
         <fx:include source="FooterComponent.fxml"/>
     </bottom>
 </BorderPane>

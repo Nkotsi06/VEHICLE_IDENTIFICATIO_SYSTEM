@@ -5,46 +5,66 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.CrimeHotspotPrediction;
 
+/**
+ * CrimeHotspotPredictionDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class CrimeHotspotPredictionDAO extends BaseDAO<CrimeHotspotPrediction> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    // View name constant
+    private static final String VIEW_NAME = "vw_predictive_crime_hotspots";
+
+    public CrimeHotspotPredictionDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public CrimeHotspotPrediction findById(int id) throws SQLException {
-        String sql = "SELECT * FROM vw_predictive_crime_hotspots WHERE id = ?";
-        return executeQuerySingle(sql, id);
+        // Use view - NO direct SQL
+        List<CrimeHotspotPrediction> results = viewLoader.loadViewWithCondition(VIEW_NAME, "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<CrimeHotspotPrediction> findAll() throws SQLException {
-        String sql = "SELECT * FROM vw_predictive_crime_hotspots ORDER BY probability_score DESC";
-        return executeQuery(sql);
+        // Use view - NO direct SQL
+        return viewLoader.loadView(VIEW_NAME);
     }
 
     public List<CrimeHotspotPrediction> findByRiskLevel(String riskLevel) throws SQLException {
-        String sql = "SELECT * FROM vw_predictive_crime_hotspots WHERE risk_level = ? ORDER BY probability_score DESC";
-        return executeQuery(sql, riskLevel);
+        // Use view - NO direct SQL
+        return viewLoader.loadViewWithCondition(VIEW_NAME, "risk_level = ? ORDER BY probability_score DESC", riskLevel);
     }
 
     public List<CrimeHotspotPrediction> findByCrimeType(String crimeType) throws SQLException {
-        String sql = "SELECT * FROM vw_predictive_crime_hotspots WHERE crime_type = ? ORDER BY probability_score DESC";
-        return executeQuery(sql, crimeType);
+        // Use view - NO direct SQL
+        return viewLoader.loadViewWithCondition(VIEW_NAME, "crime_type = ? ORDER BY probability_score DESC", crimeType);
     }
 
     public List<CrimeHotspotPrediction> findHighRiskPredictions() throws SQLException {
-        String sql = "SELECT * FROM vw_predictive_crime_hotspots WHERE risk_level IN ('HIGH', 'CRITICAL') ORDER BY probability_score DESC";
-        return executeQuery(sql);
+        // Use view - NO direct SQL
+        return viewLoader.loadViewWithCondition(VIEW_NAME, "risk_level IN ('HIGH', 'CRITICAL') ORDER BY probability_score DESC");
     }
 
     public void runPrediction() throws SQLException {
-        String sql = "CALL sp_predict_crime_hotspots()";
-        executeUpdate(sql);
+        // Use stored procedure - NO direct SQL
+        procedureCaller.executeRunCrimeHotspotPrediction();
     }
 
     @Override
     public boolean insert(CrimeHotspotPrediction entity) throws SQLException {
-        String sql = "INSERT INTO crime_hotspot_predictions (prediction_date, center_lat, center_lng, radius_meters, crime_type, probability_score, risk_level) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        int result = executeUpdate(sql,
+        // Use stored procedure - NO direct SQL
+        return procedureCaller.executeInsertCrimeHotspotPrediction(
                 entity.getPredictionDate(),
                 entity.getCenterLat(),
                 entity.getCenterLng(),
@@ -53,25 +73,28 @@ public class CrimeHotspotPredictionDAO extends BaseDAO<CrimeHotspotPrediction> {
                 entity.getProbabilityScore(),
                 entity.getRiskLevel()
         );
-        return result > 0;
     }
 
     @Override
     public boolean update(CrimeHotspotPrediction entity) throws SQLException {
+        // Predictions are typically not updated - they are regenerated
         return false;
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM crime_hotspot_predictions WHERE id = ?";
-        int result = executeUpdate(sql, id);
-        return result > 0;
+        // Use stored procedure - NO direct SQL
+        return procedureCaller.executeDeleteCrimeHotspotPrediction(id);
     }
 
     public boolean deleteOldPredictions(LocalDate beforeDate) throws SQLException {
-        String sql = "DELETE FROM crime_hotspot_predictions WHERE prediction_date < ?";
-        int result = executeUpdate(sql, beforeDate);
-        return result > 0;
+        // Use stored procedure - NO direct SQL
+        return procedureCaller.executeDeleteOldCrimeHotspotPredictions(beforeDate);
+    }
+
+    public int getHighRiskCount() throws SQLException {
+        // Use view - NO direct SQL
+        return viewLoader.countViewRowsWithCondition(VIEW_NAME, "risk_level IN ('HIGH', 'CRITICAL')");
     }
 
     @Override

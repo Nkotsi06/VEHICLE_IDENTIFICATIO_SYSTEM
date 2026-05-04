@@ -39,7 +39,7 @@ public class BulkOperationsController {
 
     @FXML private ProgressIndicator loadProgress;
     @FXML private ProgressBar operationProgress;
-    @FXML private TableView<Map<String, Object>> previewTable;  // Added missing field
+    @FXML private TableView<Map<String, Object>> previewTable;
 
     private BulkImportDAO bulkImportDAO;
     private VehicleDAO vehicleDAO;
@@ -176,7 +176,6 @@ public class BulkOperationsController {
                 if (executeButton != null) executeButton.setDisable(false);
             }
 
-            // Log validation action
             int currentUserId = utils.SessionManager.getInstance().getUserId();
             auditDAO.logAction(currentUserId, "BULK_VALIDATE: " + entityType + " - " + validCount + " valid, " + errorCount + " errors", "127.0.0.1");
 
@@ -294,7 +293,6 @@ public class BulkOperationsController {
             statusLabel.setText("Import completed. " + importCount + " records imported.");
             updateProgress(1.0);
 
-            // Log import action
             int currentUserId = utils.SessionManager.getInstance().getUserId();
             auditDAO.logAction(currentUserId, "BULK_IMPORT: " + entityType + " - " + importCount + " records", "127.0.0.1");
 
@@ -333,7 +331,6 @@ public class BulkOperationsController {
 
             updateProgress(1.0);
 
-            // Log export action
             int currentUserId = utils.SessionManager.getInstance().getUserId();
             auditDAO.logAction(currentUserId, "BULK_EXPORT: " + entityType, "127.0.0.1");
 
@@ -352,7 +349,6 @@ public class BulkOperationsController {
     private void handleBulkUpdate(String entityType) {
         AlertUtil.showInfo("Bulk Update", "Bulk update feature: Update multiple records with same values.");
 
-        // Log action
         try {
             int currentUserId = utils.SessionManager.getInstance().getUserId();
             auditDAO.logAction(currentUserId, "BULK_UPDATE_ATTEMPT: " + entityType, "127.0.0.1");
@@ -368,7 +364,6 @@ public class BulkOperationsController {
         if (confirmed) {
             AlertUtil.showInfo("Bulk Delete", "Bulk delete feature coming soon.");
 
-            // Log action
             try {
                 int currentUserId = utils.SessionManager.getInstance().getUserId();
                 auditDAO.logAction(currentUserId, "BULK_DELETE_ATTEMPT: " + entityType, "127.0.0.1");

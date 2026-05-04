@@ -1,37 +1,53 @@
 package dao;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;  // ADD THIS IMPORT
+import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
+
+import database.ProcedureCaller;
 import models.Customer;
 import models.User;
 import models.Vehicle;
 
+/**
+ * BulkImportDAO - Uses ONLY stored procedures for bulk operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class BulkImportDAO extends BaseDAO<Object> {
 
-    @Override
-    public Object findById(int id) throws SQLException {
-        return null;
+    private final ProcedureCaller procedureCaller;
+
+    public BulkImportDAO() {
+        this.procedureCaller = new ProcedureCaller();
     }
 
-    @Override
-    public List<Object> findAll() throws SQLException {
-        return null;
-    }
-
+    /**
+     * Bulk import customers using stored procedures in a transaction.
+     *
+     * @param customers list of customers to import
+     * @param users list of users to import
+     * @return number of successfully imported customers
+     * @throws SQLException if database error occurs
+     */
     public int bulkImportCustomers(List<Customer> customers, List<User> users) throws SQLException {
-        Connection conn = null;
+        if (customers == null || users == null || customers.size() != users.size()) {
+            throw new IllegalArgumentException("Customers and users lists must be non-null and same size");
+        }
+
         int importedCount = 0;
 
         try {
-            conn = getConnection();
-            conn.setAutoCommit(false);
+            dbConnection.beginTransaction();
 
             for (int i = 0; i < customers.size(); i++) {
                 Customer customer = customers.get(i);
                 User user = users.get(i);
 
-                Integer userId = executeProcedureWithOutParameter("sp_create_user", Types.INTEGER,
+                // Use stored procedure - NO direct SQL
+                Integer userId = procedureCaller.executeCreateUserWithId(
                         user.getUsername(),
                         user.getPassword(),
                         "CUSTOMER",
@@ -40,33 +56,50 @@ public class BulkImportDAO extends BaseDAO<Object> {
                 );
 
                 if (userId != null && userId > 0) {
-                    executeProcedure("sp_create_customer", userId, customer.getName(), customer.getAddress(),
-                            customer.getPhone(), customer.getNationalId(), customer.getDriversLicenseNumber());
-                    importedCount++;
+                    // Use stored procedure - NO direct SQL
+                    Integer customerId = procedureCaller.executeCreateCustomer(
+                            userId,
+                            customer.getName(),
+                            customer.getAddress(),
+                            customer.getPhone(),
+                            customer.getNationalId(),
+                            customer.getDriversLicenseNumber()
+                    );
+                    if (customerId != null && customerId > 0) {
+                        importedCount++;
+                    }
                 }
             }
 
-            conn.commit();
+            dbConnection.commitTransaction();
             return importedCount;
 
         } catch (SQLException e) {
-            if (conn != null) conn.rollback();
+            dbConnection.rollbackTransaction();
             throw e;
-        } finally {
-            if (conn != null) conn.close();
         }
     }
 
+    /**
+     * Bulk import vehicles using stored procedures in a transaction.
+     *
+     * @param vehicles list of vehicles to import
+     * @return number of successfully imported vehicles
+     * @throws SQLException if database error occurs
+     */
     public int bulkImportVehicles(List<Vehicle> vehicles) throws SQLException {
-        Connection conn = null;
+        if (vehicles == null || vehicles.isEmpty()) {
+            return 0;
+        }
+
         int importedCount = 0;
 
         try {
-            conn = getConnection();
-            conn.setAutoCommit(false);
+            dbConnection.beginTransaction();
 
             for (Vehicle vehicle : vehicles) {
-                Integer vehicleId = executeProcedureWithOutParameter("sp_register_vehicle", Types.INTEGER,
+                // Use stored procedure - NO direct SQL
+                Integer vehicleId = procedureCaller.executeRegisterVehicle(
                         vehicle.getRegistrationNumber(),
                         vehicle.getMake(),
                         vehicle.getModel(),
@@ -82,43 +115,59 @@ public class BulkImportDAO extends BaseDAO<Object> {
                 }
             }
 
-            conn.commit();
+            dbConnection.commitTransaction();
             return importedCount;
 
         } catch (SQLException e) {
-            if (conn != null) conn.rollback();
+            dbConnection.rollbackTransaction();
             throw e;
-        } finally {
-            if (conn != null) conn.close();
         }
     }
 
+    /**
+     * Bulk import from JSON using stored procedure.
+     *
+     * @param jsonData JSON string containing customer data
+     * @return number of imported records
+     * @throws SQLException if database error occurs
+     */
     public int bulkImportFromJson(String jsonData) throws SQLException {
-        String sql = "CALL sp_bulk_import_customers(?)";
-        int result = executeUpdate(sql, jsonData);
-        return result;
+        // Use stored procedure - NO direct SQL
+        // Note: This method expects a stored procedure named 'bulk_import_customers'
+        // that accepts a JSON string parameter and returns the number of imported records
+        return procedureCaller.executeBulkImportCustomers(jsonData);
+    }
+
+    @Override
+    public Object findById(int id) throws SQLException {
+        // BulkImportDAO doesn't support single entity retrieval
+        throw new UnsupportedOperationException("BulkImportDAO does not support findById");
+    }
+
+    @Override
+    public List<Object> findAll() throws SQLException {
+        throw new UnsupportedOperationException("BulkImportDAO does not support findAll");
     }
 
     @Override
     public boolean insert(Object entity) throws SQLException {
-        return false;
+        throw new UnsupportedOperationException("BulkImportDAO does not support single insert");
     }
 
     @Override
     public boolean update(Object entity) throws SQLException {
-        return false;
+        throw new UnsupportedOperationException("BulkImportDAO does not support update");
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        return false;
+        throw new UnsupportedOperationException("BulkImportDAO does not support delete");
     }
 
-    // Required mapRow method implementation for BaseDAO
     @Override
     protected Object mapRow(ResultSet rs) throws SQLException {
-        // This DAO doesn't map to a single entity - it returns counts for bulk operations
-        // Returning null is acceptable since this DAO is not used for standard entity operations
+        // This DAO doesn't map to a single entity
+        // Return null as this method is not used for bulk operations
         return null;
     }
 }

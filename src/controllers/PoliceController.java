@@ -20,45 +20,78 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Controller for Police Dashboard
+ * Displays statistics, recent activity, and provides vehicle search functionality
+ * Serves as the main hub for police officers
+ */
 public class PoliceController {
+
+    // ============================================
+    // FXML UI COMPONENTS - LABELS
+    // ============================================
 
     @FXML private Label welcomeLabel;
     @FXML private Label statusLabel;
 
-    // Statistics Cards Labels
-    @FXML private Label stolenCountLabel;
-    @FXML private Label violationsTodayLabel;
-    @FXML private Label activeWarrantsLabel;
-    @FXML private Label boloAlertsLabel;
-    @FXML private Label expiredDocsLabel;
-    @FXML private Label geofenceAlertsLabel;
-    @FXML private Label unpaidFinesLabel;
-    @FXML private Label activeTrackingLabel;
+    // ============================================
+    // STATISTICS CARDS LABELS
+    // ============================================
 
-    // Search
+    @FXML private Label stolenCountLabel;           // Number of active stolen vehicles
+    @FXML private Label violationsTodayLabel;       // Violations reported today
+    @FXML private Label activeWarrantsLabel;        // Number of active warrants
+    @FXML private Label boloAlertsLabel;            // Active BOLO alerts
+    @FXML private Label expiredDocsLabel;           // Expired document count
+    @FXML private Label geofenceAlertsLabel;        // Unread geofence alerts
+    @FXML private Label unpaidFinesLabel;           // Total unpaid fines amount
+    @FXML private Label activeTrackingLabel;        // Active tracking incidents
+
+    // ============================================
+    // SEARCH COMPONENTS
+    // ============================================
+
     @FXML private TextField searchRegistrationField;
     @FXML private Button searchButton;
     @FXML private Button refreshButton;
     @FXML private Button fadeButton;
 
-    // Recent Activity Table
+    // ============================================
+    // RECENT ACTIVITY TABLE
+    // ============================================
+
     @FXML private TableView<Map<String, Object>> recentActivityTable;
     @FXML private TableColumn<Map<String, Object>, String> activityTimeColumn;
     @FXML private TableColumn<Map<String, Object>, String> activityActionColumn;
     @FXML private TableColumn<Map<String, Object>, String> activityVehicleColumn;
     @FXML private TableColumn<Map<String, Object>, String> activityOfficerColumn;
 
-    // Progress Indicators
+    // ============================================
+    // PROGRESS INDICATORS
+    // ============================================
+
     @FXML private ProgressIndicator loadProgress;
     @FXML private ProgressBar operationProgress;
     @FXML private Pagination activityPagination;
 
-    private ViewLoader viewLoader;
+    // ============================================
+    // DAO INSTANCES & DATA MODELS
+    // ============================================
+
+    private ViewLoader viewLoader;                  // Loader for database views
     private ObservableList<Map<String, Object>> activityList;
     private List<Map<String, Object>> fullActivityData;
     private int currentPage = 0;
-    private int pageSize = 10;
+    private int pageSize = 10;                      // Items per page
 
+    // ============================================
+    // INITIALIZATION METHODS
+    // ============================================
+
+    /**
+     * Initializes the police dashboard controller
+     * Sets up UI components, loads statistics, and starts auto-refresh
+     */
     @FXML
     public void initialize() {
         viewLoader = new ViewLoader();
@@ -70,6 +103,7 @@ public class PoliceController {
         applyVisualEffects();
         loadDashboardData();
 
+        // Set welcome message with officer name
         String officerName = SessionManager.getInstance().getFullName();
         if (officerName == null || officerName.isEmpty()) {
             officerName = SessionManager.getInstance().getUsername();
@@ -77,10 +111,13 @@ public class PoliceController {
         welcomeLabel.setText("Welcome, Officer " + (officerName != null ? officerName : "User"));
         statusLabel.setText("Ready");
 
-        // Start auto-refresh every 60 seconds
+        // Start auto-refresh every 60 seconds to keep data current
         startAutoRefresh();
     }
 
+    /**
+     * Configures table columns with cell value factories
+     */
     private void setupTableColumns() {
         activityTimeColumn.setCellValueFactory(cellData ->
                 new javafx.beans.property.SimpleStringProperty(formatTimestamp(cellData.getValue().get("timestamp"))));
@@ -91,12 +128,16 @@ public class PoliceController {
         activityOfficerColumn.setCellValueFactory(cellData ->
                 new javafx.beans.property.SimpleStringProperty(getStringValue(cellData.getValue(), "officer_name")));
 
+        // Center align columns for better visual appearance
         activityTimeColumn.setStyle("-fx-alignment: CENTER;");
         activityActionColumn.setStyle("-fx-alignment: CENTER-LEFT;");
         activityVehicleColumn.setStyle("-fx-alignment: CENTER;");
         activityOfficerColumn.setStyle("-fx-alignment: CENTER;");
     }
 
+    /**
+     * Configures pagination for the activity table
+     */
     private void setupPagination() {
         if (activityPagination != null) {
             activityPagination.setPageCount(1);
@@ -108,6 +149,9 @@ public class PoliceController {
         }
     }
 
+    /**
+     * Updates the table to show current page of activity logs
+     */
     private void updateTablePage() {
         if (fullActivityData == null || fullActivityData.isEmpty()) return;
         int start = currentPage * pageSize;
@@ -118,11 +162,22 @@ public class PoliceController {
         }
     }
 
+    /**
+     * Safely extracts string value from a map
+     * @param map The data map
+     * @param key The key to extract
+     * @return String value or empty string if null
+     */
     private String getStringValue(Map<String, Object> map, String key) {
         Object value = map.get(key);
         return value != null ? value.toString() : "";
     }
 
+    /**
+     * Formats timestamp for display
+     * @param timestamp The timestamp object
+     * @return Formatted date-time string
+     */
     private String formatTimestamp(Object timestamp) {
         if (timestamp instanceof java.sql.Timestamp) {
             return ((java.sql.Timestamp) timestamp).toLocalDateTime()
@@ -131,6 +186,9 @@ public class PoliceController {
         return timestamp != null ? timestamp.toString() : "";
     }
 
+    /**
+     * Sets up button click handlers
+     */
     private void setupButtonHandlers() {
         if (searchButton != null) {
             searchButton.setOnAction(event -> searchVehicle());
@@ -146,6 +204,9 @@ public class PoliceController {
         }
     }
 
+    /**
+     * Applies drop shadow visual effects to buttons
+     */
     private void applyVisualEffects() {
         DropShadow dropShadow = new DropShadow();
         dropShadow.setRadius(5.0);
@@ -158,6 +219,9 @@ public class PoliceController {
         if (fadeButton != null) fadeButton.setEffect(dropShadow);
     }
 
+    /**
+     * Plays fade animation on the animate button
+     */
     private void showFadeAnimation() {
         if (fadeButton != null) {
             FadeTransition fadeTransition = new FadeTransition(Duration.seconds(1.5), fadeButton);
@@ -173,6 +237,9 @@ public class PoliceController {
         }
     }
 
+    /**
+     * Starts automatic refresh of dashboard data every 60 seconds
+     */
     private void startAutoRefresh() {
         javafx.animation.Timeline timeline = new javafx.animation.Timeline(
                 new javafx.animation.KeyFrame(javafx.util.Duration.seconds(60),
@@ -182,6 +249,13 @@ public class PoliceController {
         timeline.play();
     }
 
+    // ============================================
+    // DATA LOADING METHODS
+    // ============================================
+
+    /**
+     * Loads all dashboard data including statistics and recent activity
+     */
     private void loadDashboardData() {
         showLoadProgress(true);
         statusLabel.setText("Loading dashboard data...");
@@ -199,10 +273,16 @@ public class PoliceController {
         }
     }
 
+    /**
+     * Loads statistics for dashboard cards from database views
+     * @throws SQLException if database error occurs
+     */
     private void loadStatistics() throws SQLException {
+        // Load stolen vehicles count
         List<Map<String, Object>> stolenList = viewLoader.loadActiveStolenVehicles();
         stolenCountLabel.setText(String.valueOf(stolenList != null ? stolenList.size() : 0));
 
+        // Load violations and count today's violations
         List<Map<String, Object>> violationsList = viewLoader.loadViolationsView();
         if (violationsList != null) {
             long todayCount = violationsList.stream()
@@ -216,15 +296,19 @@ public class PoliceController {
             violationsTodayLabel.setText("0");
         }
 
+        // Load active warrants count
         List<Map<String, Object>> warrantsList = viewLoader.loadActiveWarrants();
         activeWarrantsLabel.setText(String.valueOf(warrantsList != null ? warrantsList.size() : 0));
 
+        // Load active BOLO alerts count
         List<Map<String, Object>> boloList = viewLoader.loadActiveBOLOAlerts();
         boloAlertsLabel.setText(String.valueOf(boloList != null ? boloList.size() : 0));
 
+        // Load expired documents count
         List<Map<String, Object>> expiredDocs = viewLoader.loadExpiredDocuments();
         expiredDocsLabel.setText(String.valueOf(expiredDocs != null ? expiredDocs.size() : 0));
 
+        // Load geofence alerts and count unread ones
         List<Map<String, Object>> geofenceAlerts = viewLoader.loadGeofenceAlerts();
         if (geofenceAlerts != null) {
             long unreadCount = geofenceAlerts.stream()
@@ -235,6 +319,7 @@ public class PoliceController {
             geofenceAlertsLabel.setText("0");
         }
 
+        // Calculate total unpaid fines
         double unpaidFinesTotal = 0;
         if (violationsList != null) {
             unpaidFinesTotal = violationsList.stream()
@@ -247,6 +332,7 @@ public class PoliceController {
         }
         unpaidFinesLabel.setText(String.format("M%,.2f", unpaidFinesTotal));
 
+        // Load officer logs for today
         List<Map<String, Object>> officerLogs = viewLoader.loadOfficerLogs();
         long todayLogs = officerLogs != null ?
                 officerLogs.stream().filter(l -> {
@@ -256,6 +342,10 @@ public class PoliceController {
         activeTrackingLabel.setText(String.valueOf(todayLogs));
     }
 
+    /**
+     * Loads recent police officer activity for the table
+     * @throws SQLException if database error occurs
+     */
     private void loadRecentActivity() throws SQLException {
         List<Map<String, Object>> logs = viewLoader.loadOfficerLogs();
         if (logs != null && !logs.isEmpty()) {
@@ -266,6 +356,14 @@ public class PoliceController {
         }
     }
 
+    // ============================================
+    // BUSINESS LOGIC METHODS
+    // ============================================
+
+    /**
+     * Searches for a vehicle by registration number
+     * Displays vehicle details in an alert dialog
+     */
     private void searchVehicle() {
         String regNumber = searchRegistrationField.getText().trim();
         if (regNumber.isEmpty()) {
@@ -283,6 +381,7 @@ public class PoliceController {
             updateProgress(0.9);
 
             if (vehicle != null) {
+                // Build detailed vehicle information display
                 StringBuilder info = new StringBuilder();
                 info.append("Vehicle Found!\n\n");
                 info.append("Registration: ").append(vehicle.get("registration_number")).append("\n");
@@ -308,10 +407,22 @@ public class PoliceController {
         }
     }
 
+    // ============================================
+    // UI PROGRESS METHODS
+    // ============================================
+
+    /**
+     * Shows/hides load progress indicator
+     * @param show true to show, false to hide
+     */
     private void showLoadProgress(boolean show) {
         if (loadProgress != null) loadProgress.setVisible(show);
     }
 
+    /**
+     * Shows/hides operation progress bar
+     * @param show true to show, false to hide
+     */
     private void showOperationProgress(boolean show) {
         if (operationProgress != null) {
             operationProgress.setVisible(show);
@@ -319,10 +430,17 @@ public class PoliceController {
         }
     }
 
+    /**
+     * Updates progress bar value
+     * @param progress value between 0 and 1
+     */
     private void updateProgress(double progress) {
         if (operationProgress != null) operationProgress.setProgress(progress);
     }
 
+    /**
+     * Hides load progress indicator after a short delay
+     */
     private void hideLoadProgressAfterDelay() {
         PauseTransition delay = new PauseTransition(Duration.seconds(1));
         delay.setOnFinished(event -> {
@@ -331,6 +449,9 @@ public class PoliceController {
         delay.play();
     }
 
+    /**
+     * Hides progress indicators after a short delay
+     */
     private void hideProgressAfterDelay() {
         PauseTransition delay = new PauseTransition(Duration.seconds(1.5));
         delay.setOnFinished(event -> {

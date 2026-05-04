@@ -1,40 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.*?>
 
-<StackPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.WorkshopRegistrationController" style="-fx-background-color: #2c3e50;">
-    <VBox spacing="20" maxWidth="500" style="-fx-background-color: #ffffff; -fx-background-radius: 10;">
-        <padding>
-            <Insets top="30" right="30" bottom="30" left="30"/>
-        </padding>
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.WorkshopRegistrationController"
+            stylesheets="@../css/application.css" styleClass="border-pane">
 
-        <Label text="Workshop Registration" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-        <Label text="Register your workshop to start servicing vehicles" style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d;"/>
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
+            <VBox spacing="20" alignment="TOP_CENTER"
+                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
 
-        <Separator/>
+                <Label text="Workshop Registration" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
+                <Label text="Register your workshop to start servicing vehicles" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
 
-        <Label text="Account Information" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
-        <TextField fx:id="usernameField" promptText="Username"/>
-        <PasswordField fx:id="passwordField" promptText="Password"/>
-        <PasswordField fx:id="confirmPasswordField" promptText="Confirm Password"/>
-        <TextField fx:id="emailField" promptText="Email Address"/>
-        <TextField fx:id="fullNameField" promptText="Contact Person Name"/>
+                <Separator/>
 
-        <Label text="Workshop Information" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
-        <TextField fx:id="workshopNameField" promptText="Workshop Name"/>
-        <TextField fx:id="addressField" promptText="Address"/>
-        <TextField fx:id="phoneField" promptText="Phone Number"/>
-        <TextField fx:id="licenseNumberField" promptText="License Number"/>
+                <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
 
-        <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-size: 12px;"/>
+                <!-- Account Information Section -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="600" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Account Information" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-        <HBox spacing="10" alignment="CENTER">
-            <Button fx:id="registerButton" text="Register" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-pref-width: 120;"/>
-            <Button fx:id="cancelButton" text="Cancel" style="-fx-background-color: #7f8c8d; -fx-text-fill: white; -fx-pref-width: 120;"/>
-        </HBox>
+                        <VBox spacing="12" alignment="CENTER">
+                            <TextField fx:id="usernameField" promptText="Username" styleClass="form-field" maxWidth="Infinity"/>
+                            <PasswordField fx:id="passwordField" promptText="Password" styleClass="form-field" maxWidth="Infinity"/>
+                            <PasswordField fx:id="confirmPasswordField" promptText="Confirm Password" styleClass="form-field" maxWidth="Infinity"/>
+                            <TextField fx:id="emailField" promptText="Email Address" styleClass="form-field" maxWidth="Infinity"/>
+                            <TextField fx:id="fullNameField" promptText="Contact Person Name" styleClass="form-field" maxWidth="Infinity"/>
+                        </VBox>
+                    </VBox>
+                </HBox>
 
-        <Label text="Note: Your account will need admin approval before you can access the system." style="-fx-text-fill: #e74c3c; -fx-font-size: 11px; -fx-wrap-text: true;"/>
-    </VBox>
-</StackPane>
+                <!-- Workshop Information Section -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="600" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Workshop Information" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+
+                        <VBox spacing="12" alignment="CENTER">
+                            <TextField fx:id="workshopNameField" promptText="Workshop Name" styleClass="form-field" maxWidth="Infinity"/>
+                            <TextField fx:id="addressField" promptText="Address" styleClass="form-field" maxWidth="Infinity"/>
+                            <TextField fx:id="phoneField" promptText="Phone Number" styleClass="form-field" maxWidth="Infinity"/>
+                            <TextField fx:id="licenseNumberField" promptText="License Number" styleClass="form-field" maxWidth="Infinity"/>
+                        </VBox>
+                    </VBox>
+                </HBox>
+
+                <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+
+                <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
+
+                <HBox alignment="CENTER">
+                    <Button fx:id="registerButton" text="Register" styleClass="button-success" prefWidth="120">
+                        <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                    </Button>
+                    <Button fx:id="cancelButton" text="Cancel" styleClass="button-secondary" prefWidth="120">
+                        <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                    </Button>
+                </HBox>
+
+                <Label text="Note: Your account will need admin approval before you can access the system."
+                       style="-fx-text-fill: #e74c3c; -fx-font-size: 11px; -fx-wrap-text: true;" alignment="CENTER" maxWidth="Infinity"/>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <fx:include source="FooterComponent.fxml"/>
+    </bottom>
+</BorderPane>

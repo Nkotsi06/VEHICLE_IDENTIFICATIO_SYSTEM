@@ -1,367 +1,119 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.CustomerQuery;
 
+/**
+ * QueryDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class QueryDAO extends BaseDAO<CustomerQuery> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public QueryDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public CustomerQuery findById(int id) throws SQLException {
-        String sql = "SELECT * FROM vw_customer_queries WHERE id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, id);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return mapRow(rs);
-            }
-            return null;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        List<CustomerQuery> results = viewLoader.loadViewWithCondition("vw_customer_queries", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<CustomerQuery> findAll() throws SQLException {
-        String sql = "SELECT * FROM vw_customer_queries ORDER BY query_date DESC";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<CustomerQuery> queries = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                queries.add(mapRow(rs));
-            }
-            return queries;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.loadView("vw_customer_queries");
     }
 
     public List<CustomerQuery> findByCustomerId(int customerId) throws SQLException {
-        String sql = "SELECT * FROM vw_customer_queries WHERE customer_id = ? ORDER BY query_date DESC";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<CustomerQuery> queries = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, customerId);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                queries.add(mapRow(rs));
-            }
-            return queries;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.loadViewWithCondition("vw_customer_queries", "customer_id = ? ORDER BY query_date DESC", customerId);
     }
 
     public List<CustomerQuery> findByCustomerName(String customerName) throws SQLException {
-        String sql = "SELECT * FROM vw_customer_queries WHERE customer_name ILIKE ? ORDER BY query_date DESC";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<CustomerQuery> queries = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, "%" + customerName + "%");
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                queries.add(mapRow(rs));
-            }
-            return queries;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.loadViewWithCondition("vw_customer_queries", "customer_name ILIKE ? ORDER BY query_date DESC", "%" + customerName + "%");
     }
 
     public List<CustomerQuery> findByVehicleId(int vehicleId) throws SQLException {
-        String sql = "SELECT * FROM vw_customer_queries WHERE vehicle_id = ? ORDER BY query_date DESC";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<CustomerQuery> queries = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, vehicleId);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                queries.add(mapRow(rs));
-            }
-            return queries;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.loadViewWithCondition("vw_customer_queries", "vehicle_id = ? ORDER BY query_date DESC", vehicleId);
     }
 
     public List<CustomerQuery> findByRegistrationNumber(String registrationNumber) throws SQLException {
-        String sql = "SELECT * FROM vw_customer_queries WHERE registration_number = ? ORDER BY query_date DESC";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<CustomerQuery> queries = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, registrationNumber);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                queries.add(mapRow(rs));
-            }
-            return queries;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.loadViewWithCondition("vw_customer_queries", "registration_number = ? ORDER BY query_date DESC", registrationNumber);
     }
 
     public List<CustomerQuery> findPendingQueries() throws SQLException {
-        String sql = "SELECT * FROM vw_pending_queries ORDER BY query_date";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<CustomerQuery> queries = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                queries.add(mapRow(rs));
-            }
-            return queries;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.loadViewWithCondition("vw_pending_queries", "1=1 ORDER BY query_date");
     }
 
     public List<CustomerQuery> findByStatus(String status) throws SQLException {
-        String sql = "SELECT * FROM vw_customer_queries WHERE status = ? ORDER BY query_date DESC";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<CustomerQuery> queries = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, status);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                queries.add(mapRow(rs));
-            }
-            return queries;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.loadViewWithCondition("vw_customer_queries", "status = ? ORDER BY query_date DESC", status);
     }
 
     public List<CustomerQuery> findByDateRange(LocalDateTime startDate, LocalDateTime endDate) throws SQLException {
-        String sql = "SELECT * FROM vw_customer_queries WHERE query_date BETWEEN ? AND ? ORDER BY query_date DESC";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<CustomerQuery> queries = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setObject(1, startDate);
-            ps.setObject(2, endDate);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                queries.add(mapRow(rs));
-            }
-            return queries;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.loadViewWithCondition("vw_customer_queries", "query_date BETWEEN ? AND ? ORDER BY query_date DESC", startDate, endDate);
     }
 
     @Override
     public boolean insert(CustomerQuery entity) throws SQLException {
-        String sql = "CALL sp_submit_query(?, ?, ?)";
-        Connection conn = null;
-        java.sql.CallableStatement cs = null;
-        try {
-            conn = getConnection();
-            cs = conn.prepareCall("{call sp_submit_query(?, ?, ?)}");
-            cs.setInt(1, entity.getCustomerId());
-            cs.setInt(2, entity.getVehicleId());
-            cs.setString(3, entity.getQueryText());
-            cs.execute();
+        Integer queryId = procedureCaller.executeSubmitQuery(
+                entity.getCustomerId(),
+                entity.getVehicleId(),
+                entity.getQueryText()
+        );
+        if (queryId != null && queryId > 0) {
+            entity.setId(queryId);
             return true;
-        } finally {
-            if (cs != null) cs.close();
-            closeResources(null, null, conn);
         }
+        return false;
     }
 
     public int insertAndGetId(CustomerQuery entity) throws SQLException {
-        String sql = "CALL sp_submit_query(?, ?, ?)";
-        Connection conn = null;
-        java.sql.CallableStatement cs = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            cs = conn.prepareCall("{call sp_submit_query(?, ?, ?)}");
-            cs.setInt(1, entity.getCustomerId());
-            cs.setInt(2, entity.getVehicleId());
-            cs.setString(3, entity.getQueryText());
-            cs.execute();
-
-            String querySql = "SELECT id FROM customer_queries WHERE customer_id = ? ORDER BY query_date DESC LIMIT 1";
-            ps = conn.prepareStatement(querySql);
-            ps.setInt(1, entity.getCustomerId());
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("id");
-            }
-            return -1;
-        } finally {
-            closeResources(rs, ps, null);
-            if (cs != null) cs.close();
-            closeResources(null, null, conn);
-        }
+        return procedureCaller.executeSubmitQuery(
+                entity.getCustomerId(),
+                entity.getVehicleId(),
+                entity.getQueryText()
+        );
     }
 
     public boolean respondToQuery(int queryId, String responseText) throws SQLException {
-        String sql = "CALL sp_respond_to_query(?, ?)";
-        Connection conn = null;
-        java.sql.CallableStatement cs = null;
-        try {
-            conn = getConnection();
-            cs = conn.prepareCall("{call sp_respond_to_query(?, ?)}");
-            cs.setInt(1, queryId);
-            cs.setString(2, responseText);
-            cs.execute();
-            return true;
-        } finally {
-            if (cs != null) cs.close();
-            closeResources(null, null, conn);
-        }
+        return procedureCaller.executeRespondToQuery(queryId, responseText);
     }
 
     public boolean closeQuery(int queryId) throws SQLException {
-        String sql = "CALL sp_close_query(?)";
-        Connection conn = null;
-        java.sql.CallableStatement cs = null;
-        try {
-            conn = getConnection();
-            cs = conn.prepareCall("{call sp_close_query(?)}");
-            cs.setInt(1, queryId);
-            cs.execute();
-            return true;
-        } finally {
-            if (cs != null) cs.close();
-            closeResources(null, null, conn);
-        }
+        return procedureCaller.executeCloseQuery(queryId);
     }
 
     @Override
     public boolean update(CustomerQuery entity) throws SQLException {
-        String sql = "UPDATE customer_queries SET response_text = ?, response_date = ?, status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, entity.getResponseText());
-            ps.setObject(2, entity.getResponseDate());
-            ps.setString(3, entity.getStatus());
-            ps.setInt(4, entity.getId());
-            int result = ps.executeUpdate();
-            return result > 0;
-        } finally {
-            closeResources(null, ps, conn);
-        }
+        return respondToQuery(entity.getId(), entity.getResponseText());
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM customer_queries WHERE id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, id);
-            int result = ps.executeUpdate();
-            return result > 0;
-        } finally {
-            closeResources(null, ps, conn);
-        }
+        return procedureCaller.executeDeleteQuery(id);
     }
 
     public int countPendingQueries() throws SQLException {
-        String sql = "SELECT COUNT(*) FROM customer_queries WHERE status = 'PENDING'";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.countViewRowsWithCondition("vw_customer_queries", "status = 'PENDING'");
     }
 
     public int countQueriesByCustomer(int customerId) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM customer_queries WHERE customer_id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, customerId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.countViewRowsWithCondition("vw_customer_queries", "customer_id = ?", customerId);
     }
 
     public double getAverageResponseTimeHours() throws SQLException {
-        String sql = "SELECT AVG(EXTRACT(EPOCH FROM (response_date - query_date)) / 3600) FROM customer_queries WHERE response_date IS NOT NULL";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getDouble(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.getAverageQueryResponseTimeHours();
     }
 
     @Override

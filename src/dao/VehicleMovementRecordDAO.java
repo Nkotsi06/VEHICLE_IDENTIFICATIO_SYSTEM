@@ -1,19 +1,29 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.VehicleMovementRecord;
-import models.VehicleSighting;
 
+/**
+ * VehicleMovementRecordDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class VehicleMovementRecordDAO extends BaseDAO<VehicleMovementRecord> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public VehicleMovementRecordDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public VehicleMovementRecord findById(int id) throws SQLException {
@@ -26,62 +36,11 @@ public class VehicleMovementRecordDAO extends BaseDAO<VehicleMovementRecord> {
     }
 
     public VehicleMovementRecord reconstructMovement(int vehicleId, LocalDate startDate, LocalDate endDate) throws SQLException {
-        String sql = "CALL sp_reconstruct_vehicle_movement(?, ?, ?, ?, ?)";
-        Connection conn = null;
-        java.sql.CallableStatement cs = null;
-        try {
-            conn = getConnection();
-            cs = conn.prepareCall("{call sp_reconstruct_vehicle_movement(?, ?, ?, ?, ?)}");
-            cs.setInt(1, vehicleId);
-            cs.setDate(2, java.sql.Date.valueOf(startDate));
-            cs.setDate(3, java.sql.Date.valueOf(endDate));
-            cs.registerOutParameter(4, Types.INTEGER);
-            cs.registerOutParameter(5, Types.OTHER);
-            cs.execute();
-
-            VehicleMovementRecord record = new VehicleMovementRecord();
-            record.setVehicleId(vehicleId);
-            record.setStartDateTime(startDate.atStartOfDay());
-            record.setEndDateTime(endDate.atTime(23, 59, 59));
-            record.setNumberOfSightings(cs.getInt(4));
-
-            return record;
-        } finally {
-            closeResources(null, cs, conn);
-        }
+        return procedureCaller.executeReconstructVehicleMovement(vehicleId, startDate, endDate);
     }
 
     public VehicleMovementRecord getReconstructionWithMap(int vehicleId, LocalDate startDate, LocalDate endDate) throws SQLException {
-        String sql = "CALL sp_get_vehicle_reconstruction_with_map(?, ?, ?, ?, ?, ?)";
-        Connection conn = null;
-        java.sql.CallableStatement cs = null;
-        try {
-            conn = getConnection();
-            cs = conn.prepareCall("{call sp_get_vehicle_reconstruction_with_map(?, ?, ?, ?, ?, ?)}");
-            cs.setInt(1, vehicleId);
-            cs.setDate(2, java.sql.Date.valueOf(startDate));
-            cs.setDate(3, java.sql.Date.valueOf(endDate));
-            cs.registerOutParameter(4, Types.OTHER);
-            cs.registerOutParameter(5, Types.DECIMAL);
-            cs.registerOutParameter(6, Types.DECIMAL);
-            cs.execute();
-
-            VehicleMovementRecord record = new VehicleMovementRecord();
-            record.setVehicleId(vehicleId);
-            record.setStartDateTime(startDate.atStartOfDay());
-            record.setEndDateTime(endDate.atTime(23, 59, 59));
-
-            if (cs.getObject(5) != null) {
-                record.setTotalDistanceKm(cs.getDouble(5));
-            }
-            if (cs.getObject(6) != null) {
-                record.setAverageSpeedKmph(cs.getDouble(6));
-            }
-
-            return record;
-        } finally {
-            closeResources(null, cs, conn);
-        }
+        return procedureCaller.executeGetVehicleReconstructionWithMap(vehicleId, startDate, endDate);
     }
 
     @Override
@@ -99,7 +58,6 @@ public class VehicleMovementRecordDAO extends BaseDAO<VehicleMovementRecord> {
         return false;
     }
 
-    // Required mapRow method implementation
     @Override
     protected VehicleMovementRecord mapRow(ResultSet rs) throws SQLException {
         VehicleMovementRecord record = new VehicleMovementRecord();
@@ -125,9 +83,6 @@ public class VehicleMovementRecordDAO extends BaseDAO<VehicleMovementRecord> {
         if (rs.getObject("suspicious_score") != null) {
             record.setSuspiciousScore(rs.getDouble("suspicious_score"));
         }
-
-        // Note: suspiciousLevel is calculated in the model based on suspiciousScore
-        // No need to set it directly
 
         if (rs.getTimestamp("created_at") != null) {
             record.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());

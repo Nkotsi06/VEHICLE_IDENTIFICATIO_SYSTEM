@@ -1,33 +1,46 @@
 package dao;
 
-import java.sql.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
-import models.RankChangeRequest;
-import models.PoliceOfficer;  // ADD THIS IMPORT
-import dao.PoliceOfficerDAO;   // ADD THIS IMPORT
 
+import database.ProcedureCaller;
+import database.ViewLoader;
+import models.RankChangeRequest;
+
+/**
+ * RankChangeRequestDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class RankChangeRequestDAO extends BaseDAO<RankChangeRequest> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public RankChangeRequestDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public RankChangeRequest findById(int id) throws SQLException {
-        String sql = "SELECT * FROM vw_rank_change_requests WHERE id = ?";
-        return executeQuerySingle(sql, id);
+        List<RankChangeRequest> results = viewLoader.loadViewWithCondition("vw_rank_change_requests", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<RankChangeRequest> findAll() throws SQLException {
-        String sql = "SELECT * FROM vw_rank_change_requests ORDER BY created_at DESC";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_rank_change_requests");
     }
 
     public List<RankChangeRequest> findByOfficerId(int officerId) throws SQLException {
-        String sql = "SELECT * FROM vw_rank_change_requests WHERE officer_id = ? ORDER BY created_at DESC";
-        return executeQuery(sql, officerId);
+        return viewLoader.loadViewWithCondition("vw_rank_change_requests", "officer_id = ? ORDER BY created_at DESC", officerId);
     }
 
     public List<RankChangeRequest> findByStatus(String status) throws SQLException {
-        String sql = "SELECT * FROM vw_rank_change_requests WHERE status = ? ORDER BY created_at DESC";
-        return executeQuery(sql, status);
+        return viewLoader.loadViewWithCondition("vw_rank_change_requests", "status = ? ORDER BY created_at DESC", status);
     }
 
     public List<RankChangeRequest> findPendingRequests() throws SQLException {
@@ -36,73 +49,39 @@ public class RankChangeRequestDAO extends BaseDAO<RankChangeRequest> {
 
     @Override
     public boolean insert(RankChangeRequest entity) throws SQLException {
-        String sql = "INSERT INTO rank_change_requests (officer_id, current_rank, requested_rank, reason, status) " +
-                "VALUES (?, ?, ?, ?, ?)";
-        int result = executeUpdate(sql,
+        return procedureCaller.executeInsertRankChangeRequest(
                 entity.getOfficerId(),
                 entity.getCurrentRank(),
                 entity.getRequestedRank(),
-                entity.getReason(),
-                "PENDING"
+                entity.getReason()
         );
-        return result > 0;
     }
 
     public boolean approveRequest(int requestId, int reviewedBy, String reviewNotes) throws SQLException {
-        String sql = "UPDATE rank_change_requests SET status = 'APPROVED', reviewed_by = ?, review_notes = ? WHERE id = ?";
-        int result = executeUpdate(sql, reviewedBy, reviewNotes, requestId);
-
-        if (result > 0) {
-            RankChangeRequest request = findById(requestId);
-            if (request != null) {
-                PoliceOfficerDAO officerDAO = new PoliceOfficerDAO();
-                PoliceOfficer officer = officerDAO.findById(request.getOfficerId());
-                if (officer != null) {
-                    officerDAO.updateRank(request.getOfficerId(), request.getRequestedRank(),
-                            getRankLevel(request.getRequestedRank()));
-                }
-            }
+        boolean result = procedureCaller.executeApproveRankChangeRequest(requestId, reviewedBy, reviewNotes);
+        if (result) {
+            // The procedure handles updating the officer's rank
         }
-        return result > 0;
+        return result;
     }
 
     public boolean rejectRequest(int requestId, int reviewedBy, String reviewNotes) throws SQLException {
-        String sql = "UPDATE rank_change_requests SET status = 'REJECTED', reviewed_by = ?, review_notes = ? WHERE id = ?";
-        int result = executeUpdate(sql, reviewedBy, reviewNotes, requestId);
-        return result > 0;
-    }
-
-    private int getRankLevel(String rankName) throws SQLException {
-        String sql = "SELECT rank_level FROM police_ranks WHERE rank_name = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, rankName);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("rank_level");
-            }
-            return 1;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return procedureCaller.executeRejectRankChangeRequest(requestId, reviewedBy, reviewNotes);
     }
 
     @Override
     public boolean update(RankChangeRequest entity) throws SQLException {
-        String sql = "UPDATE rank_change_requests SET status = ?, reviewed_by = ?, review_notes = ? WHERE id = ?";
-        int result = executeUpdate(sql, entity.getStatus(), entity.getReviewedBy(), entity.getReviewNotes(), entity.getId());
-        return result > 0;
+        if ("APPROVED".equals(entity.getStatus())) {
+            return approveRequest(entity.getId(), entity.getReviewedBy(), entity.getReviewNotes());
+        } else if ("REJECTED".equals(entity.getStatus())) {
+            return rejectRequest(entity.getId(), entity.getReviewedBy(), entity.getReviewNotes());
+        }
+        return false;
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM rank_change_requests WHERE id = ?";
-        int result = executeUpdate(sql, id);
-        return result > 0;
+        return procedureCaller.executeDeleteRankChangeRequest(id);
     }
 
     @Override
@@ -129,6 +108,9 @@ public class RankChangeRequestDAO extends BaseDAO<RankChangeRequest> {
         }
         if (rs.getTimestamp("updated_at") != null) {
             request.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
+        }
+        if (rs.getTimestamp("reviewed_at") != null) {
+            request.setReviewedAt(rs.getTimestamp("reviewed_at").toLocalDateTime());
         }
 
         return request;

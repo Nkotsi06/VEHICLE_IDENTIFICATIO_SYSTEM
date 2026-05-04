@@ -1,114 +1,112 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.CustomerQuery;
 
+/**
+ * CustomerQueryDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class CustomerQueryDAO extends BaseDAO<CustomerQuery> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public CustomerQueryDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public CustomerQuery findById(int id) throws SQLException {
-        String sql = "SELECT * FROM vw_customer_queries WHERE id = ?";
-        return executeQuerySingle(sql, id);
+        // Use view - NO direct SQL
+        List<CustomerQuery> results = viewLoader.loadViewWithCondition("vw_customer_queries", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<CustomerQuery> findAll() throws SQLException {
-        String sql = "SELECT * FROM vw_customer_queries ORDER BY query_date DESC";
-        return executeQuery(sql);
+        // Use view - NO direct SQL
+        return viewLoader.loadView("vw_customer_queries");
     }
 
     public List<CustomerQuery> findByCustomerId(int customerId) throws SQLException {
-        String sql = "SELECT * FROM vw_customer_queries WHERE customer_id = ? ORDER BY query_date DESC";
-        return executeQuery(sql, customerId);
+        // Use view - NO direct SQL
+        return viewLoader.loadViewWithCondition("vw_customer_queries", "customer_id = ? ORDER BY query_date DESC", customerId);
     }
 
     public List<CustomerQuery> findByVehicleId(int vehicleId) throws SQLException {
-        String sql = "SELECT * FROM vw_customer_queries WHERE vehicle_id = ? ORDER BY query_date DESC";
-        return executeQuery(sql, vehicleId);
+        // Use view - NO direct SQL
+        return viewLoader.loadViewWithCondition("vw_customer_queries", "vehicle_id = ? ORDER BY query_date DESC", vehicleId);
     }
 
     public List<CustomerQuery> findPendingQueries() throws SQLException {
-        String sql = "SELECT * FROM vw_pending_queries ORDER BY query_date";
-        return executeQuery(sql);
+        // Use view - NO direct SQL
+        return viewLoader.loadViewWithCondition("vw_pending_queries", "1=1 ORDER BY query_date");
     }
 
     public List<CustomerQuery> findByStatus(String status) throws SQLException {
-        String sql = "SELECT * FROM vw_customer_queries WHERE status = ? ORDER BY query_date DESC";
-        return executeQuery(sql, status);
+        // Use view - NO direct SQL
+        return viewLoader.loadViewWithCondition("vw_customer_queries", "status = ? ORDER BY query_date DESC", status);
     }
 
     public int countPendingByCustomerId(int customerId) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM customer_queries WHERE customer_id = ? AND status = 'PENDING'";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, customerId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        // Use view - NO direct SQL
+        return viewLoader.countViewRowsWithCondition("customer_queries", "customer_id = ? AND status = 'PENDING'", customerId);
     }
 
     @Override
     public boolean insert(CustomerQuery entity) throws SQLException {
-        return executeProcedure("sp_submit_query",
+        // Use stored procedure - NO direct SQL
+        Integer queryId = procedureCaller.executeSubmitQuery(
                 entity.getCustomerId(),
                 entity.getVehicleId(),
                 entity.getQueryText()
         );
+        if (queryId != null && queryId > 0) {
+            entity.setId(queryId);
+            return true;
+        }
+        return false;
     }
 
     public boolean respondToQuery(int queryId, String responseText) throws SQLException {
-        return executeProcedure("sp_respond_to_query", queryId, responseText);
+        // Use stored procedure - NO direct SQL
+        return procedureCaller.executeRespondToQuery(queryId, responseText);
     }
 
     public boolean closeQuery(int queryId) throws SQLException {
-        return executeProcedure("sp_close_query", queryId);
+        // Use stored procedure - NO direct SQL
+        return procedureCaller.executeCloseQuery(queryId);
     }
 
     @Override
     public boolean update(CustomerQuery entity) throws SQLException {
-        String sql = "UPDATE customer_queries SET response_text = ?, response_date = ?, status = ? WHERE id = ?";
-        int result = executeUpdate(sql, entity.getResponseText(), entity.getResponseDate(), entity.getStatus(), entity.getId());
-        return result > 0;
+        // Use stored procedure - NO direct SQL
+        return respondToQuery(entity.getId(), entity.getResponseText());
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM customer_queries WHERE id = ?";
-        int result = executeUpdate(sql, id);
-        return result > 0;
+        // Use stored procedure - NO direct SQL
+        return procedureCaller.executeDeleteQuery(id);
     }
 
     public int countPendingQueries() throws SQLException {
-        String sql = "SELECT COUNT(*) FROM customer_queries WHERE status = 'PENDING'";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        // Use view - NO direct SQL
+        return viewLoader.countViewRowsWithCondition("customer_queries", "status = 'PENDING'");
+    }
+
+    public int countAnsweredQueries() throws SQLException {
+        // Use view - NO direct SQL
+        return viewLoader.countViewRowsWithCondition("customer_queries", "status = 'ANSWERED'");
     }
 
     @Override

@@ -7,110 +7,128 @@
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
+<?import javafx.collections.FXCollections?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.PredictiveAnalyticsController">
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.PredictiveAnalyticsController"
+            stylesheets="@../css/application.css" styleClass="border-pane">
 
     <top>
-        <VBox>
-            <fx:include source="MenuBarComponent.fxml"/>
-        </VBox>
+        <fx:include source="MenuBarComponent.fxml"/>
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="true">
-            <VBox spacing="20" style="-fx-padding: 20;">
-                <Label text="Predictive Analytics" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-                <Label text="AI-powered predictions for crime patterns and vehicle risk" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
+            <VBox spacing="20" alignment="TOP_CENTER"
+                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
+
+                <Label text="Predictive Analytics" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
+                <Label text="AI-powered predictions for crime patterns and vehicle risk" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
 
                 <Separator/>
 
                 <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
 
-                <TitledPane text="Prediction Configuration" expanded="true" style="-fx-font-weight: bold;">
-                    <HBox spacing="15" alignment="CENTER_LEFT" style="-fx-padding: 10;">
-                        <Label text="Prediction Type:" style="-fx-font-weight: bold;"/>
-                        <ComboBox fx:id="predictionTypeComboBox" prefWidth="250">
-                            <items>
-                                <FXCollections fx:factory="observableArrayList">
-                                    <String fx:value="Crime Hotspot Prediction"/>
-                                    <String fx:value="Vehicle Theft Risk"/>
-                                    <String fx:value="Accident Prone Areas"/>
-                                    <String fx:value="Recidivism Prediction"/>
-                                </FXCollections>
-                            </items>
-                        </ComboBox>
-                        <Button fx:id="generateButton" text="Generate Predictions" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
-                            <effect>
-                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                            </effect>
-                        </Button>
-                        <Button fx:id="refreshButton" text="Refresh" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                        <Button fx:id="fadeButton" text="Animate" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                    </HBox>
-                </TitledPane>
+                <!-- Prediction Configuration -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="900" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Prediction Configuration" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+
+                        <HBox spacing="15" alignment="CENTER" wrap="True">
+                            <Label text="Prediction Type:" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="predictionTypeComboBox" prefWidth="250">
+                                <items>
+                                    <FXCollections fx:factory="observableArrayList">
+                                        <String fx:value="Crime Hotspot Prediction"/>
+                                        <String fx:value="Vehicle Theft Risk"/>
+                                        <String fx:value="Accident Prone Areas"/>
+                                        <String fx:value="Recidivism Prediction"/>
+                                    </FXCollections>
+                                </items>
+                            </ComboBox>
+                            <Button fx:id="generateButton" text="Generate Predictions" styleClass="button-primary">
+                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                            </Button>
+                            <Button fx:id="refreshButton" text="Refresh" styleClass="button-info"/>
+                            <Button fx:id="fadeButton" text="Animate" styleClass="button-warning"/>
+                        </HBox>
+                    </VBox>
+                </HBox>
 
                 <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
-                <GridPane hgap="20" vgap="15" style="-fx-background-color: #f8f9fa; -fx-padding: 20; -fx-border-radius: 10;">
-                    <Label text="High Risk Vehicles:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
-                    <Label fx:id="highRiskCountLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;"/>
+                <!-- Statistics Grid -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="1000" style=" -fx-background-color: #f8f9fa; -fx-padding: 20; -fx-border-radius: 10;" alignment="CENTER">
+                        <GridPane hgap="20" vgap="15" alignment="CENTER">
+                            <Label text="High Risk Vehicles:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                            <Label fx:id="highRiskCountLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;"/>
 
-                    <Label text="Medium Risk Vehicles:" GridPane.rowIndex="0" GridPane.columnIndex="2" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
-                    <Label fx:id="mediumRiskCountLabel" GridPane.rowIndex="0" GridPane.columnIndex="3" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #f39c12;"/>
+                            <Label text="Medium Risk Vehicles:" GridPane.rowIndex="0" GridPane.columnIndex="2" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                            <Label fx:id="mediumRiskCountLabel" GridPane.rowIndex="0" GridPane.columnIndex="3" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #f39c12;"/>
 
-                    <Label text="Low Risk Vehicles:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
-                    <Label fx:id="lowRiskCountLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #27ae60;"/>
+                            <Label text="Low Risk Vehicles:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                            <Label fx:id="lowRiskCountLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #27ae60;"/>
 
-                    <Label text="Active Crime Hotspots:" GridPane.rowIndex="1" GridPane.columnIndex="2" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
-                    <Label fx:id="hotspotsCountLabel" GridPane.rowIndex="1" GridPane.columnIndex="3" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;"/>
+                            <Label text="Active Crime Hotspots:" GridPane.rowIndex="1" GridPane.columnIndex="2" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                            <Label fx:id="hotspotsCountLabel" GridPane.rowIndex="1" GridPane.columnIndex="3" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;"/>
 
-                    <Label text="Prediction Accuracy:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
-                    <ProgressBar fx:id="accuracyProgress" prefWidth="200" progress="0.87"/>
-                    <Label fx:id="accuracyLabel" GridPane.rowIndex="2" GridPane.columnIndex="2" style="-fx-text-fill: #27ae60; -fx-font-weight: bold;"/>
-                </GridPane>
-
-                <SplitPane dividerPositions="0.5">
-                    <VBox spacing="10">
-                        <Label text="High Risk Vehicles" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;"/>
-                        <ListView fx:id="highRiskVehiclesList" prefHeight="200"/>
-                        <Label text="Predicted Crime Hotspots" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;"/>
-                        <ListView fx:id="crimeHotspotsList" prefHeight="150"/>
+                            <Label text="Prediction Accuracy:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                            <ProgressBar fx:id="accuracyProgress" prefWidth="200" progress="0.87"/>
+                            <Label fx:id="accuracyLabel" GridPane.rowIndex="2" GridPane.columnIndex="3" style="-fx-text-fill: #27ae60; -fx-font-weight: bold;"/>
+                        </GridPane>
                     </VBox>
-                    <VBox spacing="10">
-                        <Label text="Risk Factor Analysis" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-                        <TableView fx:id="riskFactorsTable" prefHeight="200">
-                            <columns>
-                                <TableColumn fx:id="factorNameColumn" text="Risk Factor" prefWidth="200"/>
-                                <TableColumn fx:id="factorWeightColumn" text="Weight" prefWidth="100"/>
-                                <TableColumn fx:id="factorImpactColumn" text="Impact" prefWidth="150"/>
-                            </columns>
-                            <columnResizePolicy>
-                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                            </columnResizePolicy>
-                        </TableView>
-                        <Label text="Recommendations" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-                        <TextArea fx:id="recommendationsArea" prefHeight="100" editable="false"/>
+                </HBox>
+
+                <!-- Split Panels for Results -->
+                <HBox spacing="20" alignment="CENTER">
+                    <VBox spacing="10" alignment="CENTER" HBox.hgrow="ALWAYS">
+                        <VBox styleClass="profile-edit-card" alignment="CENTER">
+                            <Label text="High Risk Vehicles" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;" alignment="CENTER" maxWidth="Infinity"/>
+                            <ListView fx:id="highRiskVehiclesList" prefHeight="200" maxWidth="Infinity"/>
+                            <Label text="Predicted Crime Hotspots" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;" alignment="CENTER" maxWidth="Infinity"/>
+                            <ListView fx:id="crimeHotspotsList" prefHeight="150" maxWidth="Infinity"/>
+                        </VBox>
                     </VBox>
-                </SplitPane>
+
+                    <VBox spacing="10" alignment="CENTER" HBox.hgrow="ALWAYS">
+                        <VBox styleClass="profile-edit-card" alignment="CENTER">
+                            <Label text="Risk Factor Analysis" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" alignment="CENTER" maxWidth="Infinity"/>
+
+                            <TableView fx:id="riskFactorsTable" prefHeight="200" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
+                                <columns>
+                                    <TableColumn fx:id="factorNameColumn" text="Risk Factor" minWidth="150" maxWidth="200"/>
+                                    <TableColumn fx:id="factorWeightColumn" text="Weight" minWidth="80" maxWidth="110"/>
+                                    <TableColumn fx:id="factorImpactColumn" text="Impact" minWidth="120" maxWidth="160"/>
+                                </columns>
+                            </TableView>
+
+                            <Label text="Recommendations" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" alignment="CENTER" maxWidth="Infinity"/>
+                            <TextArea fx:id="recommendationsArea" prefHeight="100" editable="false"/>
+                        </VBox>
+                    </VBox>
+                </HBox>
 
                 <Separator/>
 
-                <Label text="Crime Trend Prediction" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-                <LineChart fx:id="trendChart" prefHeight="300">
-                    <xAxis>
-                        <CategoryAxis label="Month"/>
-                    </xAxis>
-                    <yAxis>
-                        <NumberAxis label="Predicted Incidents"/>
-                    </yAxis>
-                </LineChart>
-
-                <HBox spacing="10" alignment="CENTER_RIGHT">
-                    <Button fx:id="exportButton" text="Export Report" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                    <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;"/>
+                <!-- Crime Trend Chart -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="1000" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Crime Trend Prediction" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+                        <LineChart fx:id="trendChart" prefHeight="300" maxWidth="Infinity">
+                            <xAxis><CategoryAxis label="Month"/></xAxis>
+                            <yAxis><NumberAxis label="Predicted Incidents"/></yAxis>
+                        </LineChart>
+                    </VBox>
                 </HBox>
 
-                <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+                <HBox alignment="CENTER">
+                    <Button fx:id="exportButton" text="Export Report" styleClass="button-success"/>
+                    <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-secondary" prefWidth="150"/>
+                </HBox>
+
+                <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
+
             </VBox>
         </ScrollPane>
     </center>

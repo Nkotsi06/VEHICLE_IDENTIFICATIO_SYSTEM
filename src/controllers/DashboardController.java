@@ -36,9 +36,6 @@ public class DashboardController {
         roleLabel.setText("Role: " + (role != null ? role : "Unknown"));
         dateLabel.setText(java.time.LocalDate.now().toString());
 
-        System.out.println("Dashboard loaded for user: " + (fullName != null ? fullName : "Unknown") +
-                " (Role: " + role + ")");
-
         loadDashboardStats();
     }
 
@@ -47,15 +44,9 @@ public class DashboardController {
         statsContainer.getChildren().clear();
 
         try {
-            System.out.println("Attempting to load system health data...");
             SystemHealth health = healthDAO.getSystemHealth();
 
             if (health != null) {
-                System.out.println("SystemHealth data loaded successfully:");
-                System.out.println("  - Total Users: " + health.getTotalUsers());
-                System.out.println("  - Total Vehicles: " + health.getTotalVehicles());
-                System.out.println("  - Active Users: " + health.getActiveUsers());
-
                 // Core metrics
                 addStatCard("Total Vehicles", String.valueOf(health.getTotalVehicles()), "#3498db");
                 addStatCard("Total Users", String.valueOf(health.getTotalUsers()), "#2ecc71");
@@ -89,14 +80,11 @@ public class DashboardController {
                 addStatCard("Uptime", health.getFormattedUptime(), "#95a5a6");
 
             } else {
-                System.err.println("SystemHealth object is null - views may not exist");
                 addStatCard("Status", "No data available", "#7f8c8d");
                 addStatCard("Hint", "Run database setup script", "#f39c12");
             }
 
         } catch (Exception e) {
-            System.err.println("Error loading dashboard stats: " + e.getMessage());
-            e.printStackTrace();
             addStatCard("Error", "Failed to load stats", "#e74c3c");
             addStatCard("Details", e.getMessage(), "#e67e22");
             AlertUtil.showError("Dashboard Error", "Failed to load statistics: " + e.getMessage());

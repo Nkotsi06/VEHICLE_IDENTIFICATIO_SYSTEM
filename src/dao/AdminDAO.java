@@ -1,31 +1,50 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.Admin;
 import models.User;
 
+/**
+ * AdminDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class AdminDAO extends BaseDAO<Admin> {
 
-    private UserDAO userDAO = new UserDAO();
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+    private final UserDAO userDAO;
+
+    public AdminDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+        this.userDAO = new UserDAO();
+    }
 
     @Override
     public Admin findById(int id) throws SQLException {
-        String sql = "SELECT u.id, u.username, u.password, u.role, u.full_name, u.email, u.is_active, " +
-                "u.created_at, u.updated_at " +
-                "FROM users u WHERE u.id = ? AND u.role = 'ADMIN'";
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_users",
+                "id = ? AND role = 'ADMIN'", id);
+        if (results.isEmpty()) return null;
 
-        Admin admin = executeQuerySingle(sql, id);
-        if (admin != null) {
-            User user = userDAO.findById(id);
+        Admin admin = mapToAdmin(results.get(0));
+        User user = userDAO.findById(id);
+        if (user != null) {
             admin.setUserId(user.getId());
             admin.setUsername(user.getUsername());
             admin.setFullName(user.getFullName());
             admin.setEmail(user.getEmail());
+            admin.setActive(user.isActive());
+            admin.setCreatedAt(user.getCreatedAt());
+            admin.setUpdatedAt(user.getUpdatedAt());
         }
         return admin;
     }
@@ -35,96 +54,119 @@ public class AdminDAO extends BaseDAO<Admin> {
     }
 
     public Admin findByUsername(String username) throws SQLException {
-        String sql = "SELECT u.id, u.username, u.password, u.role, u.full_name, u.email, u.is_active, " +
-                "u.created_at, u.updated_at FROM users u WHERE u.username = ? AND u.role = 'ADMIN'";
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_users",
+                "username = ? AND role = 'ADMIN'", username);
+        if (results.isEmpty()) return null;
 
-        Admin admin = executeQuerySingle(sql, username);
-        if (admin != null) {
-            User user = userDAO.findByUsername(username);
+        Admin admin = mapToAdmin(results.get(0));
+        User user = userDAO.findByUsername(username);
+        if (user != null) {
             admin.setUserId(user.getId());
             admin.setUsername(user.getUsername());
             admin.setFullName(user.getFullName());
             admin.setEmail(user.getEmail());
+            admin.setActive(user.isActive());
         }
         return admin;
     }
 
     @Override
     public List<Admin> findAll() throws SQLException {
-        String sql = "SELECT u.id, u.username, u.password, u.role, u.full_name, u.email, u.is_active, " +
-                "u.created_at, u.updated_at FROM users u WHERE u.role = 'ADMIN' ORDER BY u.full_name";
-        return executeQuery(sql);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_users", "role = 'ADMIN' ORDER BY full_name");
+        return mapToAdminList(results);
     }
 
-    public List<Admin> findSuperAdmins() throws SQLException {
-        String sql = "SELECT u.id, u.username, u.password, u.role, u.full_name, u.email, u.is_active, " +
-                "u.created_at, u.updated_at FROM users u WHERE u.role = 'ADMIN' AND u.is_active = true";
-        return executeQuery(sql);
+    public List<Admin> findActiveAdmins() throws SQLException {
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_users",
+                "role = 'ADMIN' AND is_active = true ORDER BY full_name");
+        return mapToAdminList(results);
     }
 
     @Override
     public boolean insert(Admin entity) throws SQLException {
-        User user = new User();
-        user.setUsername(entity.getUsername());
-        user.setPassword(entity.getPassword());
-        user.setRole("ADMIN");
-        user.setFullName(entity.getFullName());
-        user.setEmail(entity.getEmail());
-        user.setActive(true);
-
-        return userDAO.insert(user);
-    }
-
-    public int insertAndGetId(Admin entity) throws SQLException {
-        User user = new User();
-        user.setUsername(entity.getUsername());
-        user.setPassword(entity.getPassword());
-        user.setRole("ADMIN");
-        user.setFullName(entity.getFullName());
-        user.setEmail(entity.getEmail());
-        user.setActive(true);
-
-        return userDAO.insertAndGetId(user);
-    }
-
-    @Override
-    public boolean update(Admin entity) throws SQLException {
-        User user = userDAO.findById(entity.getUserId());
-        if (user != null) {
-            user.setUsername(entity.getUsername());
-            user.setFullName(entity.getFullName());
-            user.setEmail(entity.getEmail());
-            user.setActive(entity.isActive());
-            return userDAO.update(user);
+        Integer userId = procedureCaller.executeCreateUserWithId(
+                entity.getUsername(),
+                entity.getPassword(),
+                "ADMIN",
+                entity.getFullName(),
+                entity.getEmail()
+        );
+        if (userId != null && userId > 0) {
+            entity.setUserId(userId);
+            return true;
         }
         return false;
     }
 
+    public int insertAndGetId(Admin entity) throws SQLException {
+        return procedureCaller.executeCreateUserWithId(
+                entity.getUsername(),
+                entity.getPassword(),
+                "ADMIN",
+                entity.getFullName(),
+                entity.getEmail()
+        );
+    }
+
+    @Override
+    public boolean update(Admin entity) throws SQLException {
+        return procedureCaller.executeUpdateUser(
+                entity.getUserId(),
+                entity.getUsername(),
+                "ADMIN",
+                entity.getFullName(),
+                entity.getEmail(),
+                entity.isActive()
+        );
+    }
+
     public boolean updatePassword(int adminId, String newPassword) throws SQLException {
-        return userDAO.updatePassword(adminId, newPassword);
+        return procedureCaller.executeUpdateUserPassword(adminId, newPassword);
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        return userDAO.delete(id);
+        return procedureCaller.executeDeleteUser(id);
     }
 
     public int countAdmins() throws SQLException {
-        String sql = "SELECT COUNT(*) FROM users WHERE role = 'ADMIN' AND is_active = true";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
+        return viewLoader.countViewRowsWithCondition("vw_users", "role = 'ADMIN' AND is_active = true");
+    }
+
+    // ============================================
+    // HELPER METHODS FOR MAPPING
+    // ============================================
+
+    private Admin mapToAdmin(Map<String, Object> map) {
+        if (map == null) return null;
+
+        Admin admin = new Admin();
+        if (map.get("id") != null) admin.setUserId(((Number) map.get("id")).intValue());
+        if (map.get("username") != null) admin.setUsername(map.get("username").toString());
+        if (map.get("full_name") != null) admin.setFullName(map.get("full_name").toString());
+        if (map.get("email") != null) admin.setEmail(map.get("email").toString());
+        if (map.get("is_active") != null) admin.setActive((Boolean) map.get("is_active"));
+        admin.setDepartment("ADMINISTRATION");
+        admin.setPosition("SYSTEM_ADMIN");
+        admin.setSuperAdmin(true);
+
+        if (map.get("created_at") instanceof java.sql.Timestamp) {
+            admin.setCreatedAt(((java.sql.Timestamp) map.get("created_at")).toLocalDateTime());
         }
+        if (map.get("updated_at") instanceof java.sql.Timestamp) {
+            admin.setUpdatedAt(((java.sql.Timestamp) map.get("updated_at")).toLocalDateTime());
+        }
+        return admin;
+    }
+
+    private List<Admin> mapToAdminList(List<Map<String, Object>> maps) {
+        List<Admin> admins = new ArrayList<>();
+        if (maps != null) {
+            for (Map<String, Object> map : maps) {
+                admins.add(mapToAdmin(map));
+            }
+        }
+        return admins;
     }
 
     @Override

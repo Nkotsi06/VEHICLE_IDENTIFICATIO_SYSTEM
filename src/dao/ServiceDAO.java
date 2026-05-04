@@ -1,25 +1,41 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.Mechanic;
 import models.ServiceRecord;
 import models.ServiceSchedule;
 import models.Workshop;
 
+/**
+ * ServiceDAO - Facade that uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class ServiceDAO extends BaseDAO<ServiceRecord> {
 
-    private ServiceRecordDAO recordDAO = new ServiceRecordDAO();
-    private MechanicDAO mechanicDAO = new MechanicDAO();
-    private WorkshopDAO workshopDAO = new WorkshopDAO();
-    private ServiceScheduleDAO scheduleDAO = new ServiceScheduleDAO();
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+    private final ServiceRecordDAO recordDAO;
+    private final MechanicDAO mechanicDAO;
+    private final WorkshopDAO workshopDAO;
+    private final ServiceScheduleDAO scheduleDAO;
+
+    public ServiceDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+        this.recordDAO = new ServiceRecordDAO();
+        this.mechanicDAO = new MechanicDAO();
+        this.workshopDAO = new WorkshopDAO();
+        this.scheduleDAO = new ServiceScheduleDAO();
+    }
 
     @Override
     public ServiceRecord findById(int id) throws SQLException {
@@ -57,42 +73,7 @@ public class ServiceDAO extends BaseDAO<ServiceRecord> {
     }
 
     public int insertAndGetId(ServiceRecord entity) throws SQLException {
-        String sql = "CALL sp_add_service_record(?, ?, ?, ?, ?, ?, ?, ?)";
-        Connection conn = null;
-        java.sql.CallableStatement cs = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            cs = conn.prepareCall("{call sp_add_service_record(?, ?, ?, ?, ?, ?, ?, ?)}");
-            cs.setInt(1, entity.getVehicleId());
-            cs.setInt(2, entity.getWorkshopId());
-            if (entity.getMechanicId() > 0) {
-                cs.setInt(3, entity.getMechanicId());
-            } else {
-                cs.setNull(3, Types.INTEGER);
-            }
-            cs.setDate(4, java.sql.Date.valueOf(entity.getServiceDate()));
-            cs.setString(5, entity.getServiceType());
-            cs.setString(6, entity.getDescription());
-            cs.setDouble(7, entity.getCost());
-            cs.setInt(8, entity.getOdometerReading());
-            cs.execute();
-
-            String querySql = "SELECT id FROM service_records WHERE vehicle_id = ? ORDER BY service_date DESC LIMIT 1";
-            ps = conn.prepareStatement(querySql);
-            ps.setInt(1, entity.getVehicleId());
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("id");
-            }
-            return -1;
-        } finally {
-            if (rs != null) rs.close();
-            if (ps != null) ps.close();
-            if (cs != null) cs.close();
-            if (conn != null) conn.close();
-        }
+        return recordDAO.insertAndGetId(entity);
     }
 
     @Override
@@ -165,51 +146,26 @@ public class ServiceDAO extends BaseDAO<ServiceRecord> {
     }
 
     public List<WorkshopPerformance> getWorkshopPerformance() throws SQLException {
-        String sql = "SELECT * FROM vw_workshop_performance ORDER BY total_revenue DESC";
         List<WorkshopPerformance> performances = new ArrayList<>();
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+        List<Map<String, Object>> results = viewLoader.loadView("vw_workshop_performance");
 
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-
-            while (rs.next()) {
-                WorkshopPerformance perf = new WorkshopPerformance();
-                perf.workshopId = rs.getInt("workshop_id");
-                perf.workshopName = rs.getString("workshop_name");
-                perf.serviceCount = rs.getInt("service_count");
-                perf.totalRevenue = rs.getDouble("total_revenue");
-                perf.averageServiceCost = rs.getDouble("average_service_cost");
-                perf.averageRating = rs.getDouble("avg_rating");
-                performances.add(perf);
-            }
-
-            return performances;
-        } finally {
-            closeResources(rs, ps, conn);
+        for (Map<String, Object> row : results) {
+            WorkshopPerformance perf = new WorkshopPerformance();
+            perf.workshopId = (Integer) row.get("workshop_id");
+            perf.workshopName = (String) row.get("workshop_name");
+            perf.serviceCount = ((Number) row.get("service_count")).intValue();
+            perf.totalRevenue = ((Number) row.get("total_revenue")).doubleValue();
+            perf.averageServiceCost = ((Number) row.get("average_service_cost")).doubleValue();
+            perf.averageRating = ((Number) row.get("avg_rating")).doubleValue();
+            performances.add(perf);
         }
+        return performances;
     }
 
     public int estimateWaitTime(int workshopId) throws SQLException {
-        String sql = "SELECT estimated_wait_hours FROM vw_wait_time_estimator WHERE workshop_id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, workshopId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return (int) Math.ceil(rs.getDouble("estimated_wait_hours"));
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_wait_time_estimator", "workshop_id = ?", workshopId);
+        if (results.isEmpty()) return 0;
+        return (int) Math.ceil(((Number) results.get(0).get("estimated_wait_hours")).doubleValue());
     }
 
     public static class WorkshopPerformance {
@@ -221,8 +177,6 @@ public class ServiceDAO extends BaseDAO<ServiceRecord> {
         public double averageRating;
     }
 
-    // REMOVE THE @Override ANNOTATION - this method does NOT override a superclass method
-    // The BaseDAO class does not have an abstract mapRow method
     public ServiceRecord mapRow(ResultSet rs) throws SQLException {
         return recordDAO.mapRow(rs);
     }

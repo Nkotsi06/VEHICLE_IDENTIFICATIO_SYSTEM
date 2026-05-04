@@ -1,13 +1,7 @@
 package controllers;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
@@ -18,16 +12,27 @@ import dao.VehicleDAO;
 import dao.InsurancePolicyDAO;
 import models.VehicleDocument;
 import models.Vehicle;
-import models.InsurancePolicy;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Controller for OCR Document Scanner
+ * Provides Optical Character Recognition for vehicle and insurance documents
+ * Automatically extracts document numbers, dates, vehicle information from uploaded images
+ */
 public class OCRDocumentScannerController {
 
+    // ============================================
+    // FXML UI COMPONENTS
+    // ============================================
+
+    // Document Preview
     @FXML private ImageView documentImageView;
     @FXML private TextArea rawTextArea;
+
+    // Extracted Data Fields
     @FXML private TextField documentNumberField;
     @FXML private TextField vehicleRegField;
     @FXML private TextField ownerNameField;
@@ -36,22 +41,38 @@ public class OCRDocumentScannerController {
     @FXML private DatePicker issueDatePicker;
     @FXML private DatePicker expiryDatePicker;
 
+    // Buttons
     @FXML private Button uploadButton;
     @FXML private Button scanButton;
     @FXML private Button importButton;
     @FXML private Button clearButton;
     @FXML private Button backButton;
 
+    // Status Indicators
     @FXML private Label fileNameLabel;
     @FXML private Label statusLabel;
     @FXML private ProgressBar scanProgressBar;
 
+    // ============================================
+    // DAO INSTANCES
+    // ============================================
+
     private VehicleDocumentDAO documentDAO;
     private VehicleDAO vehicleDAO;
     private InsurancePolicyDAO policyDAO;
+
+    // Current document being processed
     private File currentFile;
     private String extractedRawText;
 
+    // ============================================
+    // INITIALIZATION METHODS
+    // ============================================
+
+    /**
+     * Initializes the OCR document scanner controller
+     * Sets up DAOs, configures document types, and initializes UI state
+     */
     @FXML
     public void initialize() {
         documentDAO = new VehicleDocumentDAO();
@@ -61,14 +82,19 @@ public class OCRDocumentScannerController {
         setupDocumentTypes();
         setupButtonHandlers();
 
+        // Disable scan and import until file is uploaded
         scanButton.setDisable(true);
         importButton.setDisable(true);
         scanProgressBar.setVisible(false);
 
+        // Set default dates
         issueDatePicker.setValue(LocalDate.now());
         expiryDatePicker.setValue(LocalDate.now().plusYears(1));
     }
 
+    /**
+     * Configures available document types in the combo box
+     */
     private void setupDocumentTypes() {
         documentTypeComboBox.getItems().addAll(
                 "REGISTRATION_CERTIFICATE",
@@ -81,6 +107,9 @@ public class OCRDocumentScannerController {
         documentTypeComboBox.setValue("INSURANCE_DISC");
     }
 
+    /**
+     * Sets up button click handlers for all interactive elements
+     */
     private void setupButtonHandlers() {
         uploadButton.setOnAction(event -> handleUpload());
         scanButton.setOnAction(event -> handleScan());
@@ -89,6 +118,14 @@ public class OCRDocumentScannerController {
         backButton.setOnAction(event -> handleBack());
     }
 
+    // ============================================
+    // DOCUMENT UPLOAD AND SCANNING
+    // ============================================
+
+    /**
+     * Handles document file upload from user's file system
+     * Supports images and PDF files
+     */
     private void handleUpload() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select Document");
@@ -106,6 +143,7 @@ public class OCRDocumentScannerController {
             scanButton.setDisable(false);
             importButton.setDisable(true);
 
+            // Display image preview
             try {
                 Image image = new Image(currentFile.toURI().toString());
                 documentImageView.setImage(image);
@@ -116,6 +154,11 @@ public class OCRDocumentScannerController {
         }
     }
 
+    /**
+     * Handles OCR scanning of the uploaded document
+     * Simulates OCR processing with progress animation
+     * In production, this would integrate with Tesseract or cloud OCR service
+     */
     private void handleScan() {
         if (currentFile == null) {
             AlertUtil.showWarning("No File", "Please upload a document first.");
@@ -127,7 +170,7 @@ public class OCRDocumentScannerController {
         scanProgressBar.setProgress(0.2);
         statusLabel.setText("Scanning document...");
 
-        // Simulate OCR processing with progress animation
+        // Simulate OCR processing stages
         javafx.animation.Timeline timeline = new javafx.animation.Timeline(
                 new javafx.animation.KeyFrame(javafx.util.Duration.seconds(0.5), e -> scanProgressBar.setProgress(0.4)),
                 new javafx.animation.KeyFrame(javafx.util.Duration.seconds(1.0), e -> scanProgressBar.setProgress(0.6)),
@@ -143,18 +186,28 @@ public class OCRDocumentScannerController {
         timeline.play();
     }
 
+    /**
+     * Performs OCR extraction on the uploaded document
+     * Generates simulated OCR text based on document type
+     * Extracts key fields using regex patterns
+     */
     private void performOCRExtraction() {
-        // Simulated OCR extraction based on file name or document type
+        // In production, this would call actual OCR engine like Tesseract
         String fileName = currentFile.getName().toLowerCase();
         extractedRawText = generateSimulatedOCRText(fileName);
         rawTextArea.setText(extractedRawText);
 
-        // Extract data from simulated text
+        // Extract structured data from raw text
         extractDataFromText(extractedRawText);
 
         importButton.setDisable(false);
     }
 
+    /**
+     * Generates simulated OCR text based on document type and file name
+     * @param fileName Original file name
+     * @return Simulated OCR extracted text
+     */
     private String generateSimulatedOCRText(String fileName) {
         String documentType = documentTypeComboBox.getValue();
 
@@ -203,6 +256,10 @@ public class OCRDocumentScannerController {
         return text.toString();
     }
 
+    /**
+     * Extracts structured data from OCR text using regex patterns
+     * @param text The raw OCR extracted text
+     */
     private void extractDataFromText(String text) {
         // Extract Document Number
         Pattern docNumPattern = Pattern.compile("(?:Policy|Document) Number:?\\s*([A-Z0-9\\-]+)", Pattern.CASE_INSENSITIVE);
@@ -225,7 +282,7 @@ public class OCRDocumentScannerController {
             ownerNameField.setText(ownerMatcher.group(1).trim());
         }
 
-        // Extract Provider
+        // Extract Insurance Provider
         Pattern providerPattern = Pattern.compile("(?:Insurance Provider|Provider):?\\s*([A-Za-z\\s]+)", Pattern.CASE_INSENSITIVE);
         Matcher providerMatcher = providerPattern.matcher(text);
         if (providerMatcher.find()) {
@@ -238,7 +295,9 @@ public class OCRDocumentScannerController {
         if (issueMatcher.find()) {
             try {
                 issueDatePicker.setValue(LocalDate.parse(issueMatcher.group(1)));
-            } catch (Exception e) {}
+            } catch (Exception e) {
+                // Invalid date format, keep default
+            }
         }
 
         // Extract Expiry Date
@@ -247,10 +306,20 @@ public class OCRDocumentScannerController {
         if (expiryMatcher.find()) {
             try {
                 expiryDatePicker.setValue(LocalDate.parse(expiryMatcher.group(1)));
-            } catch (Exception e) {}
+            } catch (Exception e) {
+                // Invalid date format, keep default
+            }
         }
     }
 
+    // ============================================
+    // DATA IMPORT METHODS
+    // ============================================
+
+    /**
+     * Handles importing extracted data into the system
+     * Creates vehicle document record in database
+     */
     private void handleImport() {
         String documentType = documentTypeComboBox.getValue();
         String documentNumber = documentNumberField.getText().trim();
@@ -258,6 +327,7 @@ public class OCRDocumentScannerController {
         LocalDate expiryDate = expiryDatePicker.getValue();
         String vehicleReg = vehicleRegField.getText().trim();
 
+        // Input validation
         if (!utils.ValidationUtil.isNotEmpty(documentNumber)) {
             AlertUtil.showWarning("Validation Error", "Document number is required.");
             documentNumberField.requestFocus();
@@ -290,6 +360,7 @@ public class OCRDocumentScannerController {
                 }
             }
 
+            // Create vehicle document record
             VehicleDocument document = new VehicleDocument();
             document.setVehicleId(vehicle.getId());
             document.setDocumentType(documentType);
@@ -303,6 +374,7 @@ public class OCRDocumentScannerController {
             if (success) {
                 AlertUtil.showSuccess("Document imported and saved successfully.");
 
+                // Notify about insurance policy creation
                 if (documentType.equals("INSURANCE_DISC") && utils.ValidationUtil.isNotEmpty(providerField.getText())) {
                     AlertUtil.showInfo("Insurance Policy", "Insurance policy data can now be added.");
                 }
@@ -318,6 +390,13 @@ public class OCRDocumentScannerController {
         }
     }
 
+    // ============================================
+    // CLEAR AND NAVIGATION METHODS
+    // ============================================
+
+    /**
+     * Clears all form fields and resets scanner state
+     */
     private void handleClear() {
         documentImageView.setImage(null);
         rawTextArea.clear();
@@ -336,6 +415,9 @@ public class OCRDocumentScannerController {
         importButton.setDisable(true);
     }
 
+    /**
+     * Navigates back to the insurance policy view
+     */
     private void handleBack() {
         SceneManager.getInstance().switchToInsurancePolicyView();
     }

@@ -21,17 +21,17 @@
             stylesheets="@../css/application.css" styleClass="border-pane">
 
     <top>
-        <VBox>
-            <fx:include source="MenuBarComponent.fxml"/>
-        </VBox>
+        <fx:include source="MenuBarComponent.fxml"/>
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
-            <VBox spacing="20" styleClass="dashboard-container" alignment="TOP_CENTER">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
+            <VBox spacing="20" alignment="TOP_CENTER"
+                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
 
-                <Label text="System Health Dashboard" styleClass="label-title"/>
-                <Label text="Real-time system monitoring and health metrics (Admin Only)" styleClass="label-subtitle"/>
+                <Label text="System Health Dashboard" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
+                <Label text="Real-time system monitoring and health metrics (Admin Only)" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
 
                 <Separator/>
 
@@ -39,30 +39,30 @@
 
                 <!-- Stats Cards Row 1 -->
                 <HBox spacing="15" alignment="CENTER">
-                    <VBox spacing="8" styleClass="dashboard-card" HBox.hgrow="ALWAYS">
+                    <VBox spacing="8" styleClass="dashboard-card" alignment="CENTER" HBox.hgrow="ALWAYS">
                         <Label text="Total Users" styleClass="card-title"/>
                         <Label fx:id="totalUsersLabel" text="0" styleClass="card-value"/>
                     </VBox>
-                    <VBox spacing="8" styleClass="dashboard-card" HBox.hgrow="ALWAYS">
+                    <VBox spacing="8" styleClass="dashboard-card" alignment="CENTER" HBox.hgrow="ALWAYS">
                         <Label text="Active Users" styleClass="card-title"/>
                         <Label fx:id="activeUsersLabel" text="0" styleClass="card-value"/>
                     </VBox>
-                    <VBox spacing="8" styleClass="dashboard-card" HBox.hgrow="ALWAYS">
+                    <VBox spacing="8" styleClass="dashboard-card" alignment="CENTER" HBox.hgrow="ALWAYS">
                         <Label text="Inactive Users" styleClass="card-title"/>
                         <Label fx:id="inactiveUsersLabel" text="0" styleClass="card-value"/>
                     </VBox>
                 </HBox>
 
                 <HBox spacing="15" alignment="CENTER">
-                    <VBox spacing="8" styleClass="dashboard-card" HBox.hgrow="ALWAYS">
+                    <VBox spacing="8" styleClass="dashboard-card" alignment="CENTER" HBox.hgrow="ALWAYS">
                         <Label text="Total Vehicles" styleClass="card-title"/>
                         <Label fx:id="totalVehiclesLabel" text="0" styleClass="card-value"/>
                     </VBox>
-                    <VBox spacing="8" styleClass="dashboard-card" HBox.hgrow="ALWAYS">
+                    <VBox spacing="8" styleClass="dashboard-card" alignment="CENTER" HBox.hgrow="ALWAYS">
                         <Label text="Stolen Vehicles" styleClass="card-title"/>
                         <Label fx:id="stolenVehiclesLabel" text="0" styleClass="card-value"/>
                     </VBox>
-                    <VBox spacing="8" styleClass="dashboard-card" HBox.hgrow="ALWAYS">
+                    <VBox spacing="8" styleClass="dashboard-card" alignment="CENTER" HBox.hgrow="ALWAYS">
                         <Label text="Unpaid Fines" styleClass="card-title"/>
                         <Label fx:id="unpaidFinesLabel" text="M0.00" styleClass="card-value"/>
                     </VBox>
@@ -71,56 +71,66 @@
                 <Separator/>
 
                 <!-- Monthly Vehicle Registrations Section -->
-                <Label text="Monthly Vehicle Registrations" styleClass="section-title"/>
-                <VBox styleClass="chart-container">
-                    <BarChart fx:id="monthlyRegistrationsChart" prefHeight="350" prefWidth="700" legendVisible="true">
-                        <xAxis><CategoryAxis label="Month"/></xAxis>
-                        <yAxis><NumberAxis label="Count"/></yAxis>
-                    </BarChart>
-                </VBox>
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="900" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Monthly Vehicle Registrations" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+                        <BarChart fx:id="monthlyRegistrationsChart" prefHeight="350" prefWidth="700" legendVisible="true">
+                            <xAxis><CategoryAxis label="Month"/></xAxis>
+                            <yAxis><NumberAxis label="Count"/></yAxis>
+                        </BarChart>
+                    </VBox>
+                </HBox>
 
                 <Separator/>
 
                 <!-- Vehicle Status Distribution Section -->
-                <Label text="Vehicle Status Distribution" styleClass="section-title"/>
-                <VBox styleClass="chart-container">
-                    <PieChart fx:id="vehicleStatusPieChart" prefHeight="300" prefWidth="500" labelsVisible="true" legendVisible="true"/>
-                </VBox>
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="600" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Vehicle Status Distribution" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+                        <PieChart fx:id="vehicleStatusPieChart" prefHeight="300" prefWidth="500" labelsVisible="true" legendVisible="true"/>
+                    </VBox>
+                </HBox>
 
                 <Separator/>
 
                 <!-- Real-time Metrics Section -->
-                <Label text="Real-time Metrics" styleClass="section-title"/>
+                <Label text="Real-time Metrics" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                <VBox spacing="5" styleClass="profile-edit-card">
-                    <Label text="System Load" style="-fx-font-weight: bold;"/>
-                    <ProgressBar fx:id="systemLoadProgress" prefWidth="Infinity" progress="0"/>
-                </VBox>
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="900" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="System Load" style="-fx-font-weight: bold;" alignment="CENTER" maxWidth="Infinity"/>
+                        <ProgressBar fx:id="systemLoadProgress" prefWidth="Infinity" progress="0"/>
+                    </VBox>
+                </HBox>
 
-                <GridPane hgap="20" vgap="10" styleClass="dashboard-card" alignment="CENTER">
-                    <Label text="Database Status:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                    <Label fx:id="databaseStatusLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-text-fill: #27ae60;"/>
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="900" styleClass="dashboard-card" alignment="CENTER">
+                        <GridPane hgap="20" vgap="10" alignment="CENTER">
+                            <Label text="Database Status:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="databaseStatusLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-text-fill: #27ae60;"/>
 
-                    <Label text="Pending Queries:" GridPane.rowIndex="0" GridPane.columnIndex="2" style="-fx-font-weight: bold;"/>
-                    <Label fx:id="pendingQueriesLabel" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+                            <Label text="Pending Queries:" GridPane.rowIndex="0" GridPane.columnIndex="2" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="pendingQueriesLabel" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
 
-                    <Label text="Pending Workshops:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                    <Label fx:id="pendingWorkshopsLabel" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                            <Label text="Pending Workshops:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="pendingWorkshopsLabel" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-                    <Label text="Pending Claims:" GridPane.rowIndex="1" GridPane.columnIndex="2" style="-fx-font-weight: bold;"/>
-                    <Label fx:id="pendingClaimsLabel" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+                            <Label text="Pending Claims:" GridPane.rowIndex="1" GridPane.columnIndex="2" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="pendingClaimsLabel" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
 
-                    <Label text="Last Updated:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                    <Label fx:id="lastUpdatedLabel" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-                </GridPane>
+                            <Label text="Last Updated:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="lastUpdatedLabel" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                        </GridPane>
+                    </VBox>
+                </HBox>
 
-                <HBox spacing="15" alignment="CENTER">
+                <HBox alignment="CENTER">
                     <Button fx:id="refreshButton" text="Refresh Data" styleClass="button-primary" prefWidth="120"/>
                     <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100"/>
                     <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-secondary" prefWidth="150"/>
                 </HBox>
 
-                <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER"/>
+                <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
 
             </VBox>
         </ScrollPane>

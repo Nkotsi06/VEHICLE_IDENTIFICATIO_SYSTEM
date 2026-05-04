@@ -1,14 +1,41 @@
 package utils;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javafx.stage.Stage;
+
+/**
+ * Scene Manager for handling navigation between different views in the application.
+ * Provides centralized control for switching between FXML views and managing scene transitions.
+ * Implements Singleton pattern to ensure only one instance exists.
+ *
+ * @author Vehicle Identification System Team
+ * @version 1.0
+ */
 public class SceneManager {
 
+    private static final Logger LOGGER = Logger.getLogger(SceneManager.class.getName());
+
+    // ============================================
+    // SINGLETON INSTANCE
+    // ============================================
     private static SceneManager instance;
     private RootManager rootManager;
 
+    /**
+     * Private constructor for Singleton pattern.
+     * Initializes the RootManager instance.
+     */
     private SceneManager() {
         rootManager = RootManager.getInstance();
     }
 
+    /**
+     * Gets the singleton instance of SceneManager.
+     *
+     * @return The SceneManager instance
+     */
     public static synchronized SceneManager getInstance() {
         if (instance == null) {
             instance = new SceneManager();
@@ -16,19 +43,36 @@ public class SceneManager {
         return instance;
     }
 
-    public void setPrimaryStage(javafx.stage.Stage stage) {
+    /**
+     * Sets the primary stage for the application.
+     *
+     * @param stage The primary stage
+     */
+    public void setPrimaryStage(Stage stage) {
+        if (stage == null) {
+            throw new IllegalArgumentException("Primary stage cannot be null");
+        }
         rootManager.setPrimaryStage(stage);
+        LOGGER.info("Primary stage set in SceneManager");
     }
 
     // ============================================
     // AUTHENTICATION VIEWS
     // ============================================
 
+    /**
+     * Switches to the login view.
+     */
     public void switchToLogin() {
+        LOGGER.fine("Switching to Login view");
         rootManager.setRoot("LoginView.fxml", "Login");
     }
 
+    /**
+     * Switches to the forgot password view.
+     */
     public void switchToForgotPassword() {
+        LOGGER.fine("Switching to ForgotPassword view");
         rootManager.setRoot("ForgotPasswordView.fxml", "ForgotPassword");
     }
 
@@ -36,12 +80,18 @@ public class SceneManager {
     // DASHBOARD VIEWS (Role-Based)
     // ============================================
 
+    /**
+     * Switches to the appropriate dashboard based on user role.
+     */
     public void switchToDashboard() {
         String role = SessionManager.getInstance().getUserRole();
         if (role == null) {
+            LOGGER.warning("User role is null, switching to login");
             switchToLogin();
             return;
         }
+
+        LOGGER.info("Switching to dashboard for role: " + role);
 
         switch (role) {
             case "ADMIN" -> switchToAdminView();
@@ -49,26 +99,44 @@ public class SceneManager {
             case "CUSTOMER" -> switchToCustomerView();
             case "WORKSHOP" -> switchToWorkshopView();
             case "INSURANCE" -> switchToInsuranceView();
-            default -> switchToLogin();
+            default -> {
+                LOGGER.warning("Unknown role: " + role + ", switching to login");
+                switchToLogin();
+            }
         }
     }
 
+    /**
+     * Switches to admin dashboard view.
+     */
     public void switchToAdminView() {
         rootManager.setRoot("AdminView.fxml", "Admin");
     }
 
+    /**
+     * Switches to police dashboard view.
+     */
     public void switchToPoliceView() {
         rootManager.setRoot("PoliceView.fxml", "Police");
     }
 
+    /**
+     * Switches to insurance dashboard view.
+     */
     public void switchToInsuranceView() {
         rootManager.setRoot("InsuranceView.fxml", "Insurance");
     }
 
+    /**
+     * Switches to workshop dashboard view.
+     */
     public void switchToWorkshopView() {
         rootManager.setRoot("WorkshopView.fxml", "Workshop");
     }
 
+    /**
+     * Switches to customer dashboard view.
+     */
     public void switchToCustomerView() {
         rootManager.setRoot("CustomerView.fxml", "Customer");
     }
@@ -145,16 +213,24 @@ public class SceneManager {
         rootManager.setRoot("TrafficCameraView.fxml", "TrafficCamera");
     }
 
+    public void switchToOfficerLogView() {
+        rootManager.setRoot("OfficerLogView.fxml", "OfficerLog");
+    }
+
     public void switchToPoliceProfileView() {
         rootManager.setRoot("PoliceProfileView.fxml", "PoliceProfile");
     }
 
-    // ============================================
-    // POLICE REPORT VIEW
-    // ============================================
-
     public void switchToPoliceReportView() {
         rootManager.setRoot("PoliceReportView.fxml", "Police Reports");
+    }
+
+    public void switchToPoliceExportView() {
+        rootManager.setRoot("PoliceExportView.fxml", "PoliceExport");
+    }
+
+    public void switchToOCRScannerView() {
+        rootManager.setRoot("OCRDocumentScannerView.fxml", "OCR Scanner");
     }
 
     // ============================================
@@ -201,12 +277,16 @@ public class SceneManager {
         rootManager.setRoot("WorkshopProfileView.fxml", "WorkshopProfile");
     }
 
-    public void switchToMechanicView() {
-        rootManager.setRoot("MechanicView.fxml", "Mechanic");
+    public void switchToWorkshopRegistrationView() {
+        rootManager.setRoot("WorkshopRegistrationView.fxml", "Workshop Registration");
     }
 
     public void switchToWorkshopServiceView() {
-        rootManager.setRoot("WorkshopServiceView.fxml", "WorkshopService");
+        rootManager.setRoot("WorkshopServiceView.fxml", "Workshop Services");
+    }
+
+    public void switchToMechanicView() {
+        rootManager.setRoot("MechanicView.fxml", "Mechanic");
     }
 
     public void switchToServiceRecordView() {
@@ -333,16 +413,16 @@ public class SceneManager {
         rootManager.setRoot("WorkshopApprovalView.fxml", "WorkshopApproval");
     }
 
-    // ============================================
-    // DUMMY DATA VIEW
-    // ============================================
-
     public void switchToDummyDataView() {
         rootManager.setRoot("DummyDataView.fxml", "Dummy Data");
     }
 
+    public void switchToAdminProfileView() {
+        rootManager.setRoot("AdminProfileView.fxml", "AdminProfile");
+    }
+
     // ============================================
-    // REPORTS AND EXPORT VIEWS
+    // REPORTS AND GENERAL VIEWS
     // ============================================
 
     public void switchToReportView() {
@@ -358,17 +438,9 @@ public class SceneManager {
         }
     }
 
-    public void switchToPoliceExportView() {
-        rootManager.setRoot("PoliceExportView.fxml", "PoliceExport");
-    }
-
     public void switchToExportView() {
         switchToReportView();
     }
-
-    // ============================================
-    // SEARCH AND SETTINGS VIEWS
-    // ============================================
 
     public void switchToSearchView() {
         rootManager.setRoot("SearchView.fxml", "Search");
@@ -383,23 +455,11 @@ public class SceneManager {
     }
 
     // ============================================
-    // ADMIN PROFILE VIEW
-    // ============================================
-
-    public void switchToAdminProfileView() {
-        rootManager.setRoot("AdminProfileView.fxml", "AdminProfile");
-    }
-
-    // ============================================
     // ADVANCED FEATURES VIEWS
     // ============================================
 
     public void switchToClaimStatusTrackerView() {
         rootManager.setRoot("ClaimStatusTrackerView.fxml", "ClaimStatusTracker");
-    }
-
-    public void switchToOCRScannerView() {
-        rootManager.setRoot("OCRScannerView.fxml", "OCRScanner");
     }
 
     public void switchToPredictiveAnalyticsView() {
@@ -410,19 +470,82 @@ public class SceneManager {
     // UTILITY METHODS
     // ============================================
 
-    public javafx.stage.Stage getPrimaryStage() {
+    /**
+     * Gets the primary stage of the application.
+     *
+     * @return The primary stage
+     */
+    public Stage getPrimaryStage() {
         return rootManager.getPrimaryStage();
     }
 
+    /**
+     * Gets the name of the current scene.
+     *
+     * @return Current scene name
+     */
     public String getCurrentScene() {
         return rootManager.getCurrentScene();
     }
 
+    /**
+     * Gets the controller of the current scene.
+     *
+     * @return Current controller instance
+     */
     public Object getCurrentController() {
         return rootManager.getCurrentController();
     }
 
+    /**
+     * Refreshes the current scene.
+     */
     public void refreshCurrentScene() {
         rootManager.refreshCurrentScene();
+    }
+
+    /**
+     * Preloads a scene for faster access.
+     *
+     * @param fxmlFile the FXML file path
+     * @param sceneName the scene name
+     * @return true if preload was successful
+     */
+    public boolean preloadScene(String fxmlFile, String sceneName) {
+        return rootManager.preloadScene(fxmlFile, sceneName);
+    }
+
+    /**
+     * Preloads common scenes for better performance.
+     */
+    public void preloadCommonScenes() {
+        String role = SessionManager.getInstance().getUserRole();
+
+        if (role != null) {
+            switch (role) {
+                case "ADMIN":
+                    rootManager.preloadScene("UserManagementView.fxml", "UserManagement");
+                    rootManager.preloadScene("AuditLogView.fxml", "AuditLog");
+                    break;
+                case "POLICE":
+                    rootManager.preloadScene("StolenVehicleView.fxml", "StolenVehicle");
+                    rootManager.preloadScene("ViolationView.fxml", "Violation");
+                    break;
+                case "CUSTOMER":
+                    rootManager.preloadScene("CustomerProfileView.fxml", "CustomerProfile");
+                    rootManager.preloadScene("CustomerVehicleView.fxml", "CustomerVehicle");
+                    break;
+                case "WORKSHOP":
+                    rootManager.preloadScene("WorkshopProfileView.fxml", "WorkshopProfile");
+                    rootManager.preloadScene("ServiceRecordView.fxml", "ServiceRecord");
+                    break;
+                case "INSURANCE":
+                    rootManager.preloadScene("InsurancePolicyView.fxml", "InsurancePolicy");
+                    rootManager.preloadScene("InsuranceClaimView.fxml", "InsuranceClaim");
+                    break;
+            }
+        }
+
+        LOGGER.info("Common scenes preloaded for role: " + role);
     }
 }

@@ -1,18 +1,34 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.DigitalInspection;
 import models.InspectionChecklistItem;
 
+/**
+ * InspectionDAO - Facade that uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class InspectionDAO extends BaseDAO<DigitalInspection> {
 
-    private DigitalInspectionDAO inspectionDAO = new DigitalInspectionDAO();
-    private InspectionChecklistItemDAO itemDAO = new InspectionChecklistItemDAO();
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+    private final DigitalInspectionDAO inspectionDAO;
+    private final InspectionChecklistItemDAO itemDAO;
+
+    public InspectionDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+        this.inspectionDAO = new DigitalInspectionDAO();
+        this.itemDAO = new InspectionChecklistItemDAO();
+    }
 
     @Override
     public DigitalInspection findById(int id) throws SQLException {
@@ -50,9 +66,7 @@ public class InspectionDAO extends BaseDAO<DigitalInspection> {
     }
 
     public boolean addInspectionItemWithPhoto(int inspectionId, String itemName, String status, String notes, String photoPath) throws SQLException {
-        InspectionChecklistItem item = new InspectionChecklistItem(inspectionId, itemName, status, notes);
-        item.setPhotoPath(photoPath);
-        return itemDAO.insert(item);
+        return procedureCaller.executeAddInspectionChecklistItemWithPhoto(inspectionId, itemName, status, notes, photoPath);
     }
 
     public List<InspectionChecklistItem> getInspectionItems(int inspectionId) throws SQLException {
@@ -78,32 +92,25 @@ public class InspectionDAO extends BaseDAO<DigitalInspection> {
     }
 
     public double getPassRateByWorkshop(int workshopId) throws SQLException {
-        String sql = "SELECT ROUND(AVG(pass_percentage), 2) FROM vw_digital_inspection WHERE workshop_id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, workshopId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getDouble(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
+        List<DigitalInspection> inspections = findByWorkshopId(workshopId);
+        if (inspections.isEmpty()) return 0.0;
+        int totalPassed = 0;
+        int totalItems = 0;
+        for (DigitalInspection inspection : inspections) {
+            totalPassed += inspection.getPassedItems();
+            totalItems += inspection.getTotalItems();
         }
+        return totalItems == 0 ? 0.0 : (double) totalPassed / totalItems * 100;
     }
 
-    public List<DigitalInspection> getInspectionsByDateRange(java.time.LocalDate startDate, java.time.LocalDate endDate) throws SQLException {
-        String sql = "SELECT * FROM vw_digital_inspection WHERE inspection_date BETWEEN ? AND ? ORDER BY inspection_date DESC";
-        return executeQuery(sql, startDate, endDate);
+    public List<DigitalInspection> getInspectionsByDateRange(LocalDate startDate, LocalDate endDate) throws SQLException {
+        return viewLoader.loadViewWithCondition("vw_digital_inspections",
+                "inspection_date BETWEEN ? AND ? ORDER BY inspection_date DESC", startDate, endDate);
     }
 
     @Override
     public boolean insert(DigitalInspection entity) throws SQLException {
-        return false;
+        return inspectionDAO.insert(entity);
     }
 
     @Override
@@ -116,10 +123,8 @@ public class InspectionDAO extends BaseDAO<DigitalInspection> {
         return inspectionDAO.delete(id);
     }
 
-    // Required mapRow method implementation for BaseDAO
     @Override
     protected DigitalInspection mapRow(ResultSet rs) throws SQLException {
-        // Delegate to the inspectionDAO's mapRow method since this is a facade DAO
         return inspectionDAO.mapRow(rs);
     }
 }

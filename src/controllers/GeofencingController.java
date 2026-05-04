@@ -4,8 +4,6 @@ import javafx.animation.PauseTransition;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.effect.DropShadow;
-import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import utils.AlertUtil;
 import utils.SceneManager;
@@ -16,19 +14,36 @@ import models.GeofenceZone;
 import models.GeofenceAlertEvent;
 import java.util.List;
 
+/**
+ * Controller for Geofencing Management
+ * Creates and manages geographic zones that trigger alerts when vehicles enter/exit
+ * Used for high-crime areas, restricted zones, school zones, etc.
+ */
 public class GeofencingController {
 
+    // ============================================
+    // FXML UI COMPONENTS - ZONES TABLE
+    // ============================================
+
     @FXML private TableView<GeofenceZone> zonesTable;
-    @FXML private TableColumn<GeofenceZone, String> zoneNameColumn;  // Fixed - was "nameColumn"
+    @FXML private TableColumn<GeofenceZone, String> zoneNameColumn;
     @FXML private TableColumn<GeofenceZone, String> zoneTypeColumn;
     @FXML private TableColumn<GeofenceZone, Integer> radiusColumn;
     @FXML private TableColumn<GeofenceZone, String> zoneStatusColumn;
+
+    // ============================================
+    // ALERTS TABLE
+    // ============================================
 
     @FXML private TableView<GeofenceAlertEvent> alertsTable;
     @FXML private TableColumn<GeofenceAlertEvent, String> alertZoneColumn;
     @FXML private TableColumn<GeofenceAlertEvent, String> alertVehicleColumn;
     @FXML private TableColumn<GeofenceAlertEvent, String> alertTypeColumn;
     @FXML private TableColumn<GeofenceAlertEvent, String> alertTimestampColumn;
+
+    // ============================================
+    // FORM COMPONENTS
+    // ============================================
 
     @FXML private TextField zoneNameField;
     @FXML private TextField latitudeField;
@@ -37,17 +52,29 @@ public class GeofencingController {
     @FXML private ComboBox<String> zoneTypeComboBox;
     @FXML private ComboBox<String> zoneStatusComboBox;
 
+    // ============================================
+    // BUTTONS
+    // ============================================
+
     @FXML private Button addZoneButton;
     @FXML private Button updateZoneButton;
     @FXML private Button deleteZoneButton;
     @FXML private Button refreshButton;
     @FXML private Button backButton;
 
+    // ============================================
+    // PROGRESS INDICATORS
+    // ============================================
+
     @FXML private ProgressIndicator loadProgress;
     @FXML private ProgressBar operationProgress;
     @FXML private Pagination zonesPagination;
     @FXML private Pagination alertsPagination;
     @FXML private Label statusLabel;
+
+    // ============================================
+    // DAO INSTANCES & DATA MODELS
+    // ============================================
 
     private GeofenceZoneDAO zoneDAO;
     private GeofenceAlertEventDAO alertDAO;
@@ -58,6 +85,14 @@ public class GeofencingController {
     private int currentAlertPage = 0;
     private int pageSize = 20;
 
+    // ============================================
+    // INITIALIZATION METHODS
+    // ============================================
+
+    /**
+     * Initializes the geofencing controller
+     * Sets up DAOs, table columns, loads data, and configures UI
+     */
     @FXML
     public void initialize() {
         zoneDAO = new GeofenceZoneDAO();
@@ -74,6 +109,9 @@ public class GeofencingController {
         statusLabel.setText("Ready");
     }
 
+    /**
+     * Configures table columns with cell value factories
+     */
     private void setupTableColumns() {
         zoneNameColumn.setCellValueFactory(cellData -> cellData.getValue().zoneNameProperty());
         zoneTypeColumn.setCellValueFactory(cellData -> cellData.getValue().zoneTypeProperty());
@@ -86,6 +124,9 @@ public class GeofencingController {
         alertTimestampColumn.setCellValueFactory(cellData -> cellData.getValue().alertTimestampProperty().asString());
     }
 
+    /**
+     * Configures pagination for both zones and alerts tables
+     */
     private void setupPagination() {
         if (zonesPagination != null) {
             zonesPagination.currentPageIndexProperty().addListener((obs, old, newPage) -> {
@@ -101,6 +142,9 @@ public class GeofencingController {
         }
     }
 
+    /**
+     * Updates zones table to show current page
+     */
     private void updateZonesPage() {
         if (fullZoneList == null || fullZoneList.isEmpty()) return;
         int start = currentZonePage * pageSize;
@@ -110,6 +154,9 @@ public class GeofencingController {
         }
     }
 
+    /**
+     * Updates alerts table to show current page
+     */
     private void updateAlertsPage() {
         if (fullAlertList == null || fullAlertList.isEmpty()) return;
         int start = currentAlertPage * pageSize;
@@ -119,6 +166,9 @@ public class GeofencingController {
         }
     }
 
+    /**
+     * Loads all geofence zones from database
+     */
     private void loadZones() {
         showProgress(true);
         statusLabel.setText("Loading geofence zones...");
@@ -138,6 +188,9 @@ public class GeofencingController {
         }
     }
 
+    /**
+     * Loads all geofence alert events from database
+     */
     private void loadAlerts() {
         try {
             fullAlertList = alertDAO.findAll();
@@ -149,12 +202,18 @@ public class GeofencingController {
         }
     }
 
+    /**
+     * Configures combo boxes with available options
+     */
     private void setupComboBoxes() {
         zoneTypeComboBox.getItems().addAll("HIGH_CRIME", "RESTRICTED", "MONITORED", "SCHOOL_ZONE");
         zoneStatusComboBox.getItems().addAll("ACTIVE", "INACTIVE");
         zoneStatusComboBox.setValue("ACTIVE");
     }
 
+    /**
+     * Sets up button click handlers
+     */
     private void setupButtonHandlers() {
         addZoneButton.setOnAction(event -> handleAddZone());
         updateZoneButton.setOnAction(event -> handleUpdateZone());
@@ -166,6 +225,9 @@ public class GeofencingController {
         backButton.setOnAction(event -> SceneManager.getInstance().switchToPoliceView());
     }
 
+    /**
+     * Sets up table selection listener for zones
+     */
     private void setupTableSelection() {
         zonesTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
@@ -175,6 +237,10 @@ public class GeofencingController {
         });
     }
 
+    /**
+     * Displays selected zone details in the form
+     * @param zone The geofence zone to display
+     */
     private void displayZoneDetails(GeofenceZone zone) {
         zoneNameField.setText(zone.getZoneName());
         latitudeField.setText(String.valueOf(zone.getCenterLat()));
@@ -184,6 +250,16 @@ public class GeofencingController {
         zoneStatusComboBox.setValue(zone.isActive() ? "ACTIVE" : "INACTIVE");
     }
 
+    // ============================================
+    // VALIDATION METHODS
+    // ============================================
+
+    /**
+     * Validates geographic coordinates
+     * @param latitude Latitude value (-90 to 90)
+     * @param longitude Longitude value (-180 to 180)
+     * @return true if coordinates are valid
+     */
     private boolean validateCoordinates(double latitude, double longitude) {
         if (Math.abs(latitude) > 90) {
             AlertUtil.showError("Invalid Latitude", "Latitude must be between -90 and 90 degrees.\nYou entered: " + latitude);
@@ -196,6 +272,13 @@ public class GeofencingController {
         return true;
     }
 
+    // ============================================
+    // CRUD OPERATIONS
+    // ============================================
+
+    /**
+     * Handles adding a new geofence zone
+     */
     private void handleAddZone() {
         if (!validateInputs()) return;
 
@@ -211,6 +294,7 @@ public class GeofencingController {
                 return;
             }
 
+            // Create and populate zone object
             GeofenceZone zone = new GeofenceZone();
             zone.setZoneName(zoneNameField.getText().trim());
             zone.setCenterLat(latitude);
@@ -241,6 +325,9 @@ public class GeofencingController {
         }
     }
 
+    /**
+     * Handles updating an existing geofence zone
+     */
     private void handleUpdateZone() {
         if (selectedZone == null) {
             AlertUtil.showWarning("No Selection", "Please select a zone to update.");
@@ -261,6 +348,7 @@ public class GeofencingController {
                 return;
             }
 
+            // Update zone object with form values
             selectedZone.setZoneName(zoneNameField.getText().trim());
             selectedZone.setCenterLat(latitude);
             selectedZone.setCenterLng(longitude);
@@ -289,6 +377,9 @@ public class GeofencingController {
         }
     }
 
+    /**
+     * Handles deleting a geofence zone
+     */
     private void handleDeleteZone() {
         if (selectedZone == null) {
             AlertUtil.showWarning("No Selection", "Please select a zone to delete.");
@@ -323,6 +414,9 @@ public class GeofencingController {
         }
     }
 
+    /**
+     * Clears all form fields and resets selection
+     */
     private void clearForm() {
         zoneNameField.clear();
         latitudeField.clear();
@@ -334,6 +428,10 @@ public class GeofencingController {
         zonesTable.getSelectionModel().clearSelection();
     }
 
+    /**
+     * Validates all form inputs
+     * @return true if all inputs are valid
+     */
     private boolean validateInputs() {
         if (!ValidationUtil.isNotEmpty(zoneNameField.getText())) {
             AlertUtil.showWarning("Validation Error", "Zone name is required.");
@@ -362,6 +460,14 @@ public class GeofencingController {
         return true;
     }
 
+    // ============================================
+    // UI PROGRESS METHODS
+    // ============================================
+
+    /**
+     * Shows/hides progress indicators
+     * @param show true to show, false to hide
+     */
     private void showProgress(boolean show) {
         if (loadProgress != null) loadProgress.setVisible(show);
         if (operationProgress != null) {
@@ -370,6 +476,9 @@ public class GeofencingController {
         }
     }
 
+    /**
+     * Hides progress indicators after a short delay
+     */
     private void hideProgressAfterDelay() {
         PauseTransition delay = new PauseTransition(Duration.seconds(1));
         delay.setOnFinished(event -> {

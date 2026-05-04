@@ -9,56 +9,58 @@
             stylesheets="@../css/application.css" styleClass="border-pane">
 
     <top>
-        <VBox>
-            <fx:include source="MenuBarComponent.fxml"/>
-        </VBox>
+        <fx:include source="MenuBarComponent.fxml"/>
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
-            <VBox spacing="20" styleClass="dashboard-container" alignment="TOP_CENTER" maxWidth="1400">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
+            <VBox spacing="20" alignment="TOP_CENTER"
+                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
 
-                <Label text="Global Search" styleClass="label-title"/>
-                <Label text="Search across all system records including activities, logs, and notifications" styleClass="label-subtitle"/>
+                <Label text="Global Search" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
+                <Label text="Search across all system records including activities, logs, and notifications" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
 
                 <Separator/>
 
                 <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
 
-                <TitledPane text="Search Parameters" expanded="true" style="-fx-font-weight: bold;">
-                    <HBox spacing="10" alignment="CENTER" style="-fx-padding: 10;">
-                        <TextField fx:id="searchField" promptText="Enter search keyword..." HBox.hgrow="ALWAYS"/>
-                        <ComboBox fx:id="searchTypeComboBox" prefWidth="200"/>
-                        <Button fx:id="searchButton" text="Search" styleClass="button-primary"/>
-                        <Button fx:id="clearButton" text="Clear" styleClass="button-secondary"/>
-                        <Button fx:id="fadeButton" text="Animate" styleClass="button-warning"/>
-                    </HBox>
-                </TitledPane>
+                <!-- Search Parameters -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="1000" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Search Parameters" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+
+                        <HBox spacing="10" alignment="CENTER">
+                            <TextField fx:id="searchField" promptText="Enter search keyword..." prefWidth="400" HBox.hgrow="ALWAYS"/>
+                            <ComboBox fx:id="searchTypeComboBox" prefWidth="200"/>
+                            <Button fx:id="searchButton" text="Search" styleClass="button-primary" prefWidth="100"/>
+                            <Button fx:id="clearButton" text="Clear" styleClass="button-secondary" prefWidth="100"/>
+                            <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100"/>
+                        </HBox>
+                    </VBox>
+                </HBox>
 
                 <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
                 <!-- Centered TabPane with All System Activities -->
-                <TabPane fx:id="resultsTabPane" styleClass="centered-tab-pane" VBox.vgrow="ALWAYS" maxHeight="Infinity">
+                <TabPane fx:id="resultsTabPane" styleClass="centered-tab-pane" maxWidth="Infinity" tabClosingPolicy="UNAVAILABLE">
 
                     <!-- VEHICLES TAB -->
                     <Tab text="Vehicles" closable="false">
-                        <VBox spacing="10">
-                            <TableView fx:id="vehiclesTable" VBox.vgrow="ALWAYS" prefHeight="400" minHeight="200">
+                        <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 10;" alignment="CENTER">
+                            <TableView fx:id="vehiclesTable" prefHeight="400" minHeight="200" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
                                 <columns>
-                                    <TableColumn fx:id="searchRegColumn" text="Registration" prefWidth="180"/>
-                                    <TableColumn fx:id="searchMakeColumn" text="Make" prefWidth="150"/>
-                                    <TableColumn fx:id="searchModelColumn" text="Model" prefWidth="150"/>
-                                    <TableColumn fx:id="searchYearColumn" text="Year" prefWidth="100"/>
-                                    <TableColumn fx:id="searchStatusColumn" text="Status" prefWidth="120"/>
+                                    <TableColumn fx:id="searchRegColumn" text="Registration" minWidth="150" maxWidth="190"/>
+                                    <TableColumn fx:id="searchMakeColumn" text="Make" minWidth="120" maxWidth="160"/>
+                                    <TableColumn fx:id="searchModelColumn" text="Model" minWidth="120" maxWidth="160"/>
+                                    <TableColumn fx:id="searchYearColumn" text="Year" minWidth="80" maxWidth="110"/>
+                                    <TableColumn fx:id="searchStatusColumn" text="Status" minWidth="100" maxWidth="130"/>
                                 </columns>
-                                <columnResizePolicy>
-                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                                </columnResizePolicy>
                                 <placeholder>
                                     <Label text="No vehicles found" styleClass="status-text"/>
                                 </placeholder>
                             </TableView>
-                            <HBox spacing="10" alignment="CENTER_RIGHT">
+                            <HBox spacing="10" alignment="CENTER">
                                 <Label fx:id="vehicleCountLabel" styleClass="status-text"/>
                                 <Pagination fx:id="vehiclesPagination" pageCount="1" maxPageIndicatorCount="5"/>
                             </HBox>
@@ -67,21 +69,18 @@
 
                     <!-- CUSTOMERS TAB -->
                     <Tab text="Customers" closable="false">
-                        <VBox spacing="10">
-                            <TableView fx:id="customersTable" VBox.vgrow="ALWAYS" prefHeight="400" minHeight="200">
+                        <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 10;" alignment="CENTER">
+                            <TableView fx:id="customersTable" prefHeight="400" minHeight="200" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
                                 <columns>
-                                    <TableColumn fx:id="searchNameColumn" text="Name" prefWidth="220"/>
-                                    <TableColumn fx:id="searchEmailColumn" text="Email" prefWidth="250"/>
-                                    <TableColumn fx:id="searchPhoneColumn" text="Phone" prefWidth="150"/>
+                                    <TableColumn fx:id="searchNameColumn" text="Name" minWidth="180" maxWidth="230"/>
+                                    <TableColumn fx:id="searchEmailColumn" text="Email" minWidth="200"/>
+                                    <TableColumn fx:id="searchPhoneColumn" text="Phone" minWidth="120" maxWidth="160"/>
                                 </columns>
-                                <columnResizePolicy>
-                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                                </columnResizePolicy>
                                 <placeholder>
                                     <Label text="No customers found" styleClass="status-text"/>
                                 </placeholder>
                             </TableView>
-                            <HBox spacing="10" alignment="CENTER_RIGHT">
+                            <HBox spacing="10" alignment="CENTER">
                                 <Label fx:id="customerCountLabel" styleClass="status-text"/>
                                 <Pagination fx:id="customersPagination" pageCount="1" maxPageIndicatorCount="5"/>
                             </HBox>
@@ -90,24 +89,21 @@
 
                     <!-- VIOLATIONS TAB -->
                     <Tab text="Violations" closable="false">
-                        <VBox spacing="10">
-                            <TableView fx:id="violationsTable" VBox.vgrow="ALWAYS" prefHeight="400" minHeight="200">
+                        <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 10;" alignment="CENTER">
+                            <TableView fx:id="violationsTable" prefHeight="400" minHeight="200" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
                                 <columns>
-                                    <TableColumn fx:id="searchViolationRegColumn" text="Vehicle" prefWidth="180"/>
-                                    <TableColumn fx:id="searchViolationTypeColumn" text="Type" prefWidth="200"/>
-                                    <TableColumn fx:id="searchFineColumn" text="Fine" prefWidth="120"/>
-                                    <TableColumn fx:id="searchPaymentColumn" text="Payment" prefWidth="120"/>
-                                    <TableColumn fx:id="searchViolationDateColumn" text="Date" prefWidth="150"/>
-                                    <TableColumn fx:id="searchOfficerColumn" text="Officer" prefWidth="180"/>
+                                    <TableColumn fx:id="searchViolationRegColumn" text="Vehicle" minWidth="150" maxWidth="190"/>
+                                    <TableColumn fx:id="searchViolationTypeColumn" text="Type" minWidth="150" maxWidth="220"/>
+                                    <TableColumn fx:id="searchFineColumn" text="Fine" minWidth="100" maxWidth="130"/>
+                                    <TableColumn fx:id="searchPaymentColumn" text="Payment" minWidth="100" maxWidth="130"/>
+                                    <TableColumn fx:id="searchViolationDateColumn" text="Date" minWidth="120" maxWidth="160"/>
+                                    <TableColumn fx:id="searchOfficerColumn" text="Officer" minWidth="150" maxWidth="190"/>
                                 </columns>
-                                <columnResizePolicy>
-                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                                </columnResizePolicy>
                                 <placeholder>
                                     <Label text="No violations found" styleClass="status-text"/>
                                 </placeholder>
                             </TableView>
-                            <HBox spacing="10" alignment="CENTER_RIGHT">
+                            <HBox spacing="10" alignment="CENTER">
                                 <Label fx:id="violationCountLabel" styleClass="status-text"/>
                                 <Pagination fx:id="violationsPagination" pageCount="1" maxPageIndicatorCount="5"/>
                             </HBox>
@@ -116,24 +112,21 @@
 
                     <!-- STOLEN VEHICLES TAB -->
                     <Tab text="Stolen Vehicles" closable="false">
-                        <VBox spacing="10">
-                            <TableView fx:id="stolenTable" VBox.vgrow="ALWAYS" prefHeight="400" minHeight="200">
+                        <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 10;" alignment="CENTER">
+                            <TableView fx:id="stolenTable" prefHeight="400" minHeight="200" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
                                 <columns>
-                                    <TableColumn fx:id="searchStolenRegColumn" text="Registration" prefWidth="180"/>
-                                    <TableColumn fx:id="searchStolenMakeColumn" text="Make" prefWidth="150"/>
-                                    <TableColumn fx:id="searchStolenModelColumn" text="Model" prefWidth="150"/>
-                                    <TableColumn fx:id="searchCaseNumberColumn" text="Case Number" prefWidth="200"/>
-                                    <TableColumn fx:id="searchStolenStatusColumn" text="Status" prefWidth="120"/>
-                                    <TableColumn fx:id="searchReportedDateColumn" text="Reported Date" prefWidth="150"/>
+                                    <TableColumn fx:id="searchStolenRegColumn" text="Registration" minWidth="150" maxWidth="190"/>
+                                    <TableColumn fx:id="searchStolenMakeColumn" text="Make" minWidth="120" maxWidth="160"/>
+                                    <TableColumn fx:id="searchStolenModelColumn" text="Model" minWidth="120" maxWidth="160"/>
+                                    <TableColumn fx:id="searchCaseNumberColumn" text="Case Number" minWidth="180" maxWidth="220"/>
+                                    <TableColumn fx:id="searchStolenStatusColumn" text="Status" minWidth="100" maxWidth="130"/>
+                                    <TableColumn fx:id="searchReportedDateColumn" text="Reported Date" minWidth="120" maxWidth="160"/>
                                 </columns>
-                                <columnResizePolicy>
-                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                                </columnResizePolicy>
                                 <placeholder>
                                     <Label text="No stolen vehicles found" styleClass="status-text"/>
                                 </placeholder>
                             </TableView>
-                            <HBox spacing="10" alignment="CENTER_RIGHT">
+                            <HBox spacing="10" alignment="CENTER">
                                 <Label fx:id="stolenCountLabel" styleClass="status-text"/>
                                 <Pagination fx:id="stolenPagination" pageCount="1" maxPageIndicatorCount="5"/>
                             </HBox>
@@ -142,22 +135,19 @@
 
                     <!-- WORKSHOPS TAB -->
                     <Tab text="Workshops" closable="false">
-                        <VBox spacing="10">
-                            <TableView fx:id="workshopsTable" VBox.vgrow="ALWAYS" prefHeight="400" minHeight="200">
+                        <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 10;" alignment="CENTER">
+                            <TableView fx:id="workshopsTable" prefHeight="400" minHeight="200" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
                                 <columns>
-                                    <TableColumn fx:id="searchWorkshopNameColumn" text="Workshop Name" prefWidth="250"/>
-                                    <TableColumn fx:id="searchWorkshopAddressColumn" text="Address" prefWidth="300"/>
-                                    <TableColumn fx:id="searchWorkshopPhoneColumn" text="Phone" prefWidth="150"/>
-                                    <TableColumn fx:id="searchWorkshopStatusColumn" text="Status" prefWidth="100"/>
+                                    <TableColumn fx:id="searchWorkshopNameColumn" text="Workshop Name" minWidth="200"/>
+                                    <TableColumn fx:id="searchWorkshopAddressColumn" text="Address" minWidth="250"/>
+                                    <TableColumn fx:id="searchWorkshopPhoneColumn" text="Phone" minWidth="120" maxWidth="160"/>
+                                    <TableColumn fx:id="searchWorkshopStatusColumn" text="Status" minWidth="80" maxWidth="110"/>
                                 </columns>
-                                <columnResizePolicy>
-                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                                </columnResizePolicy>
                                 <placeholder>
                                     <Label text="No workshops found" styleClass="status-text"/>
                                 </placeholder>
                             </TableView>
-                            <HBox spacing="10" alignment="CENTER_RIGHT">
+                            <HBox spacing="10" alignment="CENTER">
                                 <Label fx:id="workshopCountLabel" styleClass="status-text"/>
                                 <Pagination fx:id="workshopsPagination" pageCount="1" maxPageIndicatorCount="5"/>
                             </HBox>
@@ -166,23 +156,20 @@
 
                     <!-- INSURANCE TAB -->
                     <Tab text="Insurance" closable="false">
-                        <VBox spacing="10">
-                            <TableView fx:id="insuranceTable" VBox.vgrow="ALWAYS" prefHeight="400" minHeight="200">
+                        <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 10;" alignment="CENTER">
+                            <TableView fx:id="insuranceTable" prefHeight="400" minHeight="200" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
                                 <columns>
-                                    <TableColumn fx:id="searchPolicyColumn" text="Policy Number" prefWidth="200"/>
-                                    <TableColumn fx:id="searchProviderColumn" text="Provider" prefWidth="220"/>
-                                    <TableColumn fx:id="searchInsuranceStatusColumn" text="Status" prefWidth="120"/>
-                                    <TableColumn fx:id="searchStartDateColumn" text="Start Date" prefWidth="120"/>
-                                    <TableColumn fx:id="searchEndDateColumn" text="End Date" prefWidth="120"/>
+                                    <TableColumn fx:id="searchPolicyColumn" text="Policy Number" minWidth="160" maxWidth="210"/>
+                                    <TableColumn fx:id="searchProviderColumn" text="Provider" minWidth="180" maxWidth="230"/>
+                                    <TableColumn fx:id="searchInsuranceStatusColumn" text="Status" minWidth="100" maxWidth="130"/>
+                                    <TableColumn fx:id="searchStartDateColumn" text="Start Date" minWidth="100" maxWidth="130"/>
+                                    <TableColumn fx:id="searchEndDateColumn" text="End Date" minWidth="100" maxWidth="130"/>
                                 </columns>
-                                <columnResizePolicy>
-                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                                </columnResizePolicy>
                                 <placeholder>
                                     <Label text="No insurance policies found" styleClass="status-text"/>
                                 </placeholder>
                             </TableView>
-                            <HBox spacing="10" alignment="CENTER_RIGHT">
+                            <HBox spacing="10" alignment="CENTER">
                                 <Label fx:id="insuranceCountLabel" styleClass="status-text"/>
                                 <Pagination fx:id="insurancePagination" pageCount="1" maxPageIndicatorCount="5"/>
                             </HBox>
@@ -191,22 +178,19 @@
 
                     <!-- AUDIT LOGS TAB -->
                     <Tab text="Audit Logs" closable="false">
-                        <VBox spacing="10">
-                            <TableView fx:id="auditLogsTable" VBox.vgrow="ALWAYS" prefHeight="400" minHeight="200">
+                        <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 10;" alignment="CENTER">
+                            <TableView fx:id="auditLogsTable" prefHeight="400" minHeight="200" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
                                 <columns>
-                                    <TableColumn fx:id="logUserColumn" text="User" prefWidth="200"/>
-                                    <TableColumn fx:id="logActionColumn" text="Action" prefWidth="350"/>
-                                    <TableColumn fx:id="logTimestampColumn" text="Timestamp" prefWidth="200"/>
-                                    <TableColumn fx:id="logIpColumn" text="IP Address" prefWidth="150"/>
+                                    <TableColumn fx:id="logUserColumn" text="User" minWidth="160" maxWidth="210"/>
+                                    <TableColumn fx:id="logActionColumn" text="Action" minWidth="250"/>
+                                    <TableColumn fx:id="logTimestampColumn" text="Timestamp" minWidth="160" maxWidth="210"/>
+                                    <TableColumn fx:id="logIpColumn" text="IP Address" minWidth="120" maxWidth="160"/>
                                 </columns>
-                                <columnResizePolicy>
-                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                                </columnResizePolicy>
                                 <placeholder>
                                     <Label text="No audit logs found" styleClass="status-text"/>
                                 </placeholder>
                             </TableView>
-                            <HBox spacing="10" alignment="CENTER_RIGHT">
+                            <HBox spacing="10" alignment="CENTER">
                                 <Label fx:id="auditLogCountLabel" styleClass="status-text"/>
                                 <Pagination fx:id="auditLogsPagination" pageCount="1" maxPageIndicatorCount="5"/>
                             </HBox>
@@ -215,22 +199,19 @@
 
                     <!-- NOTIFICATIONS TAB -->
                     <Tab text="Notifications" closable="false">
-                        <VBox spacing="10">
-                            <TableView fx:id="notificationsTable" VBox.vgrow="ALWAYS" prefHeight="400" minHeight="200">
+                        <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 10;" alignment="CENTER">
+                            <TableView fx:id="notificationsTable" prefHeight="400" minHeight="200" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
                                 <columns>
-                                    <TableColumn fx:id="notifMessageColumn" text="Message" prefWidth="350"/>
-                                    <TableColumn fx:id="notifTypeColumn" text="Type" prefWidth="150"/>
-                                    <TableColumn fx:id="notifCreatedAtColumn" text="Date" prefWidth="180"/>
-                                    <TableColumn fx:id="notifStatusColumn" text="Status" prefWidth="100"/>
+                                    <TableColumn fx:id="notifMessageColumn" text="Message" minWidth="250"/>
+                                    <TableColumn fx:id="notifTypeColumn" text="Type" minWidth="120" maxWidth="160"/>
+                                    <TableColumn fx:id="notifCreatedAtColumn" text="Date" minWidth="150" maxWidth="190"/>
+                                    <TableColumn fx:id="notifStatusColumn" text="Status" minWidth="80" maxWidth="110"/>
                                 </columns>
-                                <columnResizePolicy>
-                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                                </columnResizePolicy>
                                 <placeholder>
                                     <Label text="No notifications found" styleClass="status-text"/>
                                 </placeholder>
                             </TableView>
-                            <HBox spacing="10" alignment="CENTER_RIGHT">
+                            <HBox spacing="10" alignment="CENTER">
                                 <Label fx:id="notificationCountLabel" styleClass="status-text"/>
                                 <Pagination fx:id="notificationsPagination" pageCount="1" maxPageIndicatorCount="5"/>
                             </HBox>
@@ -240,18 +221,17 @@
                 </TabPane>
 
                 <!-- Status Label -->
-                <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER"/>
+                <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
+
+                <HBox alignment="CENTER">
+                    <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-secondary" prefWidth="150"/>
+                </HBox>
 
             </VBox>
         </ScrollPane>
     </center>
 
     <bottom>
-        <VBox spacing="0">
-            <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
-                <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-secondary" prefWidth="150"/>
-            </HBox>
-            <fx:include source="FooterComponent.fxml"/>
-        </VBox>
+        <fx:include source="FooterComponent.fxml"/>
     </bottom>
 </BorderPane>

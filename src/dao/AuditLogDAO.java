@@ -1,66 +1,73 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.AuditLog;
 
+/**
+ * AuditLogDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class AuditLogDAO extends BaseDAO<AuditLog> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public AuditLogDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public AuditLog findById(int id) throws SQLException {
-        String sql = "SELECT * FROM vw_audit_logs WHERE id = ?";
-        return executeQuerySingle(sql, id);
+        List<AuditLog> results = viewLoader.loadAuditLogsWithCondition("id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<AuditLog> findAll() throws SQLException {
-        String sql = "SELECT * FROM vw_audit_logs LIMIT 1000";
-        return executeQuery(sql);
+        return viewLoader.loadAuditLogsWithLimit(1000);
     }
 
     public List<AuditLog> findAllWithPagination(int limit, int offset) throws SQLException {
-        String sql = "SELECT * FROM vw_audit_logs LIMIT ? OFFSET ?";
-        return executeQuery(sql, limit, offset);
+        return viewLoader.loadAuditLogsWithPagination(limit, offset);
     }
 
     public List<AuditLog> findByUserId(int userId) throws SQLException {
-        String sql = "SELECT * FROM vw_audit_logs WHERE user_id = ? ORDER BY timestamp DESC";
-        return executeQuery(sql, userId);
+        return viewLoader.loadAuditLogsWithCondition("user_id = ? ORDER BY timestamp DESC", userId);
     }
 
     public List<AuditLog> findByUsername(String username) throws SQLException {
-        String sql = "SELECT * FROM vw_audit_logs WHERE username ILIKE ? ORDER BY timestamp DESC";
-        return executeQuery(sql, "%" + username + "%");
+        return viewLoader.loadAuditLogsWithCondition("username ILIKE ? ORDER BY timestamp DESC", "%" + username + "%");
     }
 
     public List<AuditLog> findByAction(String action) throws SQLException {
-        String sql = "SELECT * FROM vw_audit_logs WHERE action ILIKE ? ORDER BY timestamp DESC";
-        return executeQuery(sql, "%" + action + "%");
+        return viewLoader.loadAuditLogsWithCondition("action ILIKE ? ORDER BY timestamp DESC", "%" + action + "%");
     }
 
     public List<AuditLog> findByDateRange(LocalDateTime startDate, LocalDateTime endDate) throws SQLException {
-        String sql = "SELECT * FROM vw_audit_logs WHERE timestamp BETWEEN ? AND ? ORDER BY timestamp DESC";
-        return executeQuery(sql, startDate, endDate);
+        return viewLoader.loadAuditLogsWithCondition("timestamp BETWEEN ? AND ? ORDER BY timestamp DESC", startDate, endDate);
     }
 
     public List<AuditLog> findTodayLogs() throws SQLException {
-        String sql = "SELECT * FROM vw_audit_logs WHERE DATE(timestamp) = CURRENT_DATE ORDER BY timestamp DESC";
-        return executeQuery(sql);
+        return viewLoader.loadAuditLogsWithCondition("DATE(timestamp) = CURRENT_DATE ORDER BY timestamp DESC");
     }
 
     public List<AuditLog> findLastHours(int hours) throws SQLException {
-        String sql = "SELECT * FROM vw_audit_logs WHERE timestamp >= CURRENT_TIMESTAMP - INTERVAL '" + hours + " hours' ORDER BY timestamp DESC";
-        return executeQuery(sql);
+        return viewLoader.loadAuditLogsWithCondition(
+                "timestamp >= CURRENT_TIMESTAMP - INTERVAL '" + hours + " hours' ORDER BY timestamp DESC");
     }
 
     @Override
     public boolean insert(AuditLog entity) throws SQLException {
-        return executeProcedure("sp_log_audit_action",
+        return procedureCaller.executeLogAuditAction(
                 entity.getUserId(),
                 entity.getAction(),
                 entity.getIpAddress()
@@ -68,67 +75,53 @@ public class AuditLogDAO extends BaseDAO<AuditLog> {
     }
 
     public void logAction(int userId, String action, String ipAddress) throws SQLException {
-        insert(new AuditLog(userId, action, ipAddress));
+        procedureCaller.executeLogAuditAction(userId, action, ipAddress);
     }
 
     @Override
     public boolean update(AuditLog entity) throws SQLException {
+        // Audit logs are immutable
         return false;
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM audit_logs WHERE id = ?";
-        int result = executeUpdate(sql, id);
-        return result > 0;
+        return procedureCaller.executeDeleteAuditLog(id);
     }
 
     public int deleteOldLogs(LocalDateTime beforeDate) throws SQLException {
-        String sql = "DELETE FROM audit_logs WHERE timestamp < ?";
-        int result = executeUpdate(sql, beforeDate);
-        return result;
+        return procedureCaller.executeDeleteAuditLogsBefore(beforeDate);
     }
 
     public int deleteLogsOlderThanDays(int days) throws SQLException {
-        String sql = "DELETE FROM audit_logs WHERE timestamp < CURRENT_TIMESTAMP - INTERVAL '" + days + " days'";
-        int result = executeUpdate(sql);
-        return result;
+        return procedureCaller.executeDeleteAuditLogsOlderThan(days);
     }
 
     public int countTotalLogs() throws SQLException {
-        String sql = "SELECT COUNT(*) FROM audit_logs";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.countAuditLogs();
+    }
+
+    public int countLogsByUser(int userId) throws SQLException {
+        return viewLoader.countAuditLogsWithCondition("user_id = ?", userId);
+    }
+
+    public List<AuditLog> exportLogs(LocalDateTime startDate, LocalDateTime endDate) throws SQLException {
+        return viewLoader.loadAuditLogsWithCondition("timestamp BETWEEN ? AND ? ORDER BY timestamp", startDate, endDate);
     }
 
     @Override
     protected AuditLog mapRow(ResultSet rs) throws SQLException {
         AuditLog log = new AuditLog();
         log.setId(rs.getInt("id"));
-
         if (rs.getObject("user_id") != null) {
             log.setUserId(rs.getInt("user_id"));
         }
         log.setUsername(rs.getString("username"));
         log.setAction(rs.getString("action"));
-
         if (rs.getTimestamp("timestamp") != null) {
             log.setTimestamp(rs.getTimestamp("timestamp").toLocalDateTime());
         }
         log.setIpAddress(rs.getString("ip_address"));
-
         return log;
     }
 }

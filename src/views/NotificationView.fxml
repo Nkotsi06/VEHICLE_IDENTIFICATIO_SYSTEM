@@ -5,82 +5,91 @@
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.NotificationController">
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.NotificationController"
+            stylesheets="@../css/application.css" styleClass="border-pane">
 
     <top>
-        <VBox>
-            <fx:include source="MenuBarComponent.fxml"/>
-        </VBox>
+        <fx:include source="MenuBarComponent.fxml"/>
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="true">
-            <SplitPane dividerPositions="0.6">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
+            <VBox spacing="20" alignment="TOP_CENTER"
+                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
 
-                <!-- Left Panel - Notifications List -->
-                <VBox spacing="10" style="-fx-padding: 15;">
-                    <Label text="Notifications" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                <Label text="Notifications" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
+                <Label text="View and manage your notifications" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
 
-                    <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="30"/>
+                <Separator/>
 
-                    <TableView fx:id="notificationsTable" prefHeight="400">
-                        <columns>
-                            <TableColumn fx:id="messageColumn" text="Message" prefWidth="300"/>
-                            <TableColumn fx:id="typeColumn" text="Type" prefWidth="100"/>
-                            <TableColumn fx:id="createdAtColumn" text="Date" prefWidth="150"/>
-                            <TableColumn fx:id="statusColumn" text="Status" prefWidth="80"/>
-                        </columns>
-                        <columnResizePolicy>
-                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                        </columnResizePolicy>
-                        <placeholder>
-                            <Label text="No notifications" style="-fx-text-fill: #7f8c8d;"/>
-                        </placeholder>
-                    </TableView>
+                <HBox spacing="20" alignment="CENTER">
+                    <!-- Left Panel - Notifications List -->
+                    <VBox spacing="10" alignment="CENTER" HBox.hgrow="ALWAYS">
+                        <VBox styleClass="profile-edit-card" alignment="CENTER">
+                            <Label text="Notifications" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                    <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+                            <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="30"/>
 
-                    <HBox spacing="10">
-                        <Button fx:id="markReadButton" text="Mark as Read" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                        <Button fx:id="markAllReadButton" text="Mark All Read" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                        <Button fx:id="refreshButton" text="Refresh" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                        <Button fx:id="deleteButton" text="Delete" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                        <Button fx:id="fadeButton" text="Animate" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                    </HBox>
-                </VBox>
+                            <TableView fx:id="notificationsTable" prefHeight="400" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
+                                <columns>
+                                    <TableColumn fx:id="messageColumn" text="Message" minWidth="200"/>
+                                    <TableColumn fx:id="typeColumn" text="Type" minWidth="80" maxWidth="110"/>
+                                    <TableColumn fx:id="createdAtColumn" text="Date" minWidth="120" maxWidth="160"/>
+                                    <TableColumn fx:id="statusColumn" text="Status" minWidth="70" maxWidth="90"/>
+                                </columns>
+                                <placeholder>
+                                    <Label text="No notifications" styleClass="status-text"/>
+                                </placeholder>
+                            </TableView>
 
-                <!-- Right Panel - Notification Details -->
-                <VBox spacing="10" style="-fx-padding: 15;">
-                    <Label text="Notification Details" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                            <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
-                    <GridPane hgap="10" vgap="10">
-                        <Label text="Type:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <Label fx:id="typeLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+                            <HBox alignment="CENTER">
+                                <Button fx:id="markReadButton" text="Mark as Read" styleClass="button-info"/>
+                                <Button fx:id="markAllReadButton" text="Mark All Read" styleClass="button-primary"/>
+                                <Button fx:id="refreshButton" text="Refresh" styleClass="button-success"/>
+                                <Button fx:id="deleteButton" text="Delete" styleClass="button-danger"/>
+                                <Button fx:id="fadeButton" text="Animate" styleClass="button-warning"/>
+                            </HBox>
+                        </VBox>
+                    </VBox>
 
-                        <Label text="Date:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <Label fx:id="createdAtLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+                    <!-- Right Panel - Notification Details -->
+                    <VBox spacing="10" alignment="CENTER" HBox.hgrow="ALWAYS">
+                        <VBox styleClass="profile-edit-card" alignment="CENTER">
+                            <Label text="Notification Details" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                        <Label text="Reference ID:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <Label fx:id="referenceIdLabel" GridPane.rowIndex="2" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
-                    </GridPane>
+                            <GridPane hgap="10" vgap="10" alignment="CENTER">
+                                <Label text="Type:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <Label fx:id="typeLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
 
-                    <Label text="Message:" style="-fx-font-weight: bold;"/>
-                    <TextArea fx:id="messageArea" prefHeight="200" wrapText="true" editable="false"
-                              style="-fx-background-color: #f8f9fa; -fx-font-family: monospace;"/>
-                </VBox>
-            </SplitPane>
+                                <Label text="Date:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <Label fx:id="createdAtLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+
+                                <Label text="Reference ID:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                                <Label fx:id="referenceIdLabel" GridPane.rowIndex="2" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
+                            </GridPane>
+
+                            <Label text="Message:" style="-fx-font-weight: bold;" alignment="CENTER" maxWidth="Infinity"/>
+                            <TextArea fx:id="messageArea" prefHeight="200" wrapText="true" editable="false"
+                                      style="-fx-background-color: #f8f9fa; -fx-font-family: monospace;" maxWidth="Infinity"/>
+                        </VBox>
+                    </VBox>
+                </HBox>
+
+                <!-- Status Label -->
+                <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
+
+                <HBox alignment="CENTER">
+                    <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-secondary"/>
+                </HBox>
+
+            </VBox>
         </ScrollPane>
     </center>
 
     <bottom>
-        <VBox spacing="10">
-            <!-- Status Label -->
-            <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic; -fx-padding: 5 15 5 15;"/>
-
-            <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
-                <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-            </HBox>
-        </VBox>
         <fx:include source="FooterComponent.fxml"/>
     </bottom>
 

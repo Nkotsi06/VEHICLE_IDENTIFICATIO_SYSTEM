@@ -1,75 +1,81 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.PolicyRenewal;
 
+/**
+ * PolicyRenewalDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class PolicyRenewalDAO extends BaseDAO<PolicyRenewal> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public PolicyRenewalDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public PolicyRenewal findById(int id) throws SQLException {
-        String sql = "SELECT * FROM vw_policy_renewals WHERE id = ?";
-        return executeQuerySingle(sql, id);
+        List<PolicyRenewal> results = viewLoader.loadViewWithCondition("vw_policy_renewals", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<PolicyRenewal> findAll() throws SQLException {
-        String sql = "SELECT * FROM vw_policy_renewals ORDER BY renewal_date DESC";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_policy_renewals");
     }
 
     public List<PolicyRenewal> findByInsuranceId(int insuranceId) throws SQLException {
-        String sql = "SELECT * FROM vw_policy_renewals WHERE insurance_id = ? ORDER BY renewal_date DESC";
-        return executeQuery(sql, insuranceId);
+        return viewLoader.loadViewWithCondition("vw_policy_renewals", "insurance_id = ? ORDER BY renewal_date DESC", insuranceId);
     }
 
     public List<PolicyRenewal> findByVehicleId(int vehicleId) throws SQLException {
-        String sql = "SELECT * FROM vw_policy_renewals WHERE vehicle_id = ? ORDER BY renewal_date DESC";
-        return executeQuery(sql, vehicleId);
+        return viewLoader.loadViewWithCondition("vw_policy_renewals", "vehicle_id = ? ORDER BY renewal_date DESC", vehicleId);
     }
 
     public List<PolicyRenewal> findPendingRenewals() throws SQLException {
-        String sql = "SELECT * FROM vw_policy_renewals WHERE payment_status = 'PENDING' ORDER BY renewal_date";
-        return executeQuery(sql);
+        return viewLoader.loadViewWithCondition("vw_policy_renewals", "payment_status = 'PENDING' ORDER BY renewal_date");
     }
 
     public List<PolicyRenewal> findRenewalsByDateRange(LocalDate startDate, LocalDate endDate) throws SQLException {
-        String sql = "SELECT * FROM vw_policy_renewals WHERE renewal_date BETWEEN ? AND ? ORDER BY renewal_date";
-        return executeQuery(sql, startDate, endDate);
+        return viewLoader.loadViewWithCondition("vw_policy_renewals", "renewal_date BETWEEN ? AND ? ORDER BY renewal_date", startDate, endDate);
     }
 
     public boolean createRenewal(int insuranceId, LocalDate renewalDate, double premium) throws SQLException {
-        return executeProcedure("sp_create_policy_renewal", insuranceId, renewalDate, premium);
+        return procedureCaller.executeCreatePolicyRenewal(insuranceId, renewalDate, premium);
     }
 
     public boolean processRenewalPayment(int renewalId) throws SQLException {
-        return executeProcedure("sp_process_renewal_payment", renewalId);
+        return procedureCaller.executeProcessRenewalPayment(renewalId);
     }
 
     @Override
     public boolean insert(PolicyRenewal entity) throws SQLException {
-        return executeProcedure("sp_create_policy_renewal",
-                entity.getInsuranceId(),
-                entity.getRenewalDate(),
-                entity.getPremium()
-        );
+        return createRenewal(entity.getInsuranceId(), entity.getRenewalDate(), entity.getPremium());
     }
 
     @Override
     public boolean update(PolicyRenewal entity) throws SQLException {
-        String sql = "UPDATE policy_renewals SET payment_status = ?, payment_date = ? WHERE id = ?";
-        int result = executeUpdate(sql, entity.getPaymentStatus(), entity.getPaymentDate(), entity.getId());
-        return result > 0;
+        if ("PAID".equals(entity.getPaymentStatus())) {
+            return processRenewalPayment(entity.getId());
+        }
+        return false;
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        return executeProcedure("sp_delete_renewal", id);
+        return procedureCaller.executeDeletePolicyRenewal(id);
     }
 
     @Override

@@ -1,97 +1,104 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.Payment;
 
+/**
+ * PaymentDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class PaymentDAO extends BaseDAO<Payment> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public PaymentDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public Payment findById(int id) throws SQLException {
-        String sql = "SELECT * FROM vw_payments WHERE id = ?";
-        return executeQuerySingle(sql, id);
+        List<Payment> results = viewLoader.loadViewWithCondition("vw_payments", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     public Payment findByReceiptNumber(String receiptNumber) throws SQLException {
-        String sql = "SELECT * FROM vw_payments WHERE receipt_number = ?";
-        return executeQuerySingle(sql, receiptNumber);
+        List<Payment> results = viewLoader.loadViewWithCondition("vw_payments", "receipt_number = ?", receiptNumber);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     public Payment findByTransactionId(String transactionId) throws SQLException {
-        String sql = "SELECT * FROM vw_payments WHERE transaction_id = ?";
-        return executeQuerySingle(sql, transactionId);
+        List<Payment> results = viewLoader.loadViewWithCondition("vw_payments", "transaction_id = ?", transactionId);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<Payment> findAll() throws SQLException {
-        String sql = "SELECT * FROM vw_payments ORDER BY payment_date DESC";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_payments");
     }
 
     public List<Payment> findByViolationId(int violationId) throws SQLException {
-        String sql = "SELECT * FROM vw_payments WHERE violation_id = ? ORDER BY payment_date DESC";
-        return executeQuery(sql, violationId);
+        return viewLoader.loadViewWithCondition("vw_payments", "violation_id = ? ORDER BY payment_date DESC", violationId);
     }
 
     public List<Payment> findByVehicleId(int vehicleId) throws SQLException {
-        String sql = "SELECT * FROM vw_payments WHERE vehicle_id = ? ORDER BY payment_date DESC";
-        return executeQuery(sql, vehicleId);
+        return viewLoader.loadViewWithCondition("vw_payments", "vehicle_id = ? ORDER BY payment_date DESC", vehicleId);
     }
 
     public List<Payment> findByDateRange(LocalDate startDate, LocalDate endDate) throws SQLException {
-        String sql = "SELECT * FROM vw_payments WHERE payment_date BETWEEN ? AND ? ORDER BY payment_date DESC";
-        return executeQuery(sql, startDate, endDate);
+        return viewLoader.loadViewWithCondition("vw_payments", "payment_date BETWEEN ? AND ? ORDER BY payment_date DESC", startDate, endDate);
     }
 
     @Override
     public boolean insert(Payment entity) throws SQLException {
-        String sql = "CALL sp_process_fine_payment(?, ?, ?, ?, ?)";
-        int result = executeUpdate(sql,
+        Integer paymentId = procedureCaller.executeProcessFinePayment(
                 entity.getViolationId(),
                 entity.getAmount(),
                 entity.getPaymentMethod(),
                 entity.getReceiptNumber(),
                 entity.getPaymentDate()
         );
-        return result >= 0;
+        if (paymentId != null && paymentId > 0) {
+            entity.setId(paymentId);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public boolean update(Payment entity) throws SQLException {
-        String sql = "UPDATE payments SET amount = ?, payment_method = ? WHERE id = ?";
-        int result = executeUpdate(sql, entity.getAmount(), entity.getPaymentMethod(), entity.getId());
-        return result > 0;
+        return procedureCaller.executeUpdatePayment(
+                entity.getId(),
+                entity.getAmount(),
+                entity.getPaymentMethod()
+        );
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM payments WHERE id = ?";
-        int result = executeUpdate(sql, id);
-        return result > 0;
+        return procedureCaller.executeDeletePayment(id);
     }
 
     public double getTotalPaymentsByVehicle(int vehicleId) throws SQLException {
-        String sql = "SELECT COALESCE(SUM(p.amount), 0) FROM payments p JOIN violations v ON p.violation_id = v.id WHERE v.vehicle_id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, vehicleId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getDouble(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
+        return viewLoader.getSumPaymentsByVehicle(vehicleId);
+    }
+
+    public double getTotalPaymentsByViolation(int violationId) throws SQLException {
+        List<Payment> payments = findByViolationId(violationId);
+        double total = 0;
+        for (Payment payment : payments) {
+            total += payment.getAmount();
         }
+        return total;
     }
 
     @Override

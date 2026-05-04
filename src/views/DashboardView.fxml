@@ -4,26 +4,29 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.DashboardController">
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.DashboardController"
+            stylesheets="@../css/application.css" styleClass="border-pane">
 
     <top>
-        <VBox>
-            <fx:include source="MenuBarComponent.fxml"/>
-        </VBox>
+        <fx:include source="MenuBarComponent.fxml"/>
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true">
-            <VBox spacing="20" alignment="TOP_CENTER" style="-fx-padding: 20;">
-                <Label fx:id="welcomeLabel" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-                <Label fx:id="roleLabel" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
-                <Label fx:id="dateLabel" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
+            <VBox spacing="20" alignment="TOP_CENTER"
+                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
+
+                <Label fx:id="welcomeLabel" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
+                <Label fx:id="roleLabel" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
+                <Label fx:id="dateLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
 
                 <Separator/>
 
-                <Label text="System Overview" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                <Label text="System Overview" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" alignment="CENTER" maxWidth="Infinity"/>
 
-                <FlowPane fx:id="statsContainer" hgap="15" vgap="15" alignment="TOP_LEFT"/>
+                <FlowPane fx:id="statsContainer" hgap="15" vgap="15" alignment="CENTER"/>
+
             </VBox>
         </ScrollPane>
     </center>

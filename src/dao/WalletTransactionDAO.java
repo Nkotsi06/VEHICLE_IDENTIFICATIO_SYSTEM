@@ -1,59 +1,64 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.WalletTransaction;
 
+/**
+ * WalletTransactionDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class WalletTransactionDAO extends BaseDAO<WalletTransaction> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public WalletTransactionDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public WalletTransaction findById(int id) throws SQLException {
-        String sql = "SELECT * FROM wallet_transactions WHERE id = ?";
-        return executeQuerySingle(sql, id);
+        List<WalletTransaction> results = viewLoader.loadViewWithCondition("vw_wallet_transactions", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<WalletTransaction> findAll() throws SQLException {
-        String sql = "SELECT * FROM wallet_transactions ORDER BY created_at DESC";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_wallet_transactions");
     }
 
     public List<WalletTransaction> findByWalletId(int walletId) throws SQLException {
-        String sql = "SELECT * FROM wallet_transactions WHERE wallet_id = ? ORDER BY created_at DESC";
-        return executeQuery(sql, walletId);
+        return viewLoader.loadViewWithCondition("vw_wallet_transactions", "wallet_id = ? ORDER BY created_at DESC", walletId);
     }
 
     public List<WalletTransaction> findByCustomerId(int customerId) throws SQLException {
-        String sql = "SELECT wt.* FROM wallet_transactions wt " +
-                "JOIN digital_wallets dw ON wt.wallet_id = dw.id " +
-                "WHERE dw.customer_id = ? ORDER BY wt.created_at DESC";
-        return executeQuery(sql, customerId);
+        return viewLoader.loadViewWithCondition("vw_wallet_transactions", "customer_id = ? ORDER BY created_at DESC", customerId);
     }
 
     public List<WalletTransaction> findByTransactionType(String transactionType) throws SQLException {
-        String sql = "SELECT * FROM wallet_transactions WHERE transaction_type = ? ORDER BY created_at DESC";
-        return executeQuery(sql, transactionType);
+        return viewLoader.loadViewWithCondition("vw_wallet_transactions", "transaction_type = ? ORDER BY created_at DESC", transactionType);
     }
 
     public List<WalletTransaction> findByDateRange(LocalDateTime startDate, LocalDateTime endDate) throws SQLException {
-        String sql = "SELECT * FROM wallet_transactions WHERE created_at BETWEEN ? AND ? ORDER BY created_at DESC";
-        return executeQuery(sql, startDate, endDate);
+        return viewLoader.loadViewWithCondition("vw_wallet_transactions", "created_at BETWEEN ? AND ? ORDER BY created_at DESC", startDate, endDate);
     }
 
     public List<WalletTransaction> findPendingTransactions() throws SQLException {
-        String sql = "SELECT * FROM wallet_transactions WHERE status = 'PENDING' ORDER BY created_at";
-        return executeQuery(sql);
+        return viewLoader.loadViewWithCondition("vw_wallet_transactions", "status = 'PENDING' ORDER BY created_at");
     }
 
     @Override
     public boolean insert(WalletTransaction entity) throws SQLException {
-        String sql = "INSERT INTO wallet_transactions (wallet_id, amount, transaction_type, reference_id, description, status) VALUES (?, ?, ?, ?, ?, ?)";
-        int result = executeUpdate(sql,
+        return procedureCaller.executeInsertWalletTransaction(
                 entity.getWalletId(),
                 entity.getAmount(),
                 entity.getTransactionType(),
@@ -61,53 +66,33 @@ public class WalletTransactionDAO extends BaseDAO<WalletTransaction> {
                 entity.getDescription(),
                 entity.getStatus()
         );
-        return result > 0;
     }
 
     public boolean markAsCompleted(int transactionId) throws SQLException {
-        String sql = "UPDATE wallet_transactions SET status = 'COMPLETED' WHERE id = ?";
-        int result = executeUpdate(sql, transactionId);
-        return result > 0;
+        return procedureCaller.executeMarkWalletTransactionCompleted(transactionId);
     }
 
     public boolean markAsFailed(int transactionId) throws SQLException {
-        String sql = "UPDATE wallet_transactions SET status = 'FAILED' WHERE id = ?";
-        int result = executeUpdate(sql, transactionId);
-        return result > 0;
+        return procedureCaller.executeMarkWalletTransactionFailed(transactionId);
     }
 
     @Override
     public boolean update(WalletTransaction entity) throws SQLException {
-        String sql = "UPDATE wallet_transactions SET status = ? WHERE id = ?";
-        int result = executeUpdate(sql, entity.getStatus(), entity.getId());
-        return result > 0;
+        if ("COMPLETED".equals(entity.getStatus())) {
+            return markAsCompleted(entity.getId());
+        } else if ("FAILED".equals(entity.getStatus())) {
+            return markAsFailed(entity.getId());
+        }
+        return false;
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM wallet_transactions WHERE id = ?";
-        int result = executeUpdate(sql, id);
-        return result > 0;
+        return procedureCaller.executeDeleteWalletTransaction(id);
     }
 
     public double getTotalByWalletAndType(int walletId, String transactionType) throws SQLException {
-        String sql = "SELECT COALESCE(SUM(amount), 0) FROM wallet_transactions WHERE wallet_id = ? AND transaction_type = ? AND status = 'COMPLETED'";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, walletId);
-            ps.setString(2, transactionType);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getDouble(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.getSumWalletTransactionsByType(walletId, transactionType);
     }
 
     @Override

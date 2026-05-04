@@ -4,46 +4,64 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.VehicleStatus;
 
+/**
+ * VehicleStatusDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class VehicleStatusDAO extends BaseDAO<VehicleStatus> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public VehicleStatusDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public VehicleStatus findById(int id) throws SQLException {
-        String sql = "SELECT * FROM vw_vehicle_status WHERE id = ?";
-        return executeQuerySingle(sql, id);
+        List<VehicleStatus> results = viewLoader.loadViewWithCondition("vw_vehicle_status", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     public VehicleStatus findByStatusName(String statusName) throws SQLException {
-        String sql = "SELECT * FROM vw_vehicle_status WHERE status_name = ?";
-        return executeQuerySingle(sql, statusName);
+        List<VehicleStatus> results = viewLoader.loadViewWithCondition("vw_vehicle_status", "status_name = ?", statusName);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<VehicleStatus> findAll() throws SQLException {
-        String sql = "SELECT * FROM vw_vehicle_status ORDER BY id";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_vehicle_status");
     }
 
     @Override
     public boolean insert(VehicleStatus entity) throws SQLException {
-        String sql = "INSERT INTO vehicle_status (status_name, description, color_code) VALUES (?, ?, ?)";
-        int result = executeUpdate(sql, entity.getStatusName(), entity.getDescription(), entity.getColorCode());
-        return result > 0;
+        return procedureCaller.executeInsertVehicleStatus(
+                entity.getStatusName(),
+                entity.getDescription(),
+                entity.getColorCode()
+        );
     }
 
     @Override
     public boolean update(VehicleStatus entity) throws SQLException {
-        String sql = "UPDATE vehicle_status SET status_name = ?, description = ?, color_code = ? WHERE id = ?";
-        int result = executeUpdate(sql, entity.getStatusName(), entity.getDescription(), entity.getColorCode(), entity.getId());
-        return result > 0;
+        return procedureCaller.executeUpdateVehicleStatus(
+                entity.getId(),
+                entity.getStatusName(),
+                entity.getDescription(),
+                entity.getColorCode()
+        );
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM vehicle_status WHERE id = ?";
-        int result = executeUpdate(sql, id);
-        return result > 0;
+        return procedureCaller.executeDeleteVehicleStatus(id);
     }
 
     @Override

@@ -1,175 +1,118 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.InsuranceClaim;
 
+/**
+ * InsuranceClaimDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class InsuranceClaimDAO extends BaseDAO<InsuranceClaim> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public InsuranceClaimDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public InsuranceClaim findById(int id) throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_claims WHERE id = ?";
-        return executeQuerySingle(sql, id);
+        List<InsuranceClaim> results = viewLoader.loadViewWithCondition("vw_insurance_claims", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<InsuranceClaim> findAll() throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_claims ORDER BY claim_date DESC";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_insurance_claims");
     }
 
     public List<InsuranceClaim> findByPolicyId(int policyId) throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_claims WHERE policy_id = ? ORDER BY claim_date DESC";
-        return executeQuery(sql, policyId);
+        return viewLoader.loadViewWithCondition("vw_insurance_claims", "policy_id = ? ORDER BY claim_date DESC", policyId);
     }
 
     public List<InsuranceClaim> findByVehicleId(int vehicleId) throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_claims WHERE vehicle_id = ? ORDER BY claim_date DESC";
-        return executeQuery(sql, vehicleId);
+        return viewLoader.loadViewWithCondition("vw_insurance_claims", "vehicle_id = ? ORDER BY claim_date DESC", vehicleId);
     }
 
     public List<InsuranceClaim> findByProviderId(int providerId) throws SQLException {
-        String sql = "SELECT c.* FROM vw_insurance_claims c " +
-                "JOIN insurance_policies p ON c.policy_id = p.id " +
-                "WHERE p.provider_id = ? " +
-                "ORDER BY c.claim_date DESC";
-        return executeQuery(sql, providerId);
+        return viewLoader.loadViewWithCondition("vw_insurance_claims", "provider_id = ? ORDER BY claim_date DESC", providerId);
     }
 
     public List<InsuranceClaim> findByProviderIdAndDateRange(int providerId, LocalDate startDate, LocalDate endDate) throws SQLException {
-        String sql = "SELECT c.* FROM vw_insurance_claims c " +
-                "JOIN insurance_policies p ON c.policy_id = p.id " +
-                "WHERE p.provider_id = ? " +
-                "AND c.claim_date BETWEEN ? AND ? " +
-                "ORDER BY c.claim_date DESC";
-        return executeQuery(sql, providerId, startDate, endDate);
+        return viewLoader.loadViewWithCondition("vw_insurance_claims",
+                "provider_id = ? AND claim_date BETWEEN ? AND ? ORDER BY claim_date DESC",
+                providerId, startDate, endDate);
     }
 
     public List<InsuranceClaim> findPendingClaims() throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_claims WHERE status = 'PENDING' ORDER BY claim_date";
-        return executeQuery(sql);
+        return viewLoader.loadViewWithCondition("vw_insurance_claims", "status = 'PENDING' ORDER BY claim_date");
     }
 
     public List<InsuranceClaim> findByStatus(String status) throws SQLException {
-        String sql = "SELECT * FROM vw_insurance_claims WHERE status = ? ORDER BY claim_date DESC";
-        return executeQuery(sql, status);
+        return viewLoader.loadViewWithCondition("vw_insurance_claims", "status = ? ORDER BY claim_date DESC", status);
     }
 
     public int countByProviderId(int providerId) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM insurance_claims c " +
-                "JOIN insurance_policies p ON c.policy_id = p.id " +
-                "WHERE p.provider_id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, providerId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.countViewRowsWithCondition("vw_insurance_claims", "provider_id = ?", providerId);
     }
 
     public int countPendingByProviderId(int providerId) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM insurance_claims c " +
-                "JOIN insurance_policies p ON c.policy_id = p.id " +
-                "WHERE p.provider_id = ? AND c.status = 'PENDING'";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, providerId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.countViewRowsWithCondition("vw_insurance_claims", "provider_id = ? AND status = 'PENDING'", providerId);
     }
 
     public int countPendingClaims() throws SQLException {
-        String sql = "SELECT COUNT(*) FROM insurance_claims WHERE status = 'PENDING'";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.countViewRowsWithCondition("vw_insurance_claims", "status = 'PENDING'");
     }
 
     public int countResolvedByProviderId(int providerId) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM insurance_claims c " +
-                "JOIN insurance_policies p ON c.policy_id = p.id " +
-                "WHERE p.provider_id = ? AND c.status IN ('APPROVED', 'PAID')";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, providerId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.countViewRowsWithCondition("vw_insurance_claims", "provider_id = ? AND status IN ('APPROVED', 'PAID')", providerId);
     }
 
     @Override
     public boolean insert(InsuranceClaim entity) throws SQLException {
-        return executeProcedure("sp_submit_insurance_claim",
+        Integer claimId = procedureCaller.executeSubmitInsuranceClaim(
                 entity.getPolicyId(),
                 entity.getClaimAmount(),
                 entity.getDescription()
         );
+        if (claimId != null && claimId > 0) {
+            entity.setId(claimId);
+            return true;
+        }
+        return false;
     }
 
     public boolean approveClaim(int claimId, double approvedAmount) throws SQLException {
-        return executeProcedure("sp_approve_claim", claimId, approvedAmount);
+        return procedureCaller.executeApproveClaim(claimId, approvedAmount);
     }
 
     public boolean rejectClaim(int claimId, String rejectionReason) throws SQLException {
-        return executeProcedure("sp_reject_claim", claimId, rejectionReason);
+        return procedureCaller.executeRejectClaim(claimId, rejectionReason);
     }
 
     @Override
     public boolean update(InsuranceClaim entity) throws SQLException {
-        String sql = "UPDATE insurance_claims SET status = ?, approved_amount = ?, rejection_reason = ? WHERE id = ?";
-        int result = executeUpdate(sql, entity.getStatus(), entity.getApprovedAmount(), entity.getRejectionReason(), entity.getId());
-        return result > 0;
+        if ("APPROVED".equals(entity.getStatus())) {
+            return approveClaim(entity.getId(), entity.getApprovedAmount());
+        } else if ("REJECTED".equals(entity.getStatus())) {
+            return rejectClaim(entity.getId(), entity.getRejectionReason());
+        }
+        return false;
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM insurance_claims WHERE id = ?";
-        int result = executeUpdate(sql, id);
-        return result > 0;
+        return procedureCaller.executeDeleteInsuranceClaim(id);
     }
 
     @Override

@@ -1,69 +1,86 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.PoliceReport;
 
+/**
+ * PoliceReportDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class PoliceReportDAO extends BaseDAO<PoliceReport> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public PoliceReportDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public PoliceReport findById(int id) throws SQLException {
-        String sql = "SELECT * FROM vw_police_reports WHERE id = ?";
-        return executeQuerySingle(sql, id);
+        List<PoliceReport> results = viewLoader.loadViewWithCondition("vw_police_reports", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     public PoliceReport findByCaseNumber(String caseNumber) throws SQLException {
-        String sql = "SELECT * FROM vw_police_reports WHERE case_number = ?";
-        return executeQuerySingle(sql, caseNumber);
+        List<PoliceReport> results = viewLoader.loadViewWithCondition("vw_police_reports", "case_number = ?", caseNumber);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<PoliceReport> findAll() throws SQLException {
-        String sql = "SELECT * FROM vw_police_reports ORDER BY report_date DESC";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_police_reports");
     }
 
     public List<PoliceReport> findByVehicleId(int vehicleId) throws SQLException {
-        String sql = "SELECT * FROM vw_police_reports WHERE vehicle_id = ? ORDER BY report_date DESC";
-        return executeQuery(sql, vehicleId);
+        return viewLoader.loadViewWithCondition("vw_police_reports", "vehicle_id = ? ORDER BY report_date DESC", vehicleId);
     }
 
     public List<PoliceReport> findByReportType(String reportType) throws SQLException {
-        String sql = "SELECT * FROM vw_police_reports WHERE report_type = ? ORDER BY report_date DESC";
-        return executeQuery(sql, reportType);
+        return viewLoader.loadViewWithCondition("vw_police_reports", "report_type = ? ORDER BY report_date DESC", reportType);
     }
 
     public List<PoliceReport> findByOfficer(String officerName) throws SQLException {
-        String sql = "SELECT * FROM vw_police_reports WHERE officer_name ILIKE ? ORDER BY report_date DESC";
-        return executeQuery(sql, "%" + officerName + "%");
+        return viewLoader.loadViewWithCondition("vw_police_reports", "officer_name ILIKE ? ORDER BY report_date DESC", "%" + officerName + "%");
     }
 
     public List<PoliceReport> findByDateRange(LocalDate startDate, LocalDate endDate) throws SQLException {
-        String sql = "SELECT * FROM vw_police_reports WHERE report_date BETWEEN ? AND ? ORDER BY report_date DESC";
-        return executeQuery(sql, startDate, endDate);
+        return viewLoader.loadViewWithCondition("vw_police_reports", "report_date BETWEEN ? AND ? ORDER BY report_date DESC", startDate, endDate);
     }
 
     @Override
     public boolean insert(PoliceReport entity) throws SQLException {
-        return executeProcedure("sp_create_police_report",
+        Integer reportId = procedureCaller.executeCreatePoliceReport(
                 entity.getVehicleId(),
-                entity.getReportDate(),
+                java.sql.Date.valueOf(entity.getReportDate()),
                 entity.getReportType(),
                 entity.getDescription(),
                 entity.getOfficerName(),
                 entity.getBadgeNumber(),
-                entity.getCaseNumber()
+                entity.getCaseNumber(),
+                entity.getLocation(),
+                entity.getLatitude(),
+                entity.getLongitude()
         );
+        if (reportId != null && reportId > 0) {
+            entity.setId(reportId);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public boolean update(PoliceReport entity) throws SQLException {
-        return executeProcedure("sp_update_police_report",
+        return procedureCaller.executeUpdatePoliceReport(
                 entity.getId(),
                 entity.getVehicleId(),
                 entity.getReportDate(),
@@ -71,32 +88,18 @@ public class PoliceReportDAO extends BaseDAO<PoliceReport> {
                 entity.getDescription(),
                 entity.getOfficerName(),
                 entity.getBadgeNumber(),
-                entity.getCaseNumber()
+                entity.getCaseNumber(),
+                entity.getLocation()
         );
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        return executeProcedure("sp_delete_police_report", id);
+        return procedureCaller.executeDeletePoliceReport(id);
     }
 
     public int countReportsByType(String reportType) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM police_reports WHERE report_type = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, reportType);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.countViewRowsWithCondition("vw_police_reports", "report_type = ?", reportType);
     }
 
     @Override
@@ -116,6 +119,7 @@ public class PoliceReportDAO extends BaseDAO<PoliceReport> {
         report.setOfficerName(rs.getString("officer_name"));
         report.setBadgeNumber(rs.getString("badge_number"));
         report.setCaseNumber(rs.getString("case_number"));
+        report.setLocation(rs.getString("location"));
 
         if (rs.getTimestamp("created_at") != null) {
             report.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());

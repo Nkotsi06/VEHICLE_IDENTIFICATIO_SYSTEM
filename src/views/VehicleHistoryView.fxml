@@ -1,57 +1,112 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.VehicleHistoryController">
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.VehicleHistoryController"
+            stylesheets="@../css/application.css" styleClass="border-pane">
 
     <top>
-        <VBox>
-            <fx:include source="MenuBarComponent.fxml"/>
-        </VBox>
+        <fx:include source="MenuBarComponent.fxml"/>
     </top>
 
     <center>
-        <VBox spacing="15" style="-fx-padding: 20;">
-            <Label text="Vehicle History" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
+            <VBox spacing="20" alignment="TOP_CENTER"
+                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
 
-            <GridPane hgap="10" vgap="10">
-                <Label text="Vehicle:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                <ComboBox fx:id="vehicleComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="300"/>
+                <Label text="Vehicle History" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
+                <Label text="View vehicle event history and timeline" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
 
-                <Label text="Start Date:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                <DatePicker fx:id="startDatePicker" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                <Separator/>
 
-                <Label text="End Date:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                <DatePicker fx:id="endDatePicker" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-            </GridPane>
+                <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
 
-            <HBox spacing="10">
-                <Button fx:id="searchButton" text="Search" style="-fx-background-color: #2980b9; -fx-text-fill: white;"/>
-                <Button fx:id="refreshButton" text="Refresh"/>
-                <Button fx:id="exportButton" text="Export CSV"/>
-            </HBox>
+                <!-- Search Filters -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="1000" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Search Filters" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-            <Separator/>
+                        <GridPane hgap="15" vgap="12" alignment="CENTER">
+                            <columnConstraints>
+                                <ColumnConstraints halignment="RIGHT" minWidth="100"/>
+                                <ColumnConstraints minWidth="250"/>
+                                <ColumnConstraints halignment="RIGHT" minWidth="100"/>
+                                <ColumnConstraints minWidth="250"/>
+                            </columnConstraints>
 
-            <Label fx:id="vehicleInfoLabel" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
-            <Label fx:id="totalEventsLabel" style="-fx-text-fill: #7f8c8d;"/>
+                            <Label text="Vehicle:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="vehicleComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="300"/>
 
-            <TableView fx:id="historyTable">
-                <columns>
-                    <TableColumn fx:id="eventTypeColumn" text="Event Type" prefWidth="120"/>
-                    <TableColumn fx:id="eventDateColumn" text="Date" prefWidth="120"/>
-                    <TableColumn fx:id="descriptionColumn" text="Description" prefWidth="300"/>
-                    <TableColumn fx:id="detailsColumn" text="Details" prefWidth="300"/>
-                </columns>
-            </TableView>
-        </VBox>
+                            <Label text="Start Date:" GridPane.rowIndex="0" GridPane.columnIndex="2" style="-fx-font-weight: bold;"/>
+                            <DatePicker fx:id="startDatePicker" GridPane.rowIndex="0" GridPane.columnIndex="3" prefWidth="200"/>
+
+                            <Label text="End Date:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <DatePicker fx:id="endDatePicker" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="200"/>
+                        </GridPane>
+
+                        <HBox alignment="CENTER">
+                            <Button fx:id="searchButton" text="Search" styleClass="button-primary" prefWidth="100">
+                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                            </Button>
+                            <Button fx:id="refreshButton" text="Refresh" styleClass="button-info" prefWidth="100">
+                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                            </Button>
+                            <Button fx:id="exportButton" text="Export CSV" styleClass="button-success" prefWidth="100">
+                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                            </Button>
+                            <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100">
+                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                            </Button>
+                        </HBox>
+                    </VBox>
+                </HBox>
+
+                <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
+
+                <!-- Vehicle Info -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="1000" styleClass="profile-card" alignment="CENTER">
+                        <Label fx:id="vehicleInfoLabel" style="-fx-font-size: 14px; -fx-font-weight: bold;" alignment="CENTER" maxWidth="Infinity"/>
+                        <Label fx:id="totalEventsLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
+                    </VBox>
+                </HBox>
+
+                <!-- History Table -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="1200" styleClass="profile-edit-card" alignment="CENTER">
+                        <TableView fx:id="historyTable" prefHeight="350" minHeight="250" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
+                            <columns>
+                                <TableColumn fx:id="eventTypeColumn" text="Event Type" minWidth="120" maxWidth="160"/>
+                                <TableColumn fx:id="eventDateColumn" text="Date" minWidth="120" maxWidth="160"/>
+                                <TableColumn fx:id="descriptionColumn" text="Description" minWidth="250"/>
+                                <TableColumn fx:id="detailsColumn" text="Details" minWidth="200"/>
+                            </columns>
+                            <placeholder>
+                                <Label text="No history events found" styleClass="status-text"/>
+                            </placeholder>
+                        </TableView>
+
+                        <HBox alignment="CENTER">
+                            <Pagination fx:id="historyPagination" pageCount="1" maxPageIndicatorCount="10"/>
+                        </HBox>
+                    </VBox>
+                </HBox>
+
+                <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
+
+                <HBox alignment="CENTER">
+                    <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-secondary" prefWidth="150"/>
+                </HBox>
+
+            </VBox>
+        </ScrollPane>
     </center>
 
     <bottom>
-        <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
-            <Button fx:id="backButton" text="Back"/>
-        </HBox>
         <fx:include source="FooterComponent.fxml"/>
     </bottom>
 </BorderPane>

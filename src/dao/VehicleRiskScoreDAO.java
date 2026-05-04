@@ -1,78 +1,85 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.VehicleRiskScore;
 
+/**
+ * VehicleRiskScoreDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class VehicleRiskScoreDAO extends BaseDAO<VehicleRiskScore> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public VehicleRiskScoreDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public VehicleRiskScore findById(int id) throws SQLException {
-        String sql = "SELECT * FROM vw_vehicle_risk_score WHERE id = ?";
-        return executeQuerySingle(sql, id);
+        List<VehicleRiskScore> results = viewLoader.loadViewWithCondition("vw_vehicle_risk_score", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     public VehicleRiskScore findByVehicleId(int vehicleId) throws SQLException {
-        String sql = "SELECT * FROM vw_vehicle_risk_score WHERE vehicle_id = ?";
-        return executeQuerySingle(sql, vehicleId);
+        List<VehicleRiskScore> results = viewLoader.loadViewWithCondition("vw_vehicle_risk_score", "vehicle_id = ?", vehicleId);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<VehicleRiskScore> findAll() throws SQLException {
-        String sql = "SELECT * FROM vw_vehicle_risk_score ORDER BY risk_score DESC";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_vehicle_risk_score");
     }
 
     public List<VehicleRiskScore> findHighRiskVehicles() throws SQLException {
-        String sql = "SELECT * FROM vw_vehicle_risk_score WHERE risk_level IN ('HIGH', 'CRITICAL') ORDER BY risk_score DESC";
-        return executeQuery(sql);
+        return viewLoader.loadViewWithCondition("vw_vehicle_risk_score", "risk_level IN ('HIGH', 'CRITICAL') ORDER BY risk_score DESC");
     }
 
     public void calculateRiskScore(int vehicleId) throws SQLException {
-        String sql = "CALL sp_calculate_vehicle_risk_score_for_vehicle(?)";
-        executeUpdate(sql, vehicleId);
+        procedureCaller.executeCalculateVehicleRiskScoreForVehicle(vehicleId);
     }
 
     public void calculateAllRiskScores() throws SQLException {
-        String sql = "CALL sp_calculate_vehicle_risk_score()";
-        executeUpdate(sql);
+        procedureCaller.executeCalculateAllVehicleRiskScores();
     }
 
     @Override
     public boolean insert(VehicleRiskScore entity) throws SQLException {
-        String sql = "INSERT INTO vehicle_risk_scores (vehicle_id, risk_score, risk_factors, last_calculation_date) VALUES (?, ?, ?, ?)";
-        int result = executeUpdate(sql,
+        return procedureCaller.executeInsertVehicleRiskScore(
                 entity.getVehicleId(),
                 entity.getRiskScore(),
                 entity.getRiskFactors(),
                 entity.getLastCalculationDate()
         );
-        return result > 0;
     }
 
     @Override
     public boolean update(VehicleRiskScore entity) throws SQLException {
-        String sql = "UPDATE vehicle_risk_scores SET risk_score = ?, risk_factors = ?, last_calculation_date = ? WHERE vehicle_id = ?";
-        int result = executeUpdate(sql,
+        return procedureCaller.executeUpdateVehicleRiskScore(
+                entity.getVehicleId(),
                 entity.getRiskScore(),
                 entity.getRiskFactors(),
-                entity.getLastCalculationDate(),
-                entity.getVehicleId()
+                entity.getLastCalculationDate()
         );
-        return result > 0;
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM vehicle_risk_scores WHERE id = ?";
-        int result = executeUpdate(sql, id);
-        return result > 0;
+        return procedureCaller.executeDeleteVehicleRiskScore(id);
+    }
+
+    public boolean deleteByVehicleId(int vehicleId) throws SQLException {
+        return procedureCaller.executeDeleteVehicleRiskScoreByVehicle(vehicleId);
     }
 
     @Override

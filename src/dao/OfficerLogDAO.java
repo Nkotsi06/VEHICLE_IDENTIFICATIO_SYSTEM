@@ -1,56 +1,64 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.OfficerLog;
 
+/**
+ * OfficerLogDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class OfficerLogDAO extends BaseDAO<OfficerLog> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public OfficerLogDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public OfficerLog findById(int id) throws SQLException {
-        String sql = "SELECT * FROM vw_officer_logs WHERE id = ?";
-        return executeQuerySingle(sql, id);
+        List<OfficerLog> results = viewLoader.loadViewWithCondition("vw_officer_logs", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<OfficerLog> findAll() throws SQLException {
-        String sql = "SELECT * FROM vw_officer_logs ORDER BY timestamp DESC";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_officer_logs");
     }
 
     public List<OfficerLog> findByOfficerName(String officerName) throws SQLException {
-        String sql = "SELECT * FROM vw_officer_logs WHERE officer_name ILIKE ? ORDER BY timestamp DESC";
-        return executeQuery(sql, "%" + officerName + "%");
+        return viewLoader.loadViewWithCondition("vw_officer_logs", "officer_name ILIKE ? ORDER BY timestamp DESC", "%" + officerName + "%");
     }
 
     public List<OfficerLog> findByBadgeNumber(String badgeNumber) throws SQLException {
-        String sql = "SELECT * FROM vw_officer_logs WHERE badge_number = ? ORDER BY timestamp DESC";
-        return executeQuery(sql, badgeNumber);
+        return viewLoader.loadViewWithCondition("vw_officer_logs", "badge_number = ? ORDER BY timestamp DESC", badgeNumber);
     }
 
     public List<OfficerLog> findByVehicleId(int vehicleId) throws SQLException {
-        String sql = "SELECT * FROM vw_officer_logs WHERE vehicle_id = ? ORDER BY timestamp DESC";
-        return executeQuery(sql, vehicleId);
+        return viewLoader.loadViewWithCondition("vw_officer_logs", "vehicle_id = ? ORDER BY timestamp DESC", vehicleId);
     }
 
     public List<OfficerLog> findByDateRange(LocalDateTime startDate, LocalDateTime endDate) throws SQLException {
-        String sql = "SELECT * FROM vw_officer_logs WHERE timestamp BETWEEN ? AND ? ORDER BY timestamp DESC";
-        return executeQuery(sql, startDate, endDate);
+        return viewLoader.loadViewWithCondition("vw_officer_logs", "timestamp BETWEEN ? AND ? ORDER BY timestamp DESC", startDate, endDate);
     }
 
     public List<OfficerLog> findByAction(String action) throws SQLException {
-        String sql = "SELECT * FROM vw_officer_logs WHERE action ILIKE ? ORDER BY timestamp DESC";
-        return executeQuery(sql, "%" + action + "%");
+        return viewLoader.loadViewWithCondition("vw_officer_logs", "action ILIKE ? ORDER BY timestamp DESC", "%" + action + "%");
     }
 
     @Override
     public boolean insert(OfficerLog entity) throws SQLException {
-        return executeProcedure("sp_log_officer_action",
+        return procedureCaller.executeLogOfficerAction(
                 entity.getOfficerName(),
                 entity.getBadgeNumber(),
                 entity.getAction(),
@@ -60,22 +68,17 @@ public class OfficerLogDAO extends BaseDAO<OfficerLog> {
 
     @Override
     public boolean update(OfficerLog entity) throws SQLException {
-        String sql = "UPDATE officer_logs SET action = ? WHERE id = ?";
-        int result = executeUpdate(sql, entity.getAction(), entity.getId());
-        return result > 0;
+        // Officer logs are typically immutable
+        return false;
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM officer_logs WHERE id = ?";
-        int result = executeUpdate(sql, id);
-        return result > 0;
+        return procedureCaller.executeDeleteOfficerLog(id);
     }
 
     public boolean deleteOldLogs(LocalDateTime beforeDate) throws SQLException {
-        String sql = "DELETE FROM officer_logs WHERE timestamp < ?";
-        int result = executeUpdate(sql, beforeDate);
-        return result > 0;
+        return procedureCaller.executeDeleteOldOfficerLogs(beforeDate);
     }
 
     @Override

@@ -1,254 +1,128 @@
 package dao;
 
-import java.sql.*;
+import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
+
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.PoliceOfficer;
 
+/**
+ * PoliceOfficerDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0 */
 public class PoliceOfficerDAO extends BaseDAO<PoliceOfficer> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public PoliceOfficerDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public PoliceOfficer findById(int id) throws SQLException {
-        String sql = "SELECT * FROM vw_police_officers WHERE id = ?";
-        return executeQuerySingle(sql, id);
+        List<PoliceOfficer> results = viewLoader.loadViewWithCondition("vw_police_officers", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     public PoliceOfficer findByUserId(int userId) throws SQLException {
-        String sql = "SELECT * FROM vw_police_officers WHERE user_id = ?";
-        return executeQuerySingle(sql, userId);
+        List<PoliceOfficer> results = viewLoader.loadViewWithCondition("vw_police_officers", "user_id = ?", userId);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     public PoliceOfficer findByBadgeNumber(String badgeNumber) throws SQLException {
-        String sql = "SELECT * FROM vw_police_officers WHERE badge_number = ?";
-        return executeQuerySingle(sql, badgeNumber);
+        List<PoliceOfficer> results = viewLoader.loadViewWithCondition("vw_police_officers", "badge_number = ?", badgeNumber);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<PoliceOfficer> findAll() throws SQLException {
-        String sql = "SELECT * FROM vw_police_officers ORDER BY rank_level, full_name";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_police_officers");
     }
 
     public List<PoliceOfficer> findByRank(String rank) throws SQLException {
-        String sql = "SELECT * FROM vw_police_officers WHERE rank = ? ORDER BY full_name";
-        return executeQuery(sql, rank);
+        return viewLoader.loadViewWithCondition("vw_police_officers", "rank = ? ORDER BY full_name", rank);
     }
 
     public List<PoliceOfficer> findByDepartment(String department) throws SQLException {
-        String sql = "SELECT * FROM vw_police_officers WHERE department = ? ORDER BY full_name";
-        return executeQuery(sql, department);
+        return viewLoader.loadViewWithCondition("vw_police_officers", "department = ? ORDER BY full_name", department);
     }
 
     @Override
     public boolean insert(PoliceOfficer entity) throws SQLException {
-        String sql = "INSERT INTO police_officers (user_id, badge_number, rank, rank_level, department, station_assigned, hire_date, supervisor_name, phone, address) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        int result = executeUpdate(sql,
+        Integer officerId = procedureCaller.executeAddPoliceOfficer(
                 entity.getUserId(),
                 entity.getBadgeNumber(),
                 entity.getRank(),
-                entity.getRankLevel(),
                 entity.getDepartment(),
                 entity.getStationAssigned(),
                 entity.getHireDate() != null ? Date.valueOf(entity.getHireDate()) : null,
                 entity.getSupervisorName(),
-                entity.getPhone(),
-                entity.getAddress()
+                entity.getPhone()
         );
-        return result > 0;
+        if (officerId != null && officerId > 0) {
+            entity.setId(officerId);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public boolean update(PoliceOfficer entity) throws SQLException {
-        String sql = "UPDATE police_officers SET rank = ?, rank_level = ?, department = ?, station_assigned = ?, " +
-                "supervisor_name = ?, phone = ?, address = ? WHERE id = ?";
-        int result = executeUpdate(sql,
+        return procedureCaller.executeUpdatePoliceOfficer(
+                entity.getId(),
                 entity.getRank(),
                 entity.getRankLevel(),
                 entity.getDepartment(),
                 entity.getStationAssigned(),
                 entity.getSupervisorName(),
                 entity.getPhone(),
-                entity.getAddress(),
-                entity.getId()
+                entity.getAddress()
         );
-
-        if (result > 0) {
-            String updateUserSql = "UPDATE users SET full_name = ?, email = ?, phone = ?, address = ? WHERE id = ?";
-            executeUpdate(updateUserSql,
-                    entity.getFullName(),
-                    entity.getEmail(),
-                    entity.getPhone(),
-                    entity.getAddress(),
-                    entity.getUserId()
-            );
-        }
-
-        return result > 0;
     }
 
     public boolean updateRank(int officerId, String newRank, int newRankLevel) throws SQLException {
-        String sql = "UPDATE police_officers SET rank = ?, rank_level = ? WHERE id = ?";
-        int result = executeUpdate(sql, newRank, newRankLevel, officerId);
-        return result > 0;
+        return procedureCaller.executeUpdatePoliceOfficerRank(officerId, newRank, newRankLevel);
     }
 
-    /**
-     * Update police officer's profile image path
-     * @param officerId The ID of the police officer
-     * @param imagePath The file path to the profile image
-     * @return true if update was successful, false otherwise
-     */
     public boolean updateProfileImage(int officerId, String imagePath) throws SQLException {
-        String sql = "UPDATE police_officers SET profile_image = ? WHERE id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, imagePath);
-            ps.setInt(2, officerId);
-            int result = ps.executeUpdate();
-
-            // Also log the activity - could be handled by trigger
-            System.out.println("Profile image updated for officer ID: " + officerId + " - Path: " + imagePath);
-
-            return result > 0;
-        } finally {
-            closeResources(null, ps, conn);
-        }
+        return procedureCaller.executeUpdatePoliceOfficerProfileImage(officerId, imagePath);
     }
 
-    /**
-     * Get profile image path for a police officer
-     * @param officerId The ID of the police officer
-     * @return The file path to the profile image, or null if not set
-     */
     public String getProfileImagePath(int officerId) throws SQLException {
-        String sql = "SELECT profile_image FROM police_officers WHERE id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, officerId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getString("profile_image");
-            }
-            return null;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        PoliceOfficer officer = findById(officerId);
+        return officer != null ? officer.getProfileImage() : null;
     }
 
-    /**
-     * Clear profile image for a police officer
-     * @param officerId The ID of the police officer
-     * @return true if update was successful, false otherwise
-     */
     public boolean clearProfileImage(int officerId) throws SQLException {
-        String sql = "UPDATE police_officers SET profile_image = NULL WHERE id = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, officerId);
-            return ps.executeUpdate() > 0;
-        } finally {
-            closeResources(null, ps, conn);
-        }
+        return procedureCaller.executeClearPoliceOfficerProfileImage(officerId);
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM police_officers WHERE id = ?";
-        int result = executeUpdate(sql, id);
-        return result > 0;
+        return procedureCaller.executeDeletePoliceOfficer(id);
     }
 
     public List<String> getAllRanks() throws SQLException {
-        List<String> ranks = new ArrayList<>();
-        String sql = "SELECT rank_name FROM police_ranks ORDER BY rank_level";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                ranks.add(rs.getString("rank_name"));
-            }
-            return ranks;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.loadStringListFromView("police_ranks", "rank_name", "rank_level");
     }
 
     public List<String> getAllDepartments() throws SQLException {
-        List<String> departments = new ArrayList<>();
-        String sql = "SELECT department_name FROM police_departments ORDER BY department_name";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                departments.add(rs.getString("department_name"));
-            }
-            return departments;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.loadStringListFromView("police_departments", "department_name", "department_name");
     }
 
     public boolean requiresApprovalForRank(String rankName) throws SQLException {
-        String sql = "SELECT requires_approval FROM police_ranks WHERE rank_name = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, rankName);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getBoolean("requires_approval");
-            }
-            return false;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.getBooleanValueFromTable("police_ranks", "requires_approval", "rank_name = ?", rankName);
     }
 
-    /**
-     * Get rank level for a given rank name
-     * @param rankName The name of the rank
-     * @return The rank level number, or 0 if not found
-     */
     public int getRankLevel(String rankName) throws SQLException {
-        String sql = "SELECT rank_level FROM police_ranks WHERE rank_name = ?";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, rankName);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("rank_level");
-            }
-            return 0;
-        } finally {
-            closeResources(rs, ps, conn);
-        }
+        return viewLoader.getIntValueFromTable("police_ranks", "rank_level", "rank_name = ?", rankName);
     }
 
     @Override

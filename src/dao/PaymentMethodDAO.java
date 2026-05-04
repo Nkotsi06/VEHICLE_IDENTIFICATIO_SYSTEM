@@ -1,48 +1,56 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import database.ProcedureCaller;
+import database.ViewLoader;
 import models.PaymentMethod;
 
+/**
+ * PaymentMethodDAO - Uses ONLY stored procedures and views for all operations.
+ *
+ * @author Vehicle Identification System Team
+ * @version 2.0
+ */
 public class PaymentMethodDAO extends BaseDAO<PaymentMethod> {
+
+    private final ProcedureCaller procedureCaller;
+    private final ViewLoader viewLoader;
+
+    public PaymentMethodDAO() {
+        this.procedureCaller = new ProcedureCaller();
+        this.viewLoader = new ViewLoader();
+    }
 
     @Override
     public PaymentMethod findById(int id) throws SQLException {
-        String sql = "SELECT * FROM payment_methods WHERE id = ?";
-        return executeQuerySingle(sql, id);
+        List<PaymentMethod> results = viewLoader.loadViewWithCondition("vw_payment_methods", "id = ?", id);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public List<PaymentMethod> findAll() throws SQLException {
-        String sql = "SELECT * FROM payment_methods ORDER BY wallet_id, is_default DESC";
-        return executeQuery(sql);
+        return viewLoader.loadView("vw_payment_methods");
     }
 
     public List<PaymentMethod> findByWalletId(int walletId) throws SQLException {
-        String sql = "SELECT * FROM payment_methods WHERE wallet_id = ? ORDER BY is_default DESC, created_at DESC";
-        return executeQuery(sql, walletId);
+        return viewLoader.loadViewWithCondition("vw_payment_methods", "wallet_id = ? ORDER BY is_default DESC", walletId);
     }
 
     public List<PaymentMethod> findByCustomerId(int customerId) throws SQLException {
-        String sql = "SELECT pm.* FROM payment_methods pm " +
-                "JOIN digital_wallets dw ON pm.wallet_id = dw.id " +
-                "WHERE dw.customer_id = ? ORDER BY pm.is_default DESC";
-        return executeQuery(sql, customerId);
+        return viewLoader.loadViewWithCondition("vw_payment_methods", "customer_id = ? ORDER BY is_default DESC", customerId);
     }
 
     public PaymentMethod findDefaultByWalletId(int walletId) throws SQLException {
-        String sql = "SELECT * FROM payment_methods WHERE wallet_id = ? AND is_default = true";
-        return executeQuerySingle(sql, walletId);
+        List<PaymentMethod> results = viewLoader.loadViewWithCondition("vw_payment_methods", "wallet_id = ? AND is_default = true", walletId);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public boolean insert(PaymentMethod entity) throws SQLException {
-        String sql = "INSERT INTO payment_methods (wallet_id, card_last_four, card_type, expiry_month, expiry_year, is_default) VALUES (?, ?, ?, ?, ?, ?)";
-        int result = executeUpdate(sql,
+        Integer methodId = procedureCaller.executeInsertPaymentMethod(
                 entity.getWalletId(),
                 entity.getCardLastFour(),
                 entity.getCardType(),
@@ -50,12 +58,15 @@ public class PaymentMethodDAO extends BaseDAO<PaymentMethod> {
                 entity.getExpiryYear(),
                 entity.isDefault()
         );
-        return result > 0;
+        if (methodId != null && methodId > 0) {
+            entity.setId(methodId);
+            return true;
+        }
+        return false;
     }
 
     public int insertAndGetId(PaymentMethod entity) throws SQLException {
-        String sql = "INSERT INTO payment_methods (wallet_id, card_last_four, card_type, expiry_month, expiry_year, is_default) VALUES (?, ?, ?, ?, ?, ?)";
-        return executeUpdateWithGeneratedKeys(sql,
+        Integer methodId = procedureCaller.executeInsertPaymentMethod(
                 entity.getWalletId(),
                 entity.getCardLastFour(),
                 entity.getCardType(),
@@ -63,66 +74,37 @@ public class PaymentMethodDAO extends BaseDAO<PaymentMethod> {
                 entity.getExpiryYear(),
                 entity.isDefault()
         );
+        if (methodId != null && methodId > 0) {
+            entity.setId(methodId);
+            return methodId;
+        }
+        return -1;
     }
 
     public boolean setAsDefault(int paymentMethodId, int walletId) throws SQLException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-
-        try {
-            conn = getConnection();
-            conn.setAutoCommit(false);
-
-            String clearDefaultSql = "UPDATE payment_methods SET is_default = false WHERE wallet_id = ?";
-            ps = conn.prepareStatement(clearDefaultSql);
-            ps.setInt(1, walletId);
-            ps.executeUpdate();
-            ps.close();
-
-            String setDefaultSql = "UPDATE payment_methods SET is_default = true WHERE id = ?";
-            ps = conn.prepareStatement(setDefaultSql);
-            ps.setInt(1, paymentMethodId);
-            ps.executeUpdate();
-
-            conn.commit();
-            return true;
-
-        } catch (SQLException e) {
-            if (conn != null) {
-                conn.rollback();
-            }
-            throw e;
-        } finally {
-            if (ps != null) ps.close();
-            if (conn != null) conn.close();
-        }
+        // This operation needs to be transactional - clear others first, then set this one
+        return procedureCaller.executeSetDefaultPaymentMethod(paymentMethodId, walletId);
     }
 
     @Override
     public boolean update(PaymentMethod entity) throws SQLException {
-        String sql = "UPDATE payment_methods SET card_last_four = ?, card_type = ?, expiry_month = ?, expiry_year = ?, is_default = ? WHERE id = ?";
-        int result = executeUpdate(sql,
+        return procedureCaller.executeUpdatePaymentMethod(
+                entity.getId(),
                 entity.getCardLastFour(),
                 entity.getCardType(),
                 entity.getExpiryMonth(),
                 entity.getExpiryYear(),
-                entity.isDefault(),
-                entity.getId()
+                entity.isDefault()
         );
-        return result > 0;
     }
 
     @Override
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM payment_methods WHERE id = ?";
-        int result = executeUpdate(sql, id);
-        return result > 0;
+        return procedureCaller.executeDeletePaymentMethod(id);
     }
 
     public boolean deleteByWalletId(int walletId) throws SQLException {
-        String sql = "DELETE FROM payment_methods WHERE wallet_id = ?";
-        int result = executeUpdate(sql, walletId);
-        return result > 0;
+        return procedureCaller.executeDeletePaymentMethodsByWallet(walletId);
     }
 
     @Override

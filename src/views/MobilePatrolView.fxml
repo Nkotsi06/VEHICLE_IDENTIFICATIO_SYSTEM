@@ -5,115 +5,170 @@
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MobilePatrolController">
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MobilePatrolController"
+            stylesheets="@../css/application.css" styleClass="border-pane">
 
     <top>
-        <VBox>
-            <fx:include source="MenuBarComponent.fxml"/>
-        </VBox>
+        <fx:include source="MenuBarComponent.fxml"/>
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="true">
-            <VBox spacing="20" style="-fx-padding: 20;">
-                <Label text="Mobile Patrol Integration" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-                <Label text="Coordinate and track mobile patrol units" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
+            <VBox spacing="20" alignment="TOP_CENTER"
+                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
+
+                <!-- Title Section -->
+                <Label text="Mobile Patrol Integration" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
+                <Label text="Coordinate and track mobile patrol units" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
 
                 <Separator/>
 
+                <!-- Progress Indicator -->
                 <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
 
-                <TitledPane text="Unit Control" expanded="true" style="-fx-font-weight: bold;">
-                    <GridPane hgap="10" vgap="10" style="-fx-padding: 10;">
-                        <Label text="Select Unit:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <ComboBox fx:id="unitComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250"/>
-                        <Button fx:id="syncButton" text="Sync Data" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;">
-                            <effect>
-                                <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                            </effect>
-                        </Button>
-                        <Button fx:id="refreshButton" text="Refresh" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                        <Button fx:id="fadeButton" text="Animate" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
-                    </GridPane>
-                </TitledPane>
+                <!-- Unit Control Section -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="900" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Unit Control" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+
+                        <GridPane hgap="10" vgap="10" alignment="CENTER">
+                            <columnConstraints>
+                                <ColumnConstraints halignment="RIGHT" minWidth="80"/>
+                                <ColumnConstraints minWidth="200"/>
+                            </columnConstraints>
+
+                            <Label text="Select Unit:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="unitComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250"/>
+                        </GridPane>
+
+                        <HBox alignment="CENTER">
+                            <Button fx:id="syncButton" text="Sync Data" styleClass="button-info" prefWidth="100">
+                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                            </Button>
+                            <Button fx:id="refreshButton" text="Refresh" styleClass="button-primary" prefWidth="90"/>
+                            <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="90">
+                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                            </Button>
+                        </HBox>
+                    </VBox>
+                </HBox>
 
                 <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
-                <GridPane hgap="20" vgap="15" style="-fx-background-color: #f8f9fa; -fx-padding: 20; -fx-border-radius: 10;">
-                    <Label text="Status:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                    <Label fx:id="unitStatusLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-font-weight: bold;"/>
+                <!-- Unit Status Card -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="900" styleClass="profile-card" alignment="CENTER">
+                        <Label text="Unit Status" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                    <Label text="Location:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                    <Label fx:id="unitLocationLabel" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                        <GridPane hgap="20" vgap="15" alignment="CENTER">
+                            <columnConstraints>
+                                <ColumnConstraints halignment="RIGHT" minWidth="100"/>
+                                <ColumnConstraints minWidth="200"/>
+                                <ColumnConstraints halignment="RIGHT" minWidth="100"/>
+                                <ColumnConstraints minWidth="200"/>
+                            </columnConstraints>
 
-                    <Label text="Last Sync:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                    <Label fx:id="lastSyncLabel" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                            <Label text="Status:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="unitStatusLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-text-fill: #27ae60; -fx-font-weight: bold;"/>
 
-                    <Label text="Battery Level:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                    <ProgressBar fx:id="batteryProgress" prefWidth="150" progress="0"/>
-                </GridPane>
+                            <Label text="Location:" GridPane.rowIndex="0" GridPane.columnIndex="2" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="unitLocationLabel" GridPane.rowIndex="0" GridPane.columnIndex="3" styleClass="status-text"/>
+
+                            <Label text="Last Sync:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="lastSyncLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" styleClass="status-text"/>
+
+                            <Label text="Battery Level:" GridPane.rowIndex="1" GridPane.columnIndex="2" style="-fx-font-weight: bold;"/>
+                            <ProgressBar fx:id="batteryProgress" prefWidth="150" progress="0"/>
+                        </GridPane>
+                    </VBox>
+                </HBox>
 
                 <Separator/>
 
-                <TitledPane text="Update Location" expanded="true" style="-fx-font-weight: bold;">
-                    <GridPane hgap="15" vgap="10" style="-fx-padding: 15;">
-                        <Label text="Latitude:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <TextField fx:id="latitudeField" promptText="Latitude" prefWidth="150"/>
+                <!-- Update Location Section -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="900" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Update Location" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                        <Label text="Longitude:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                        <TextField fx:id="longitudeField" promptText="Longitude" prefWidth="150"/>
+                        <GridPane hgap="15" vgap="10" alignment="CENTER">
+                            <Label text="Latitude:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="latitudeField" promptText="Latitude" prefWidth="150"/>
 
-                        <Button fx:id="updateLocationButton" text="Update Location" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                    </GridPane>
-                </TitledPane>
+                            <Label text="Longitude:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="longitudeField" promptText="Longitude" prefWidth="150"/>
+                        </GridPane>
 
-                <TitledPane text="Nearby Stolen Vehicles" expanded="true" style="-fx-font-weight: bold;">
-                    <VBox spacing="10" style="-fx-padding: 10;">
-                        <TableView fx:id="nearbyStolenTable" prefHeight="200">
+                        <HBox alignment="CENTER">
+                            <Button fx:id="updateLocationButton" text="Update Location" styleClass="button-success" prefWidth="130">
+                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                            </Button>
+                            <Button fx:id="locateButton" text="Locate Unit" styleClass="button-info" prefWidth="100">
+                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                            </Button>
+                        </HBox>
+                    </VBox>
+                </HBox>
+
+                <!-- Nearby Stolen Vehicles -->
+                <HBox alignment="CENTER">
+                    <VBox maxWidth="1000" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Nearby Stolen Vehicles" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+
+                        <TableView fx:id="nearbyStolenTable" prefHeight="200" minHeight="150" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
                             <columns>
-                                <TableColumn fx:id="regColumn" text="Registration" prefWidth="120"/>
-                                <TableColumn fx:id="makeColumn" text="Make" prefWidth="100"/>
-                                <TableColumn fx:id="modelColumn" text="Model" prefWidth="100"/>
-                                <TableColumn fx:id="distanceColumn" text="Distance (km)" prefWidth="100"/>
-                                <TableColumn fx:id="theftDateColumn" text="Theft Date" prefWidth="120"/>
+                                <TableColumn fx:id="regColumn" text="Registration" minWidth="100" maxWidth="130"/>
+                                <TableColumn fx:id="makeColumn" text="Make" minWidth="80" maxWidth="110"/>
+                                <TableColumn fx:id="modelColumn" text="Model" minWidth="80" maxWidth="110"/>
+                                <TableColumn fx:id="distanceColumn" text="Distance (km)" minWidth="80" maxWidth="110"/>
+                                <TableColumn fx:id="theftDateColumn" text="Theft Date" minWidth="100" maxWidth="130"/>
                             </columns>
-                            <columnResizePolicy>
-                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                            </columnResizePolicy>
                             <placeholder>
-                                <Label text="No stolen vehicles nearby" style="-fx-text-fill: #7f8c8d;"/>
+                                <Label text="No stolen vehicles nearby" styleClass="status-text"/>
                             </placeholder>
                         </TableView>
-                        <Pagination fx:id="stolenPagination" pageCount="1" maxPageIndicatorCount="5"/>
+                        <HBox alignment="CENTER">
+                            <Pagination fx:id="stolenPagination" pageCount="1" maxPageIndicatorCount="5"/>
+                        </HBox>
                     </VBox>
-                </TitledPane>
+                </HBox>
 
-                <SplitPane dividerPositions="0.5">
-                    <VBox spacing="10">
-                        <Label text="BOLO Alerts" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-                        <ListView fx:id="boloAlertsList" prefHeight="150"/>
+                <!-- Alerts and Sync -->
+                <HBox spacing="20" alignment="CENTER">
+                    <VBox spacing="10" alignment="CENTER" HBox.hgrow="ALWAYS">
+                        <VBox styleClass="profile-edit-card" alignment="CENTER">
+                            <Label text="BOLO Alerts" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+                            <ListView fx:id="boloAlertsList" prefHeight="150" maxWidth="Infinity"/>
+                        </VBox>
                     </VBox>
-                    <VBox spacing="10">
-                        <Label text="Pending Sync" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-                        <ListView fx:id="pendingSyncList" prefHeight="150"/>
+                    <VBox spacing="10" alignment="CENTER" HBox.hgrow="ALWAYS">
+                        <VBox styleClass="profile-edit-card" alignment="CENTER">
+                            <Label text="Pending Sync" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+                            <ListView fx:id="pendingSyncList" prefHeight="150" maxWidth="Infinity"/>
+                        </VBox>
                     </VBox>
-                </SplitPane>
+                </HBox>
 
-                <Button fx:id="alertButton" text="Send Broadcast Alert" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 200;">
-                    <effect>
-                        <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                    </effect>
-                </Button>
+                <!-- Broadcast Alert Button -->
+                <HBox alignment="CENTER">
+                    <Button fx:id="alertButton" text="Send Broadcast Alert" styleClass="button-danger" prefWidth="200">
+                        <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
+                    </Button>
+                </HBox>
 
-                <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+                <!-- Status Label -->
+                <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
+
+                <!-- Back Button -->
+                <HBox alignment="CENTER">
+                    <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-secondary" prefWidth="150"/>
+                </HBox>
+
             </VBox>
         </ScrollPane>
     </center>
 
     <bottom>
-        <HBox spacing="10" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
-            <Button fx:id="backButton" text="Back to Dashboard" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150;"/>
-        </HBox>
         <fx:include source="FooterComponent.fxml"/>
     </bottom>
 </BorderPane>

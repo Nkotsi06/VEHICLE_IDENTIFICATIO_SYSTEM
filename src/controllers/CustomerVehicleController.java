@@ -11,6 +11,8 @@ import utils.SessionManager;
 import dao.VehicleDAO;
 import models.Vehicle;
 
+import java.util.List;
+
 public class CustomerVehicleController {
 
     @FXML private TableView<Vehicle> vehiclesTable;
@@ -56,7 +58,7 @@ public class CustomerVehicleController {
 
     private void loadVehicles() {
         try {
-            java.util.List<Vehicle> vehicles = vehicleDAO.findByOwnerId(customerId);
+            List<Vehicle> vehicles = vehicleDAO.findByOwnerId(customerId);
             vehiclesTable.getItems().setAll(vehicles);
             vehicleCountLabel.setText("Total Vehicles: " + vehicles.size());
         } catch (Exception e) {

@@ -5,71 +5,72 @@
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ExportController">
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ExportController"
+            stylesheets="@../css/application.css" styleClass="border-pane">
 
     <top>
-        <VBox>
-            <fx:include source="MenuBarComponent.fxml"/>
-        </VBox>
+        <fx:include source="MenuBarComponent.fxml"/>
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="true" style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
-            <VBox spacing="20" style="-fx-padding: 20; -fx-background-color: #f0f2f5;"
-                  maxHeight="Infinity" maxWidth="Infinity">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
+            <VBox spacing="20" alignment="TOP_CENTER"
+                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
 
-                <Label text="Export Data" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-                <Label text="Export system data to CSV format" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
-
-                <Separator/>
-
-                <GridPane hgap="15" vgap="12" style="-fx-padding: 5 0;">
-                    <columnConstraints>
-                        <ColumnConstraints minWidth="100" maxWidth="150"/>
-                        <ColumnConstraints minWidth="200" maxWidth="400" hgrow="ALWAYS"/>
-                    </columnConstraints>
-
-                    <Label text="Export Type:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                    <ComboBox fx:id="exportTypeComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250" promptText="Select export type" maxWidth="350"/>
-
-                    <Label text="Start Date:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                    <DatePicker fx:id="startDatePicker" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="200"/>
-
-                    <Label text="End Date:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                    <DatePicker fx:id="endDatePicker" GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="200"/>
-
-                    <Label text="File Name:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                    <TextField fx:id="fileNameField" GridPane.rowIndex="3" GridPane.columnIndex="1" promptText="export_report" prefWidth="300"/>
-                </GridPane>
+                <Label text="Export Data" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
+                <Label text="Export system data to CSV format" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
 
                 <Separator/>
 
-                <Button fx:id="exportButton" text="Export to CSV"
-                        style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 200; -fx-padding: 8 15;">
-                    <effect>
-                        <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                    </effect>
-                </Button>
+                <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
+                <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
-                <Label fx:id="statusLabel" style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+                <!-- Export Configuration Card -->
+                <HBox alignment="CENTER">
+                    <VBox spacing="20" styleClass="profile-edit-card" maxWidth="600" alignment="CENTER">
+                        <Label text="Export Configuration" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+
+                        <GridPane hgap="15" vgap="15" alignment="CENTER">
+                            <columnConstraints>
+                                <ColumnConstraints minWidth="100" maxWidth="150" halignment="RIGHT"/>
+                                <ColumnConstraints minWidth="200" maxWidth="400" hgrow="ALWAYS"/>
+                            </columnConstraints>
+
+                            <Label text="Export Type:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="exportTypeComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250" promptText="Select export type"/>
+
+                            <Label text="Start Date:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <DatePicker fx:id="startDatePicker" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="200"/>
+
+                            <Label text="End Date:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <DatePicker fx:id="endDatePicker" GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="200"/>
+
+                            <Label text="File Name:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="fileNameField" GridPane.rowIndex="3" GridPane.columnIndex="1" promptText="export_report" prefWidth="300"/>
+                        </GridPane>
+
+                        <Separator/>
+
+                        <HBox spacing="15" alignment="CENTER">
+                            <Button fx:id="exportButton" text="Export to CSV" styleClass="button-success" prefWidth="150"/>
+                            <Button fx:id="cancelButton" text="Cancel" styleClass="button-secondary" prefWidth="100"/>
+                        </HBox>
+                    </VBox>
+                </HBox>
+
+                <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
+
+                <!-- Back Button -->
+                <HBox alignment="CENTER">
+                    <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-secondary" prefWidth="150"/>
+                </HBox>
 
             </VBox>
         </ScrollPane>
     </center>
 
     <bottom>
-        <!-- Wrap both the Back button HBox and Footer in a single VBox -->
-        <VBox spacing="0" style="-fx-background-color: white;">
-            <HBox spacing="10" style="-fx-padding: 10 20;" alignment="CENTER_RIGHT">
-                <Button fx:id="backButton" text="Back to Dashboard"
-                        style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-pref-width: 150; -fx-padding: 8 15;">
-                    <effect>
-                        <DropShadow radius="3" color="rgba(0,0,0,0.2)"/>
-                    </effect>
-                </Button>
-            </HBox>
-            <fx:include source="FooterComponent.fxml"/>
-        </VBox>
+        <fx:include source="FooterComponent.fxml"/>
     </bottom>
-
 </BorderPane>

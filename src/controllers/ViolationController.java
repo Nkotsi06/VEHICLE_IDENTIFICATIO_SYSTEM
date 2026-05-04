@@ -2,6 +2,7 @@ package controllers;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.util.Duration;
@@ -15,8 +16,17 @@ import dao.AuditDAO;
 import models.Violation;
 import models.Vehicle;
 
+/**
+ * Controller for Violation Management
+ * Handles creating, updating, deleting, and marking violations as paid
+ */
 public class ViolationController {
 
+    // ============================================
+    // FXML UI COMPONENTS
+    // ============================================
+
+    // Table Components
     @FXML private TableView<Violation> violationsTable;
     @FXML private TableColumn<Violation, String> regNumberColumn;
     @FXML private TableColumn<Violation, String> violationTypeColumn;
@@ -25,6 +35,7 @@ public class ViolationController {
     @FXML private TableColumn<Violation, String> paymentStatusColumn;
     @FXML private TableColumn<Violation, String> officerColumn;
 
+    // Form Components
     @FXML private ComboBox<Vehicle> vehicleComboBox;
     @FXML private TextField violationTypeField;
     @FXML private TextField fineAmountField;
@@ -33,6 +44,7 @@ public class ViolationController {
     @FXML private ComboBox<String> paymentStatusComboBox;
     @FXML private TextArea descriptionArea;
 
+    // Buttons
     @FXML private Button addButton;
     @FXML private Button updateButton;
     @FXML private Button deleteButton;
@@ -41,15 +53,27 @@ public class ViolationController {
     @FXML private Button backButton;
     @FXML private Button fadeButton;
 
+    // Progress Indicators
     @FXML private ProgressIndicator loadProgress;
     @FXML private ProgressBar operationProgress;
     @FXML private Label statusLabel;
+
+    // ============================================
+    // DAO INSTANCES & DATA MODELS
+    // ============================================
 
     private ViolationDAO violationDAO;
     private VehicleDAO vehicleDAO;
     private AuditDAO auditDAO;
     private Violation selectedViolation;
 
+    // ============================================
+    // INITIALIZATION METHODS
+    // ============================================
+
+    /**
+     * Initializes the controller - sets up DAOs, loads data, configures UI
+     */
     @FXML
     public void initialize() {
         violationDAO = new ViolationDAO();
@@ -62,11 +86,15 @@ public class ViolationController {
         setupButtonHandlers();
         setupTableSelection();
 
+        // Configure combo box items
         paymentStatusComboBox.getItems().setAll("UNPAID", "PAID", "DISPUTED");
         violationDatePicker.setValue(java.time.LocalDate.now());
         statusLabel.setText("Ready");
     }
 
+    /**
+     * Configures table columns with cell value factories
+     */
     private void setupTableColumns() {
         regNumberColumn.setCellValueFactory(cellData -> cellData.getValue().registrationNumberProperty());
         violationTypeColumn.setCellValueFactory(cellData -> cellData.getValue().violationTypeProperty());
@@ -76,6 +104,9 @@ public class ViolationController {
         officerColumn.setCellValueFactory(cellData -> cellData.getValue().officerNameProperty());
     }
 
+    /**
+     * Loads all vehicles into the combo box
+     */
     private void loadComboBoxes() {
         try {
             java.util.List<Vehicle> vehicles = vehicleDAO.findAll();
@@ -85,6 +116,9 @@ public class ViolationController {
         }
     }
 
+    /**
+     * Loads all violations from the database
+     */
     private void loadViolations() {
         try {
             java.util.List<Violation> violations = violationDAO.findAll();
@@ -97,6 +131,13 @@ public class ViolationController {
         }
     }
 
+    // ============================================
+    // EVENT HANDLERS
+    // ============================================
+
+    /**
+     * Sets up button click handlers with animations
+     */
     private void setupButtonHandlers() {
         addButton.setOnAction(event -> handleAdd());
         updateButton.setOnAction(event -> handleUpdate());
@@ -104,11 +145,27 @@ public class ViolationController {
         markPaidButton.setOnAction(event -> handleMarkPaid());
         refreshButton.setOnAction(event -> loadViolations());
         backButton.setOnAction(event -> SceneManager.getInstance().switchToPoliceView());
+
         if (fadeButton != null) {
             fadeButton.setOnAction(event -> showFadeAnimation());
         }
     }
 
+    /**
+     * Sets up table selection listener to populate form when row is selected
+     */
+    private void setupTableSelection() {
+        violationsTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                selectedViolation = newSelection;
+                displayViolationDetails(selectedViolation);
+            }
+        });
+    }
+
+    /**
+     * Plays fade animation on the fade button
+     */
     private void showFadeAnimation() {
         if (fadeButton != null) {
             FadeTransition fadeTransition = new FadeTransition(Duration.seconds(1.5), fadeButton);
@@ -124,15 +181,14 @@ public class ViolationController {
         }
     }
 
-    private void setupTableSelection() {
-        violationsTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            if (newSelection != null) {
-                selectedViolation = newSelection;
-                displayViolationDetails(selectedViolation);
-            }
-        });
-    }
+    // ============================================
+    // FORM HANDLING METHODS
+    // ============================================
 
+    /**
+     * Displays selected violation details in the form
+     * @param violation The violation to display
+     */
     private void displayViolationDetails(Violation violation) {
         try {
             Vehicle vehicle = vehicleDAO.findById(violation.getVehicleId());
@@ -149,9 +205,32 @@ public class ViolationController {
         descriptionArea.setText(violation.getDescription());
     }
 
+    /**
+     * Clears all form fields
+     */
+    private void clearForm() {
+        vehicleComboBox.getSelectionModel().clearSelection();
+        violationTypeField.clear();
+        fineAmountField.clear();
+        locationField.clear();
+        violationDatePicker.setValue(java.time.LocalDate.now());
+        paymentStatusComboBox.setValue(null);
+        descriptionArea.clear();
+        selectedViolation = null;
+        violationsTable.getSelectionModel().clearSelection();
+    }
+
+    // ============================================
+    // BUSINESS LOGIC METHODS
+    // ============================================
+
+    /**
+     * Handles adding a new violation
+     */
     private void handleAdd() {
         Vehicle selectedVehicle = vehicleComboBox.getSelectionModel().getSelectedItem();
 
+        // Input validation
         if (selectedVehicle == null) {
             AlertUtil.showWarning("Validation Error", "Please select a vehicle.");
             return;
@@ -178,6 +257,7 @@ public class ViolationController {
                 return;
             }
 
+            // Create violation object
             Violation violation = new Violation();
             violation.setVehicleId(selectedVehicle.getId());
             violation.setViolationDate(violationDatePicker.getValue());
@@ -191,7 +271,7 @@ public class ViolationController {
             boolean success = violationDAO.insert(violation);
 
             if (success) {
-                // Log violation creation
+                // Log the action
                 int currentUserId = SessionManager.getInstance().getUserId();
                 auditDAO.logAction(currentUserId, "CREATE_VIOLATION: " + violationTypeField.getText().trim() +
                         " for vehicle " + selectedVehicle.getRegistrationNumber() + " - Fine: M" + fineAmount, "127.0.0.1");
@@ -213,6 +293,9 @@ public class ViolationController {
         }
     }
 
+    /**
+     * Handles updating an existing violation
+     */
     private void handleUpdate() {
         if (selectedViolation == null) {
             AlertUtil.showWarning("No Selection", "Please select a violation to update.");
@@ -230,6 +313,7 @@ public class ViolationController {
             String oldType = selectedViolation.getViolationType();
             double oldFine = selectedViolation.getFineAmount();
 
+            // Update violation object
             selectedViolation.setVehicleId(selectedVehicle.getId());
             selectedViolation.setViolationDate(violationDatePicker.getValue());
             selectedViolation.setViolationType(violationTypeField.getText().trim());
@@ -241,7 +325,7 @@ public class ViolationController {
             boolean success = violationDAO.update(selectedViolation);
 
             if (success) {
-                // Log violation update
+                // Log the update
                 int currentUserId = SessionManager.getInstance().getUserId();
                 auditDAO.logAction(currentUserId, "UPDATE_VIOLATION ID:" + selectedViolation.getId() +
                         " - " + oldType + " -> " + selectedViolation.getViolationType() +
@@ -263,6 +347,9 @@ public class ViolationController {
         }
     }
 
+    /**
+     * Handles deleting a violation
+     */
     private void handleDelete() {
         if (selectedViolation == null) {
             AlertUtil.showWarning("No Selection", "Please select a violation to delete.");
@@ -280,7 +367,7 @@ public class ViolationController {
                 boolean success = violationDAO.delete(violationId);
 
                 if (success) {
-                    // Log violation deletion
+                    // Log the deletion
                     int currentUserId = SessionManager.getInstance().getUserId();
                     auditDAO.logAction(currentUserId, "DELETE_VIOLATION ID:" + violationId + " - " + violationType, "127.0.0.1");
 
@@ -298,6 +385,9 @@ public class ViolationController {
         }
     }
 
+    /**
+     * Handles marking a violation as paid
+     */
     private void handleMarkPaid() {
         if (selectedViolation == null) {
             AlertUtil.showWarning("No Selection", "Please select a violation to mark as paid.");
@@ -317,7 +407,7 @@ public class ViolationController {
                 boolean success = violationDAO.markAsPaid(selectedViolation.getId());
 
                 if (success) {
-                    // Log payment marking
+                    // Log the payment
                     int currentUserId = SessionManager.getInstance().getUserId();
                     auditDAO.logAction(currentUserId, "MARK_VIOLATION_PAID ID:" + selectedViolation.getId() +
                             " - Fine: M" + selectedViolation.getFineAmount(), "127.0.0.1");
@@ -335,17 +425,5 @@ public class ViolationController {
                 AlertUtil.showError("Database Error", "An error occurred while updating.");
             }
         }
-    }
-
-    private void clearForm() {
-        vehicleComboBox.getSelectionModel().clearSelection();
-        violationTypeField.clear();
-        fineAmountField.clear();
-        locationField.clear();
-        violationDatePicker.setValue(java.time.LocalDate.now());
-        paymentStatusComboBox.setValue(null);
-        descriptionArea.clear();
-        selectedViolation = null;
-        violationsTable.getSelectionModel().clearSelection();
     }
 }
