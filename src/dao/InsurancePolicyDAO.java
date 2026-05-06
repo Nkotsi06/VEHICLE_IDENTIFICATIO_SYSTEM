@@ -3,7 +3,10 @@ package dao;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import database.ProcedureCaller;
 import database.ViewLoader;
@@ -27,65 +30,82 @@ public class InsurancePolicyDAO extends BaseDAO<InsurancePolicy> {
 
     @Override
     public InsurancePolicy findById(int id) throws SQLException {
-        List<InsurancePolicy> results = viewLoader.loadViewWithCondition("vw_insurance_policies", "id = ?", id);
-        return results.isEmpty() ? null : results.get(0);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_insurance_policies", "id = ?", id);
+        if (results.isEmpty()) {
+            return null;
+        }
+        return mapMapToInsurancePolicy(results.get(0));
     }
 
     public InsurancePolicy findByPolicyNumber(String policyNumber) throws SQLException {
-        List<InsurancePolicy> results = viewLoader.loadViewWithCondition("vw_insurance_policies", "policy_number = ?", policyNumber);
-        return results.isEmpty() ? null : results.get(0);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_insurance_policies", "policy_number = ?", policyNumber);
+        if (results.isEmpty()) {
+            return null;
+        }
+        return mapMapToInsurancePolicy(results.get(0));
     }
 
     public List<InsurancePolicy> searchByPolicyNumber(String keyword) throws SQLException {
         String pattern = "%" + keyword + "%";
-        return viewLoader.loadViewWithCondition("vw_insurance_policies", "policy_number ILIKE ? ORDER BY policy_number", pattern);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_insurance_policies", "policy_number ILIKE ? ORDER BY policy_number", pattern);
+        return mapMapsToInsurancePolicies(results);
     }
 
     public List<InsurancePolicy> searchByRegistrationNumber(String keyword) throws SQLException {
         String pattern = "%" + keyword + "%";
-        return viewLoader.loadViewWithCondition("vw_insurance_policies", "registration_number ILIKE ? ORDER BY registration_number", pattern);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_insurance_policies", "registration_number ILIKE ? ORDER BY registration_number", pattern);
+        return mapMapsToInsurancePolicies(results);
     }
 
     public List<InsurancePolicy> searchByProviderName(String keyword) throws SQLException {
         String pattern = "%" + keyword + "%";
-        return viewLoader.loadViewWithCondition("vw_insurance_policies", "provider_name ILIKE ? ORDER BY provider_name", pattern);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_insurance_policies", "provider_name ILIKE ? ORDER BY provider_name", pattern);
+        return mapMapsToInsurancePolicies(results);
     }
 
     public List<InsurancePolicy> searchInsurance(String keyword) throws SQLException {
         String pattern = "%" + keyword + "%";
-        return viewLoader.loadViewWithCondition("vw_insurance_policies",
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_insurance_policies",
                 "policy_number ILIKE ? OR registration_number ILIKE ? OR provider_name ILIKE ? OR status ILIKE ? ORDER BY policy_number",
                 pattern, pattern, pattern, pattern);
+        return mapMapsToInsurancePolicies(results);
     }
 
     @Override
     public List<InsurancePolicy> findAll() throws SQLException {
-        return viewLoader.loadView("vw_insurance_policies");
+        List<Map<String, Object>> results = viewLoader.loadView("vw_insurance_policies");
+        return mapMapsToInsurancePolicies(results);
     }
 
     public List<InsurancePolicy> findByVehicleId(int vehicleId) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_insurance_policies", "vehicle_id = ? ORDER BY start_date DESC", vehicleId);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_insurance_policies", "vehicle_id = ? ORDER BY start_date DESC", vehicleId);
+        return mapMapsToInsurancePolicies(results);
     }
 
     public List<InsurancePolicy> findActivePolicies() throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_insurance_policies", "status = 'ACTIVE' AND end_date >= CURRENT_DATE ORDER BY end_date");
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_insurance_policies", "status = 'ACTIVE' AND end_date >= CURRENT_DATE ORDER BY end_date");
+        return mapMapsToInsurancePolicies(results);
     }
 
     public List<InsurancePolicy> findByProviderId(int providerId) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_insurance_policies", "provider_id = ? ORDER BY start_date DESC", providerId);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_insurance_policies", "provider_id = ? ORDER BY start_date DESC", providerId);
+        return mapMapsToInsurancePolicies(results);
     }
 
     public List<InsurancePolicy> findByCustomerId(int customerId) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_insurance_policies", "owner_id = ? ORDER BY start_date DESC", customerId);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_insurance_policies", "owner_id = ? ORDER BY start_date DESC", customerId);
+        return mapMapsToInsurancePolicies(results);
     }
 
     public List<InsurancePolicy> findExpiringPolicies(int daysThreshold) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_insurance_policies",
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_insurance_policies",
                 "status = 'ACTIVE' AND end_date <= CURRENT_DATE + ? ORDER BY end_date", daysThreshold);
+        return mapMapsToInsurancePolicies(results);
     }
 
     public List<InsurancePolicy> findExpiredPolicies() throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_insurance_policies", "end_date < CURRENT_DATE AND status = 'ACTIVE'");
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_insurance_policies", "end_date < CURRENT_DATE AND status = 'ACTIVE'");
+        return mapMapsToInsurancePolicies(results);
     }
 
     public int countExpiredByCustomerId(int customerId) throws SQLException {
@@ -156,6 +176,147 @@ public class InsurancePolicyDAO extends BaseDAO<InsurancePolicy> {
     @Override
     public boolean delete(int id) throws SQLException {
         return procedureCaller.executeDeleteInsurancePolicy(id);
+    }
+
+    /**
+     * Converts a List of Maps to a List of InsurancePolicy objects.
+     *
+     * @param maps the list of maps from the view loader
+     * @return list of InsurancePolicy objects
+     */
+    private List<InsurancePolicy> mapMapsToInsurancePolicies(List<Map<String, Object>> maps) {
+        List<InsurancePolicy> policies = new ArrayList<>();
+        if (maps == null) {
+            return policies;
+        }
+        for (Map<String, Object> map : maps) {
+            InsurancePolicy policy = mapMapToInsurancePolicy(map);
+            if (policy != null) {
+                policies.add(policy);
+            }
+        }
+        return policies;
+    }
+
+    /**
+     * Converts a Map to an InsurancePolicy object.
+     *
+     * @param map the map from the view loader
+     * @return InsurancePolicy object
+     */
+    private InsurancePolicy mapMapToInsurancePolicy(Map<String, Object> map) {
+        if (map == null) {
+            return null;
+        }
+
+        InsurancePolicy policy = new InsurancePolicy();
+
+        policy.setId(getIntValue(map, "id"));
+        policy.setVehicleId(getIntValue(map, "vehicle_id"));
+        policy.setRegistrationNumber(getStringValue(map, "registration_number"));
+        policy.setMake(getStringValue(map, "make"));
+        policy.setModel(getStringValue(map, "model"));
+        policy.setVehicleMake(getStringValue(map, "make"));
+        policy.setVehicleModel(getStringValue(map, "model"));
+        policy.setProviderId(getIntValue(map, "provider_id"));
+        policy.setProviderName(getStringValue(map, "provider_name"));
+        policy.setPolicyNumber(getStringValue(map, "policy_number"));
+        policy.setStartDate(getLocalDateValue(map, "start_date"));
+        policy.setEndDate(getLocalDateValue(map, "end_date"));
+        policy.setPremium(getDoubleValue(map, "premium"));
+        policy.setCoverageAmount(getDoubleValue(map, "coverage_amount"));
+        policy.setStatus(getStringValue(map, "status"));
+        policy.setOwnerName(getStringValue(map, "owner_name"));
+        policy.setOwnerId(getIntValue(map, "owner_id"));
+        policy.setCreatedAt(getLocalDateTimeValue(map, "created_at"));
+        policy.setUpdatedAt(getLocalDateTimeValue(map, "updated_at"));
+
+        return policy;
+    }
+
+    /**
+     * Helper method to safely get Integer values from Map.
+     */
+    private Integer getIntValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) {
+            return 0;
+        }
+        if (value instanceof Integer) {
+            return (Integer) value;
+        }
+        if (value instanceof Long) {
+            return ((Long) value).intValue();
+        }
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        }
+        return 0;
+    }
+
+    /**
+     * Helper method to safely get Double values from Map.
+     */
+    private Double getDoubleValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) {
+            return 0.0;
+        }
+        if (value instanceof Double) {
+            return (Double) value;
+        }
+        if (value instanceof Integer) {
+            return ((Integer) value).doubleValue();
+        }
+        if (value instanceof Long) {
+            return ((Long) value).doubleValue();
+        }
+        if (value instanceof Number) {
+            return ((Number) value).doubleValue();
+        }
+        return 0.0;
+    }
+
+    /**
+     * Helper method to safely get String values from Map.
+     */
+    private String getStringValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        return value != null ? value.toString() : "";
+    }
+
+    /**
+     * Helper method to safely get LocalDate values from Map.
+     */
+    private LocalDate getLocalDateValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof java.sql.Date) {
+            return ((java.sql.Date) value).toLocalDate();
+        }
+        if (value instanceof LocalDate) {
+            return (LocalDate) value;
+        }
+        return null;
+    }
+
+    /**
+     * Helper method to safely get LocalDateTime values from Map.
+     */
+    private LocalDateTime getLocalDateTimeValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof java.sql.Timestamp) {
+            return ((java.sql.Timestamp) value).toLocalDateTime();
+        }
+        if (value instanceof LocalDateTime) {
+            return (LocalDateTime) value;
+        }
+        return null;
     }
 
     @Override

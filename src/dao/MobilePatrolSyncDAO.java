@@ -2,6 +2,7 @@ package dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -73,8 +74,139 @@ public class MobilePatrolSyncDAO extends BaseDAO<Object> {
     }
 
     public PoliceUnit getPoliceUnitByUnitId(String unitId) throws SQLException {
-        List<PoliceUnit> results = viewLoader.loadViewWithCondition("vw_police_units", "unit_id = ?", unitId);
-        return results.isEmpty() ? null : results.get(0);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_police_units", "unit_id = ?", unitId);
+        if (results.isEmpty()) {
+            return null;
+        }
+        return mapMapToPoliceUnit(results.get(0));
+    }
+
+    public List<PoliceUnit> getAllPoliceUnits() throws SQLException {
+        List<Map<String, Object>> results = viewLoader.loadView("vw_police_units");
+        return mapMapsToPoliceUnits(results);
+    }
+
+    public List<PoliceUnit> getAvailablePoliceUnits() throws SQLException {
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_police_units", "status = 'AVAILABLE'");
+        return mapMapsToPoliceUnits(results);
+    }
+
+    /**
+     * Converts a List of Maps to a List of PoliceUnit objects.
+     *
+     * @param maps the list of maps from the view loader
+     * @return list of PoliceUnit objects
+     */
+    private List<PoliceUnit> mapMapsToPoliceUnits(List<Map<String, Object>> maps) {
+        List<PoliceUnit> units = new ArrayList<>();
+        if (maps == null) {
+            return units;
+        }
+        for (Map<String, Object> map : maps) {
+            PoliceUnit unit = mapMapToPoliceUnit(map);
+            if (unit != null) {
+                units.add(unit);
+            }
+        }
+        return units;
+    }
+
+    /**
+     * Converts a Map to a PoliceUnit object.
+     *
+     * @param map the map from the view loader
+     * @return PoliceUnit object
+     */
+    private PoliceUnit mapMapToPoliceUnit(Map<String, Object> map) {
+        if (map == null) {
+            return null;
+        }
+
+        PoliceUnit unit = new PoliceUnit();
+
+        unit.setId(getIntValue(map, "id"));
+        unit.setUnitId(getStringValue(map, "unit_id"));
+        unit.setOfficerName(getStringValue(map, "officer_name"));
+        unit.setBadgeNumber(getStringValue(map, "badge_number"));
+        // FIXED: Use setCurrentLocationLat and setCurrentLocationLng instead of setLatitude/setLongitude
+        unit.setCurrentLocationLat(getDoubleValue(map, "current_location_lat"));
+        unit.setCurrentLocationLng(getDoubleValue(map, "current_location_lng"));
+        unit.setStatus(getStringValue(map, "status"));
+        unit.setDeviceId(getStringValue(map, "device_id"));
+
+        unit.setLastLocationUpdate(getLocalDateTimeValue(map, "last_location_update"));
+        unit.setCreatedAt(getLocalDateTimeValue(map, "created_at"));
+        unit.setUpdatedAt(getLocalDateTimeValue(map, "updated_at"));
+
+        return unit;
+    }
+
+    /**
+     * Helper method to safely get Integer values from Map.
+     */
+    private Integer getIntValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) {
+            return 0;
+        }
+        if (value instanceof Integer) {
+            return (Integer) value;
+        }
+        if (value instanceof Long) {
+            return ((Long) value).intValue();
+        }
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        }
+        return 0;
+    }
+
+    /**
+     * Helper method to safely get Double values from Map.
+     */
+    private Double getDoubleValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) {
+            return 0.0;
+        }
+        if (value instanceof Double) {
+            return (Double) value;
+        }
+        if (value instanceof Integer) {
+            return ((Integer) value).doubleValue();
+        }
+        if (value instanceof Long) {
+            return ((Long) value).doubleValue();
+        }
+        if (value instanceof Number) {
+            return ((Number) value).doubleValue();
+        }
+        return 0.0;
+    }
+
+    /**
+     * Helper method to safely get String values from Map.
+     */
+    private String getStringValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        return value != null ? value.toString() : "";
+    }
+
+    /**
+     * Helper method to safely get LocalDateTime values from Map.
+     */
+    private LocalDateTime getLocalDateTimeValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof java.sql.Timestamp) {
+            return ((java.sql.Timestamp) value).toLocalDateTime();
+        }
+        if (value instanceof LocalDateTime) {
+            return (LocalDateTime) value;
+        }
+        return null;
     }
 
     @Override

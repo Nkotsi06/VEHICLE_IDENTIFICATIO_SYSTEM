@@ -2,7 +2,6 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 
@@ -14,10 +13,11 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
-            <VBox spacing="20" alignment="TOP_CENTER"
-                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" alignment="TOP_CENTER" styleClass="dashboard-container">
+                <padding>
+                    <Insets top="25" right="40" bottom="30" left="40"/>
+                </padding>
 
                 <Label text="QR Code Vehicle Check-in" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
                 <Label text="Scan QR code for quick vehicle check-in" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
@@ -28,20 +28,14 @@
 
                 <!-- QR Scan Section -->
                 <HBox alignment="CENTER">
-                    <VBox maxWidth="800" styleClass="profile-edit-card" alignment="CENTER">
+                    <VBox maxWidth="900" minWidth="600" styleClass="profile-edit-card" alignment="CENTER">
                         <Label text="Scan QR Code" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
                         <HBox spacing="15" alignment="CENTER">
-                            <TextField fx:id="qrCodeField" promptText="Scan or enter QR code" prefWidth="400" HBox.hgrow="ALWAYS"/>
-                            <Button fx:id="scanButton" text="Scan" styleClass="button-primary" prefWidth="100">
-                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                            </Button>
-                            <Button fx:id="manualEntryButton" text="Manual Entry" styleClass="button-info" prefWidth="110">
-                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                            </Button>
-                            <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100">
-                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                            </Button>
+                            <TextField fx:id="qrCodeField" promptText="Scan or enter QR code" HBox.hgrow="ALWAYS" prefWidth="400"/>
+                            <Button fx:id="scanButton" text="Scan" styleClass="button-primary" prefWidth="100"/>
+                            <Button fx:id="manualEntryButton" text="Manual Entry" styleClass="button-info" prefWidth="110"/>
+                            <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100"/>
                         </HBox>
                     </VBox>
                 </HBox>
@@ -50,16 +44,16 @@
 
                 <!-- Vehicle Information Section -->
                 <HBox alignment="CENTER">
-                    <VBox maxWidth="900" styleClass="profile-edit-card" alignment="CENTER">
+                    <VBox maxWidth="900" minWidth="600" styleClass="profile-edit-card" alignment="CENTER">
                         <Label text="Vehicle Information" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
                         <HBox spacing="30" alignment="CENTER">
-                            <ImageView fx:id="qrImageView" fitWidth="150" fitHeight="150" styleClass="profile-card"/>
+                            <ImageView fx:id="qrImageView" fitWidth="150" fitHeight="150" styleClass="profile-image-circle"/>
                             <VBox spacing="15" HBox.hgrow="ALWAYS" alignment="CENTER">
                                 <GridPane hgap="15" vgap="10" alignment="CENTER">
                                     <columnConstraints>
-                                        <ColumnConstraints halignment="RIGHT" minWidth="100"/>
-                                        <ColumnConstraints minWidth="200"/>
+                                        <ColumnConstraints halignment="RIGHT" minWidth="100" prefWidth="100"/>
+                                        <ColumnConstraints minWidth="250" hgrow="ALWAYS"/>
                                     </columnConstraints>
 
                                     <Label text="Registration:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
@@ -81,17 +75,17 @@
 
                 <!-- Service Details Section -->
                 <HBox alignment="CENTER">
-                    <VBox maxWidth="900" styleClass="profile-edit-card" alignment="CENTER">
+                    <VBox maxWidth="900" minWidth="600" styleClass="profile-edit-card" alignment="CENTER">
                         <Label text="Service Details" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
                         <GridPane hgap="15" vgap="12" alignment="CENTER">
                             <columnConstraints>
-                                <ColumnConstraints halignment="RIGHT" minWidth="100"/>
-                                <ColumnConstraints minWidth="200"/>
+                                <ColumnConstraints halignment="RIGHT" minWidth="100" prefWidth="100"/>
+                                <ColumnConstraints minWidth="250" hgrow="ALWAYS"/>
                             </columnConstraints>
 
                             <Label text="Service Type:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <ComboBox fx:id="serviceTypeComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="200"/>
+                            <ComboBox fx:id="serviceTypeComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250"/>
 
                             <Label text="Cost (M):" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
                             <TextField fx:id="costField" GridPane.rowIndex="1" GridPane.columnIndex="1" promptText="Enter cost"/>
@@ -100,19 +94,15 @@
                             <TextField fx:id="odometerField" GridPane.rowIndex="2" GridPane.columnIndex="1" promptText="Enter odometer reading"/>
 
                             <Label text="Mechanic:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <ComboBox fx:id="mechanicComboBox" GridPane.rowIndex="3" GridPane.columnIndex="1" prefWidth="200"/>
+                            <ComboBox fx:id="mechanicComboBox" GridPane.rowIndex="3" GridPane.columnIndex="1" prefWidth="250"/>
                         </GridPane>
                     </VBox>
                 </HBox>
 
                 <!-- Action Buttons -->
-                <HBox alignment="CENTER">
-                    <Button fx:id="checkinButton" text="Complete Check-in" styleClass="button-success" prefWidth="150" disable="true">
-                        <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                    </Button>
-                    <Button fx:id="clearButton" text="Clear" styleClass="button-secondary" prefWidth="100">
-                        <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                    </Button>
+                <HBox alignment="CENTER" spacing="15">
+                    <Button fx:id="checkinButton" text="Complete Check-in" styleClass="button-success" prefWidth="160" disable="true"/>
+                    <Button fx:id="clearButton" text="Clear" styleClass="button-secondary" prefWidth="100"/>
                 </HBox>
 
                 <Label fx:id="messageLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>

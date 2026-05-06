@@ -76,6 +76,15 @@ public class SceneManager {
         rootManager.setRoot("ForgotPasswordView.fxml", "ForgotPassword");
     }
 
+    /**
+     * Switches to the welcome screen (FIRST SCREEN WHEN APP STARTS).
+     * This screen introduces the system before login.
+     */
+    public void switchToWelcome() {
+        LOGGER.fine("Switching to Welcome view");
+        rootManager.setRoot("WelcomeView.fxml", "Welcome");
+    }
+
     // ============================================
     // DASHBOARD VIEWS (Role-Based)
     // ============================================
@@ -85,24 +94,41 @@ public class SceneManager {
      */
     public void switchToDashboard() {
         String role = SessionManager.getInstance().getUserRole();
+
+        // Debug output
+        System.out.println("DEBUG SceneManager: User role = " + role);
+
         if (role == null) {
             LOGGER.warning("User role is null, switching to login");
+            System.err.println("DEBUG SceneManager: Role is null, switching to login");
             switchToLogin();
             return;
         }
 
         LOGGER.info("Switching to dashboard for role: " + role);
+        System.out.println("DEBUG SceneManager: Switching to dashboard for role: " + role);
 
         switch (role) {
-            case "ADMIN" -> switchToAdminView();
-            case "POLICE" -> switchToPoliceView();
-            case "CUSTOMER" -> switchToCustomerView();
-            case "WORKSHOP" -> switchToWorkshopView();
-            case "INSURANCE" -> switchToInsuranceView();
-            default -> {
+            case "ADMIN":
+                switchToAdminView();
+                break;
+            case "POLICE":
+                switchToPoliceView();
+                break;
+            case "CUSTOMER":
+                switchToCustomerView();
+                break;
+            case "WORKSHOP":
+                switchToWorkshopView();
+                break;
+            case "INSURANCE":
+                switchToInsuranceView();
+                break;
+            default:
                 LOGGER.warning("Unknown role: " + role + ", switching to login");
+                System.err.println("DEBUG SceneManager: Unknown role: " + role);
                 switchToLogin();
-            }
+                break;
         }
     }
 
@@ -110,6 +136,7 @@ public class SceneManager {
      * Switches to admin dashboard view.
      */
     public void switchToAdminView() {
+        System.out.println("DEBUG SceneManager: Loading AdminView");
         rootManager.setRoot("AdminView.fxml", "Admin");
     }
 
@@ -117,6 +144,7 @@ public class SceneManager {
      * Switches to police dashboard view.
      */
     public void switchToPoliceView() {
+        System.out.println("DEBUG SceneManager: Loading PoliceView");
         rootManager.setRoot("PoliceView.fxml", "Police");
     }
 
@@ -124,6 +152,7 @@ public class SceneManager {
      * Switches to insurance dashboard view.
      */
     public void switchToInsuranceView() {
+        System.out.println("DEBUG SceneManager: Loading InsuranceView");
         rootManager.setRoot("InsuranceView.fxml", "Insurance");
     }
 
@@ -131,6 +160,7 @@ public class SceneManager {
      * Switches to workshop dashboard view.
      */
     public void switchToWorkshopView() {
+        System.out.println("DEBUG SceneManager: Loading WorkshopView");
         rootManager.setRoot("WorkshopView.fxml", "Workshop");
     }
 
@@ -138,6 +168,7 @@ public class SceneManager {
      * Switches to customer dashboard view.
      */
     public void switchToCustomerView() {
+        System.out.println("DEBUG SceneManager: Loading CustomerView");
         rootManager.setRoot("CustomerView.fxml", "Customer");
     }
 
@@ -547,5 +578,23 @@ public class SceneManager {
         }
 
         LOGGER.info("Common scenes preloaded for role: " + role);
+    }
+
+    /**
+     * Logs out the current user and returns to login screen.
+     */
+    public void logout() {
+        LOGGER.info("Logging out user: " + SessionManager.getInstance().getUsername());
+        SessionManager.getInstance().clearSession();
+        switchToLogin();
+    }
+
+    /**
+     * Checks if a user is logged in and session is valid.
+     *
+     * @return true if logged in and session not expired
+     */
+    public boolean isSessionValid() {
+        return SessionManager.getInstance().isLoggedIn() && !SessionManager.getInstance().isSessionExpired();
     }
 }

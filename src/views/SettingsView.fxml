@@ -2,7 +2,6 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.SettingsController"
@@ -13,10 +12,11 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
-            <VBox spacing="20" alignment="TOP_CENTER"
-                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" alignment="TOP_CENTER" styleClass="dashboard-container">
+                <padding>
+                    <Insets top="25" right="40" bottom="30" left="40"/>
+                </padding>
 
                 <Label text="System Settings" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
                 <Label text="Configure application preferences" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
@@ -27,9 +27,8 @@
 
                 <TabPane fx:id="settingsTabPane" styleClass="centered-tab-pane" maxWidth="Infinity" tabClosingPolicy="UNAVAILABLE">
 
-                    <!-- General Tab -->
                     <Tab text="General" closable="false">
-                        <VBox spacing="15" styleClass="profile-edit-card" alignment="TOP_CENTER" style="-fx-background-color: white; -fx-padding: 20;">
+                        <VBox spacing="15" styleClass="profile-edit-card" alignment="TOP_CENTER" style="-fx-padding: 20;">
                             <Label text="General Settings" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
                             <GridPane hgap="15" vgap="12" alignment="CENTER">
@@ -58,16 +57,15 @@
 
                             <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
-                            <HBox alignment="CENTER">
-                                <Button fx:id="saveGeneralButton" text="Save General Settings" styleClass="button-success" prefWidth="160"/>
+                            <HBox alignment="CENTER" spacing="15">
+                                <Button fx:id="saveGeneralButton" text="Save General Settings" styleClass="button-success" prefWidth="170"/>
                                 <Button fx:id="resetGeneralButton" text="Reset" styleClass="button-secondary" prefWidth="100"/>
                             </HBox>
                         </VBox>
                     </Tab>
 
-                    <!-- Database Tab -->
                     <Tab text="Database" closable="false">
-                        <VBox spacing="15" styleClass="profile-edit-card" alignment="TOP_CENTER" style="-fx-background-color: white; -fx-padding: 20;">
+                        <VBox spacing="15" styleClass="profile-edit-card" alignment="TOP_CENTER" style="-fx-padding: 20;">
                             <Label text="Database Configuration" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
                             <GridPane hgap="15" vgap="12" alignment="CENTER">
@@ -92,18 +90,17 @@
                                 <PasswordField fx:id="dbPasswordField" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
                             </GridPane>
 
-                            <HBox alignment="CENTER">
-                                <Button fx:id="testConnectionButton" text="Test Connection" styleClass="button-info" prefWidth="130"/>
-                                <Button fx:id="saveDatabaseButton" text="Save Database Settings" styleClass="button-success" prefWidth="160"/>
+                            <HBox alignment="CENTER" spacing="15">
+                                <Button fx:id="testConnectionButton" text="Test Connection" styleClass="button-info" prefWidth="140"/>
+                                <Button fx:id="saveDatabaseButton" text="Save Database Settings" styleClass="button-success" prefWidth="180"/>
                             </HBox>
 
                             <Label fx:id="dbStatusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
                         </VBox>
                     </Tab>
 
-                    <!-- Security Tab -->
                     <Tab text="Security" closable="false">
-                        <VBox spacing="15" styleClass="profile-edit-card" alignment="TOP_CENTER" style="-fx-background-color: white; -fx-padding: 20;">
+                        <VBox spacing="15" styleClass="profile-edit-card" alignment="TOP_CENTER" style="-fx-padding: 20;">
                             <Label text="Security Settings" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
                             <VBox spacing="12" alignment="CENTER_LEFT">
@@ -121,14 +118,13 @@
                             </VBox>
 
                             <HBox alignment="CENTER">
-                                <Button fx:id="saveSecurityButton" text="Save Security Settings" styleClass="button-success" prefWidth="160"/>
+                                <Button fx:id="saveSecurityButton" text="Save Security Settings" styleClass="button-success" prefWidth="180"/>
                             </HBox>
                         </VBox>
                     </Tab>
 
-                    <!-- Notifications Tab -->
                     <Tab text="Notifications" closable="false">
-                        <VBox spacing="15" styleClass="profile-edit-card" alignment="TOP_CENTER" style="-fx-background-color: white; -fx-padding: 20;">
+                        <VBox spacing="15" styleClass="profile-edit-card" alignment="TOP_CENTER" style="-fx-padding: 20;">
                             <Label text="Email Notification Settings" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
                             <CheckBox fx:id="emailNotificationsCheckBox" text="Enable Email Notifications"/>
@@ -152,9 +148,9 @@
                                 <PasswordField fx:id="smtpPasswordField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
                             </GridPane>
 
-                            <HBox alignment="CENTER">
-                                <Button fx:id="testEmailButton" text="Send Test Email" styleClass="button-warning" prefWidth="130"/>
-                                <Button fx:id="saveNotificationButton" text="Save Notification Settings" styleClass="button-success" prefWidth="160"/>
+                            <HBox alignment="CENTER" spacing="15">
+                                <Button fx:id="testEmailButton" text="Send Test Email" styleClass="button-warning" prefWidth="140"/>
+                                <Button fx:id="saveNotificationButton" text="Save Notification Settings" styleClass="button-success" prefWidth="190"/>
                             </HBox>
 
                             <Label fx:id="notificationStatusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>

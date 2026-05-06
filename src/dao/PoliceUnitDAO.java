@@ -2,7 +2,10 @@ package dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import database.ProcedureCaller;
 import database.ViewLoader;
@@ -26,26 +29,35 @@ public class PoliceUnitDAO extends BaseDAO<PoliceUnit> {
 
     @Override
     public PoliceUnit findById(int id) throws SQLException {
-        List<PoliceUnit> results = viewLoader.loadViewWithCondition("vw_police_units", "id = ?", id);
-        return results.isEmpty() ? null : results.get(0);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_police_units", "id = ?", id);
+        if (results.isEmpty()) {
+            return null;
+        }
+        return mapMapToPoliceUnit(results.get(0));
     }
 
     public PoliceUnit findByUnitId(String unitId) throws SQLException {
-        List<PoliceUnit> results = viewLoader.loadViewWithCondition("vw_police_units", "unit_id = ?", unitId);
-        return results.isEmpty() ? null : results.get(0);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_police_units", "unit_id = ?", unitId);
+        if (results.isEmpty()) {
+            return null;
+        }
+        return mapMapToPoliceUnit(results.get(0));
     }
 
     @Override
     public List<PoliceUnit> findAll() throws SQLException {
-        return viewLoader.loadView("vw_police_units");
+        List<Map<String, Object>> results = viewLoader.loadView("vw_police_units");
+        return mapMapsToPoliceUnits(results);
     }
 
     public List<PoliceUnit> findByStatus(String status) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_police_units", "status = ? ORDER BY officer_name", status);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_police_units", "status = ? ORDER BY officer_name", status);
+        return mapMapsToPoliceUnits(results);
     }
 
     public List<PoliceUnit> findAvailableUnits() throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_police_units", "status IN ('AVAILABLE', 'ON_PATROL') ORDER BY officer_name");
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_police_units", "status IN ('AVAILABLE', 'ON_PATROL') ORDER BY officer_name");
+        return mapMapsToPoliceUnits(results);
     }
 
     @Override
@@ -80,6 +92,81 @@ public class PoliceUnitDAO extends BaseDAO<PoliceUnit> {
     @Override
     public boolean delete(int id) throws SQLException {
         return procedureCaller.executeDeletePoliceUnit(id);
+    }
+
+    /**
+     * Converts a List of Maps to a List of PoliceUnit objects.
+     */
+    private List<PoliceUnit> mapMapsToPoliceUnits(List<Map<String, Object>> maps) {
+        List<PoliceUnit> units = new ArrayList<>();
+        if (maps == null) {
+            return units;
+        }
+        for (Map<String, Object> map : maps) {
+            PoliceUnit unit = mapMapToPoliceUnit(map);
+            if (unit != null) {
+                units.add(unit);
+            }
+        }
+        return units;
+    }
+
+    /**
+     * Converts a Map to a PoliceUnit object.
+     */
+    private PoliceUnit mapMapToPoliceUnit(Map<String, Object> map) {
+        if (map == null) {
+            return null;
+        }
+
+        PoliceUnit unit = new PoliceUnit();
+
+        unit.setId(getIntValue(map, "id"));
+        unit.setUnitId(getStringValue(map, "unit_id"));
+        unit.setOfficerName(getStringValue(map, "officer_name"));
+        unit.setBadgeNumber(getStringValue(map, "badge_number"));
+        unit.setStatus(getStringValue(map, "status"));
+        unit.setDeviceId(getStringValue(map, "device_id"));
+
+        unit.setCurrentLocationLat(getDoubleValue(map, "current_location_lat"));
+        unit.setCurrentLocationLng(getDoubleValue(map, "current_location_lng"));
+        unit.setLastLocationUpdate(getLocalDateTimeValue(map, "last_location_update"));
+        unit.setCreatedAt(getLocalDateTimeValue(map, "created_at"));
+        unit.setUpdatedAt(getLocalDateTimeValue(map, "updated_at"));
+
+        return unit;
+    }
+
+    private Integer getIntValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) return 0;
+        if (value instanceof Integer) return (Integer) value;
+        if (value instanceof Long) return ((Long) value).intValue();
+        if (value instanceof Number) return ((Number) value).intValue();
+        return 0;
+    }
+
+    private Double getDoubleValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) return 0.0;
+        if (value instanceof Double) return (Double) value;
+        if (value instanceof Integer) return ((Integer) value).doubleValue();
+        if (value instanceof Long) return ((Long) value).doubleValue();
+        if (value instanceof Number) return ((Number) value).doubleValue();
+        return 0.0;
+    }
+
+    private String getStringValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        return value != null ? value.toString() : "";
+    }
+
+    private LocalDateTime getLocalDateTimeValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) return null;
+        if (value instanceof java.sql.Timestamp) return ((java.sql.Timestamp) value).toLocalDateTime();
+        if (value instanceof LocalDateTime) return (LocalDateTime) value;
+        return null;
     }
 
     @Override

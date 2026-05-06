@@ -2,7 +2,6 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.RoleManagementController"
@@ -13,10 +12,11 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
-            <VBox spacing="20" alignment="TOP_CENTER"
-                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" alignment="TOP_CENTER" styleClass="dashboard-container">
+                <padding>
+                    <Insets top="25" right="40" bottom="30" left="40"/>
+                </padding>
 
                 <Label text="Role Based Access Control (RBAC)" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
                 <Label text="Manage user roles and their permissions" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
@@ -27,14 +27,13 @@
 
                 <!-- Role Selection Section -->
                 <HBox alignment="CENTER">
-                    <VBox maxWidth="800" styleClass="profile-edit-card" alignment="CENTER">
+                    <VBox maxWidth="900" minWidth="500" styleClass="profile-edit-card" alignment="CENTER">
                         <Label text="Role Selection" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
-
                         <HBox spacing="15" alignment="CENTER">
                             <Label text="Select Role:" style="-fx-font-weight: bold;"/>
-                            <ComboBox fx:id="roleComboBox" prefWidth="200" promptText="Choose a role"/>
-                            <Button fx:id="refreshButton" text="Load Permissions" styleClass="button-primary"/>
-                            <Button fx:id="fadeButton" text="Animate" styleClass="button-warning"/>
+                            <ComboBox fx:id="roleComboBox" prefWidth="250" promptText="Choose a role"/>
+                            <Button fx:id="refreshButton" text="Load Permissions" styleClass="button-primary" prefWidth="150"/>
+                            <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100"/>
                         </HBox>
                     </VBox>
                 </HBox>
@@ -45,13 +44,16 @@
 
                 <!-- Permissions Table Section -->
                 <HBox alignment="CENTER">
-                    <VBox maxWidth="1000" styleClass="profile-edit-card" alignment="CENTER">
+                    <VBox maxWidth="1000" minWidth="600" styleClass="profile-edit-card" alignment="CENTER">
                         <Label text="Permissions" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                        <TableView fx:id="permissionsTable" prefHeight="450" minHeight="300" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
+                        <TableView fx:id="permissionsTable" prefHeight="450" maxWidth="Infinity">
+                            <columnResizePolicy>
+                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                            </columnResizePolicy>
                             <columns>
-                                <TableColumn fx:id="permissionKeyColumn" text="Permission" minWidth="350"/>
-                                <TableColumn fx:id="permissionValueColumn" text="Granted" minWidth="80" maxWidth="120"/>
+                                <TableColumn fx:id="permissionKeyColumn" text="Permission" prefWidth="500"/>
+                                <TableColumn fx:id="permissionValueColumn" text="Granted" prefWidth="120"/>
                             </columns>
                             <placeholder>
                                 <Label text="No permissions found for selected role" styleClass="status-text"/>
@@ -66,17 +68,21 @@
 
                 <!-- Manage Permission Section -->
                 <HBox alignment="CENTER">
-                    <VBox maxWidth="800" styleClass="profile-edit-card" alignment="CENTER">
+                    <VBox maxWidth="800" minWidth="500" styleClass="profile-edit-card" alignment="CENTER">
                         <Label text="Manage Permission" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                        <GridPane hgap="15" vgap="10" alignment="CENTER">
+                        <GridPane hgap="15" vgap="12" alignment="CENTER">
+                            <columnConstraints>
+                                <ColumnConstraints halignment="RIGHT" minWidth="100" prefWidth="100"/>
+                                <ColumnConstraints minWidth="300" hgrow="ALWAYS"/>
+                            </columnConstraints>
+
                             <Label text="Permission:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <ComboBox fx:id="permissionComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="350" promptText="Select a permission"/>
+                            <ComboBox fx:id="permissionComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="400" promptText="Select a permission"/>
 
                             <Label text="Action:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <CheckBox fx:id="grantCheckBox" text="Grant Permission" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-font-weight: bold;"/>
-
-                            <HBox spacing="10" GridPane.rowIndex="2" GridPane.columnIndex="1" alignment="CENTER">
+                            <HBox spacing="20" GridPane.rowIndex="1" GridPane.columnIndex="1" alignment="CENTER_LEFT">
+                                <CheckBox fx:id="grantCheckBox" text="Grant Permission" style="-fx-font-weight: bold;"/>
                                 <Button fx:id="applyButton" text="Apply Changes" styleClass="button-success" prefWidth="150"/>
                             </HBox>
                         </GridPane>

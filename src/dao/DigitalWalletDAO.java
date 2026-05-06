@@ -2,6 +2,9 @@ package dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -28,40 +31,33 @@ public class DigitalWalletDAO extends BaseDAO<DigitalWallet> {
 
     @Override
     public DigitalWallet findById(int id) throws SQLException {
-        List<DigitalWallet> results = viewLoader.loadViewWithCondition("vw_digital_wallet", "wallet_id = ?", id);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_digital_wallet", "wallet_id = ?", id);
         if (results.isEmpty()) return null;
 
-        DigitalWallet wallet = results.get(0);
-        List<WalletTransaction> transactions = viewLoader.loadViewWithCondition("vw_wallet_transactions", "wallet_id = ?", id);
+        DigitalWallet wallet = mapToDigitalWallet(results.get(0));
+        List<Map<String, Object>> txResults = viewLoader.loadViewWithCondition("vw_wallet_transactions", "wallet_id = ?", id);
+        List<WalletTransaction> transactions = mapToWalletTransactionList(txResults);
         wallet.setTransactions(transactions);
         return wallet;
     }
 
     public DigitalWallet findByCustomerId(int customerId) throws SQLException {
-        Map<String, Object> result = viewLoader.loadViewSingle("vw_digital_wallet", "customer_id = ?", customerId);
-        if (result == null) return null;
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_digital_wallet", "customer_id = ?", customerId);
+        if (results.isEmpty()) return null;
 
-        DigitalWallet wallet = new DigitalWallet();
-        wallet.setId((Integer) result.get("wallet_id"));
-        wallet.setCustomerId((Integer) result.get("customer_id"));
-        wallet.setCustomerName((String) result.get("customer_name"));
-        wallet.setBalance((Double) result.get("balance"));
-
-        if (result.get("created_at") != null) {
-            wallet.setCreatedAt(((java.sql.Timestamp) result.get("created_at")).toLocalDateTime());
+        DigitalWallet wallet = mapToDigitalWallet(results.get(0));
+        if (wallet != null) {
+            List<Map<String, Object>> txResults = viewLoader.loadViewWithCondition("vw_wallet_transactions", "wallet_id = ?", wallet.getId());
+            List<WalletTransaction> transactions = mapToWalletTransactionList(txResults);
+            wallet.setTransactions(transactions);
         }
-        if (result.get("updated_at") != null) {
-            wallet.setUpdatedAt(((java.sql.Timestamp) result.get("updated_at")).toLocalDateTime());
-        }
-
-        List<WalletTransaction> transactions = viewLoader.loadViewWithCondition("vw_wallet_transactions", "wallet_id = ?", wallet.getId());
-        wallet.setTransactions(transactions);
         return wallet;
     }
 
     @Override
     public List<DigitalWallet> findAll() throws SQLException {
-        return viewLoader.loadView("vw_digital_wallet");
+        List<Map<String, Object>> results = viewLoader.loadView("vw_digital_wallet");
+        return mapToDigitalWalletList(results);
     }
 
     @Override
@@ -73,17 +69,10 @@ public class DigitalWalletDAO extends BaseDAO<DigitalWallet> {
         return procedureCaller.executeAddWalletBalance(customerId, amount, referenceId, description);
     }
 
-    /**
-     * Convenience method for adding funds without description.
-     * Calls addFunds with default description.
-     */
     public boolean addFunds(int customerId, double amount, String referenceId) throws SQLException {
         return addFunds(customerId, amount, referenceId, "Wallet deposit");
     }
 
-    /**
-     * Alias method for backward compatibility with controllers expecting addBalance.
-     */
     public boolean addBalance(int customerId, double amount, String referenceId) throws SQLException {
         return addFunds(customerId, amount, referenceId, "Wallet deposit");
     }
@@ -93,24 +82,25 @@ public class DigitalWalletDAO extends BaseDAO<DigitalWallet> {
     }
 
     public List<WalletTransaction> getTransactionHistory(int walletId, int limit) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_wallet_transactions", "wallet_id = ? ORDER BY created_at DESC LIMIT ?", walletId, limit);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_wallet_transactions",
+                "wallet_id = ? ORDER BY created_at DESC LIMIT ?", walletId, limit);
+        return mapToWalletTransactionList(results);
     }
 
     public List<WalletTransaction> getTransactionHistoryByDateRange(int walletId, String startDate, String endDate) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_wallet_transactions",
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_wallet_transactions",
                 "wallet_id = ? AND created_at BETWEEN ? AND ? ORDER BY created_at DESC",
                 walletId, startDate, endDate);
+        return mapToWalletTransactionList(results);
     }
 
     public double getWalletBalance(int customerId) throws SQLException {
-        Map<String, Object> result = viewLoader.loadViewSingle("vw_digital_wallet", "customer_id = ?", customerId);
-        if (result == null) return 0.0;
-        return (Double) result.get("balance");
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_digital_wallet", "customer_id = ?", customerId);
+        if (results.isEmpty()) return 0.0;
+        Number balance = (Number) results.get(0).get("balance");
+        return balance != null ? balance.doubleValue() : 0.0;
     }
 
-    /**
-     * Alias method for getWalletBalance for compatibility with CustomerController.
-     */
     public double getBalanceByCustomerId(int customerId) throws SQLException {
         return getWalletBalance(customerId);
     }
@@ -126,23 +116,93 @@ public class DigitalWalletDAO extends BaseDAO<DigitalWallet> {
     }
 
     public double getTotalDeposits(int customerId) throws SQLException {
-        List<WalletTransaction> transactions = viewLoader.loadViewWithCondition("vw_wallet_transactions",
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_wallet_transactions",
                 "customer_id = ? AND transaction_type = 'DEPOSIT'", customerId);
         double total = 0;
-        for (WalletTransaction tx : transactions) {
-            total += tx.getAmount();
+        for (Map<String, Object> map : results) {
+            Number amount = (Number) map.get("amount");
+            total += amount != null ? amount.doubleValue() : 0;
         }
         return total;
     }
 
     public double getTotalPayments(int customerId) throws SQLException {
-        List<WalletTransaction> transactions = viewLoader.loadViewWithCondition("vw_wallet_transactions",
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_wallet_transactions",
                 "customer_id = ? AND transaction_type = 'PAYMENT'", customerId);
         double total = 0;
-        for (WalletTransaction tx : transactions) {
-            total += Math.abs(tx.getAmount());
+        for (Map<String, Object> map : results) {
+            Number amount = (Number) map.get("amount");
+            total += amount != null ? Math.abs(amount.doubleValue()) : 0;
         }
         return total;
+    }
+
+    // ============================================
+    // HELPER METHODS FOR MAPPING
+    // ============================================
+
+    private DigitalWallet mapToDigitalWallet(Map<String, Object> map) {
+        if (map == null) return null;
+
+        DigitalWallet wallet = new DigitalWallet();
+
+        if (map.get("wallet_id") != null) wallet.setId(((Number) map.get("wallet_id")).intValue());
+        if (map.get("customer_id") != null) wallet.setCustomerId(((Number) map.get("customer_id")).intValue());
+        if (map.get("customer_name") != null) wallet.setCustomerName(map.get("customer_name").toString());
+        if (map.get("balance") != null) wallet.setBalance(((Number) map.get("balance")).doubleValue());
+
+        if (map.get("created_at") instanceof Timestamp) {
+            wallet.setCreatedAt(((Timestamp) map.get("created_at")).toLocalDateTime());
+        }
+        if (map.get("updated_at") instanceof Timestamp) {
+            wallet.setUpdatedAt(((Timestamp) map.get("updated_at")).toLocalDateTime());
+        }
+
+        return wallet;
+    }
+
+    private List<DigitalWallet> mapToDigitalWalletList(List<Map<String, Object>> maps) {
+        List<DigitalWallet> wallets = new ArrayList<>();
+        if (maps != null) {
+            for (Map<String, Object> map : maps) {
+                wallets.add(mapToDigitalWallet(map));
+            }
+        }
+        return wallets;
+    }
+
+    private WalletTransaction mapToWalletTransaction(Map<String, Object> map) {
+        if (map == null) return null;
+
+        WalletTransaction tx = new WalletTransaction();
+
+        if (map.get("id") != null) tx.setId(((Number) map.get("id")).intValue());
+        if (map.get("wallet_id") != null) tx.setWalletId(((Number) map.get("wallet_id")).intValue());
+        if (map.get("amount") != null) tx.setAmount(((Number) map.get("amount")).doubleValue());
+        if (map.get("transaction_type") != null) tx.setTransactionType(map.get("transaction_type").toString());
+        if (map.get("reference_id") != null) tx.setReferenceId(map.get("reference_id").toString());
+        if (map.get("description") != null) tx.setDescription(map.get("description").toString());
+        if (map.get("status") != null) tx.setStatus(map.get("status").toString());
+
+        if (map.get("created_at") instanceof Timestamp) {
+            tx.setTransactionDate(((Timestamp) map.get("created_at")).toLocalDateTime());
+            tx.setCreatedAt(((Timestamp) map.get("created_at")).toLocalDateTime());
+        }
+        if (map.get("updated_at") instanceof Timestamp) {
+            tx.setUpdatedAt(((Timestamp) map.get("updated_at")).toLocalDateTime());
+        }
+
+        return tx;
+    }
+
+    private List<WalletTransaction> mapToWalletTransactionList(List<Map<String, Object>> maps) {
+        List<WalletTransaction> transactions = new ArrayList<>();
+        if (maps != null) {
+            for (Map<String, Object> map : maps) {
+                transactions.add(mapToWalletTransaction(map));
+            }
+        }
+        return transactions;
     }
 
     @Override

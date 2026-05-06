@@ -38,6 +38,35 @@ public class LoginController {
         setupFocusEffects();
         setupButtonEffects();
         setupPasswordToggle();
+
+        // Debug: Print all users in database
+        debugPrintAllUsers();
+    }
+
+    /**
+     * Debug method to print all users in the database
+     */
+    private void debugPrintAllUsers() {
+        try {
+            System.out.println("\n========== USERS IN DATABASE ==========");
+            java.sql.Connection conn = database.DatabaseConnection.getInstance().getConnection();
+            java.sql.Statement stmt = conn.createStatement();
+            java.sql.ResultSet rs = stmt.executeQuery(
+                    "SELECT id, username, role, is_active, LENGTH(password) as pwd_len FROM users"
+            );
+            while (rs.next()) {
+                System.out.println("ID: " + rs.getInt("id") +
+                        ", Username: " + rs.getString("username") +
+                        ", Role: " + rs.getString("role") +
+                        ", Active: " + rs.getBoolean("is_active") +
+                        ", Password Length: " + rs.getInt("pwd_len"));
+            }
+            rs.close();
+            stmt.close();
+            System.out.println("=======================================\n");
+        } catch (Exception e) {
+            System.err.println("Debug error: " + e.getMessage());
+        }
     }
 
     private void setupPasswordToggle() {
@@ -131,9 +160,21 @@ public class LoginController {
         loginButton.setText("LOGGING IN...");
 
         try {
+            // Debug output
+            System.out.println("\n========== LOGIN ATTEMPT ==========");
+            System.out.println("Username: '" + username + "'");
+            System.out.println("Password: '" + password + "'");
+            System.out.println("===================================\n");
+
             User user = userDAO.login(username, password);
 
+            System.out.println("Login result: " + (user != null ? "User found" : "NULL"));
+
             if (user != null && user.isActive()) {
+                System.out.println("User role: " + user.getRole());
+                System.out.println("User active: " + user.isActive());
+
+                // Log successful login with actual user_id
                 auditDAO.logAction(user.getId(), "LOGIN_SUCCESS", "127.0.0.1");
 
                 SessionManager.getInstance().createSession(user.getId(), user.getUsername(),
@@ -146,7 +187,14 @@ public class LoginController {
                 clearForm();
                 SceneManager.getInstance().switchToDashboard();
             } else {
-                auditDAO.logAction(0, "LOGIN_FAILED - " + username, "127.0.0.1");
+                // FIXED: Use user_id = NULL or 1 instead of 0
+                // Option 1: Use NULL (requires modified stored procedure)
+                // auditDAO.logAction(null, "LOGIN_FAILED - " + username, "127.0.0.1");
+
+                // Option 2: Use existing admin user ID (find a valid ID first)
+                int systemUserId = getSystemUserId();
+                auditDAO.logAction(systemUserId, "LOGIN_FAILED - " + username, "127.0.0.1");
+
                 showErrorAnimation();
                 AlertUtil.showError("Login Failed", "Invalid username or password.");
                 passwordField.clear();
@@ -155,12 +203,33 @@ public class LoginController {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            AlertUtil.showError("Error", "Login failed. Please try again.");
+            AlertUtil.showError("Error", "Login failed: " + e.getMessage());
             loginButton.setText("LOGIN");
         } finally {
             loginButton.setDisable(false);
             loginProgress.setVisible(false);
         }
+    }
+
+    /**
+     * Get a valid system user ID for audit logging
+     */
+    private int getSystemUserId() {
+        try {
+            java.sql.Connection conn = database.DatabaseConnection.getInstance().getConnection();
+            java.sql.PreparedStatement ps = conn.prepareStatement(
+                    "SELECT id FROM users WHERE role = 'SYSTEM' OR id = 1 LIMIT 1"
+            );
+            java.sql.ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("id");
+            }
+            rs.close();
+            ps.close();
+        } catch (Exception e) {
+            System.err.println("Could not get system user ID: " + e.getMessage());
+        }
+        return 1; // Default fallback
     }
 
     private void showSuccessAnimation() {

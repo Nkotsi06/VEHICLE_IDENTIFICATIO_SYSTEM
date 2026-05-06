@@ -2,7 +2,10 @@ package dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import database.ProcedureCaller;
 import database.ViewLoader;
@@ -26,21 +29,27 @@ public class OfficerActivityLogDAO extends BaseDAO<OfficerActivityLog> {
 
     @Override
     public OfficerActivityLog findById(int id) throws SQLException {
-        List<OfficerActivityLog> results = viewLoader.loadViewWithCondition("vw_officer_activity_log", "id = ?", id);
-        return results.isEmpty() ? null : results.get(0);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_officer_activity_log", "id = ?", id);
+        if (results.isEmpty()) {
+            return null;
+        }
+        return mapMapToOfficerActivityLog(results.get(0));
     }
 
     @Override
     public List<OfficerActivityLog> findAll() throws SQLException {
-        return viewLoader.loadView("vw_officer_activity_log");
+        List<Map<String, Object>> results = viewLoader.loadView("vw_officer_activity_log");
+        return mapMapsToOfficerActivityLogs(results);
     }
 
     public List<OfficerActivityLog> findByOfficerId(int officerId) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_officer_activity_log", "officer_id = ? ORDER BY created_at DESC", officerId);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_officer_activity_log", "officer_id = ? ORDER BY created_at DESC", officerId);
+        return mapMapsToOfficerActivityLogs(results);
     }
 
     public List<OfficerActivityLog> findByActionType(String actionType) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_officer_activity_log", "action_type = ? ORDER BY created_at DESC", actionType);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_officer_activity_log", "action_type = ? ORDER BY created_at DESC", actionType);
+        return mapMapsToOfficerActivityLogs(results);
     }
 
     @Override
@@ -71,8 +80,104 @@ public class OfficerActivityLogDAO extends BaseDAO<OfficerActivityLog> {
         return procedureCaller.executeDeleteOfficerActivityLog(id);
     }
 
-    public int deleteOldLogs(java.time.LocalDateTime beforeDate) throws SQLException {
+    public int deleteOldLogs(LocalDateTime beforeDate) throws SQLException {
         return procedureCaller.executeDeleteOldOfficerActivityLogs(beforeDate);
+    }
+
+    /**
+     * Converts a List of Maps to a List of OfficerActivityLog objects.
+     *
+     * @param maps the list of maps from the view loader
+     * @return list of OfficerActivityLog objects
+     */
+    private List<OfficerActivityLog> mapMapsToOfficerActivityLogs(List<Map<String, Object>> maps) {
+        List<OfficerActivityLog> logs = new ArrayList<>();
+        if (maps == null) {
+            return logs;
+        }
+        for (Map<String, Object> map : maps) {
+            OfficerActivityLog log = mapMapToOfficerActivityLog(map);
+            if (log != null) {
+                logs.add(log);
+            }
+        }
+        return logs;
+    }
+
+    /**
+     * Converts a Map to an OfficerActivityLog object.
+     *
+     * @param map the map from the view loader
+     * @return OfficerActivityLog object
+     */
+    private OfficerActivityLog mapMapToOfficerActivityLog(Map<String, Object> map) {
+        if (map == null) {
+            return null;
+        }
+
+        OfficerActivityLog log = new OfficerActivityLog();
+
+        log.setId(getIntValue(map, "id"));
+        log.setOfficerId(getIntValue(map, "officer_id"));
+        log.setOfficerName(getStringValue(map, "officer_name"));
+        log.setActionType(getStringValue(map, "action_type"));
+        log.setActionDescription(getStringValue(map, "action_description"));
+        log.setTargetType(getStringValue(map, "target_type"));
+
+        int targetId = getIntValue(map, "target_id");
+        if (targetId > 0) {
+            log.setTargetId(targetId);
+        }
+
+        log.setIpAddress(getStringValue(map, "ip_address"));
+        log.setCreatedAt(getLocalDateTimeValue(map, "created_at"));
+
+        return log;
+    }
+
+    /**
+     * Helper method to safely get Integer values from Map.
+     */
+    private Integer getIntValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) {
+            return 0;
+        }
+        if (value instanceof Integer) {
+            return (Integer) value;
+        }
+        if (value instanceof Long) {
+            return ((Long) value).intValue();
+        }
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        }
+        return 0;
+    }
+
+    /**
+     * Helper method to safely get String values from Map.
+     */
+    private String getStringValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        return value != null ? value.toString() : "";
+    }
+
+    /**
+     * Helper method to safely get LocalDateTime values from Map.
+     */
+    private LocalDateTime getLocalDateTimeValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof java.sql.Timestamp) {
+            return ((java.sql.Timestamp) value).toLocalDateTime();
+        }
+        if (value instanceof LocalDateTime) {
+            return (LocalDateTime) value;
+        }
+        return null;
     }
 
     @Override

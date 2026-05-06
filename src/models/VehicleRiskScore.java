@@ -29,6 +29,10 @@ public class VehicleRiskScore extends BaseEntity {
     private LocalDate lastCalculationDate;
     private String riskLevel;
 
+    // ADDED FIELDS
+    private String make;
+    private String model;
+
     // Risk level constants
     public static final String RISK_CRITICAL = "CRITICAL";
     public static final String RISK_HIGH = "HIGH";
@@ -52,6 +56,10 @@ public class VehicleRiskScore extends BaseEntity {
     private final StringProperty riskLevelDisplayProperty = new SimpleStringProperty();
     private final StringProperty riskColorProperty = new SimpleStringProperty();
     private final StringProperty formattedScoreProperty = new SimpleStringProperty();
+
+    // ADDED PROPERTIES
+    private final StringProperty makeProperty = new SimpleStringProperty();
+    private final StringProperty modelProperty = new SimpleStringProperty();
 
     /**
      * Default constructor.
@@ -147,6 +155,11 @@ public class VehicleRiskScore extends BaseEntity {
     // GETTERS AND SETTERS WITH PROPERTY UPDATES
     // ============================================
 
+    @Override
+    public int getId() { return id; }
+    @Override
+    public void setId(int id) { this.id = id; }
+
     public int getVehicleId() { return vehicleId; }
     public void setVehicleId(int vehicleId) {
         this.vehicleId = vehicleId;
@@ -160,6 +173,21 @@ public class VehicleRiskScore extends BaseEntity {
         registrationNumberProperty.set(registrationNumber);
     }
     public StringProperty registrationNumberProperty() { return registrationNumberProperty; }
+
+    // ADDED GETTERS AND SETTERS
+    public String getMake() { return make; }
+    public void setMake(String make) {
+        this.make = make;
+        makeProperty.set(make);
+    }
+    public StringProperty makeProperty() { return makeProperty; }
+
+    public String getModel() { return model; }
+    public void setModel(String model) {
+        this.model = model;
+        modelProperty.set(model);
+    }
+    public StringProperty modelProperty() { return modelProperty; }
 
     public double getRiskScore() { return riskScore; }
     public void setRiskScore(double riskScore) {
@@ -226,14 +254,17 @@ public class VehicleRiskScore extends BaseEntity {
         return riskFactors.substring(0, 100) + "...";
     }
 
+    public String getVehicleInfo() {
+        String info = registrationNumber != null ? registrationNumber : "";
+        if (make != null && model != null) {
+            info += " (" + make + " " + model + ")";
+        }
+        return info;
+    }
+
     // ============================================
     // OVERRIDE METHODS
     // ============================================
-
-    @Override
-    public int getId() { return id; }
-    @Override
-    public void setId(int id) { this.id = id; }
 
     @Override
     public String toString() {
@@ -250,6 +281,8 @@ public class VehicleRiskScore extends BaseEntity {
         copy.setId(this.id);
         copy.setVehicleId(this.vehicleId);
         copy.setRegistrationNumber(this.registrationNumber);
+        copy.setMake(this.make);
+        copy.setModel(this.model);
         copy.setRiskScore(this.riskScore);
         copy.setRiskFactors(this.riskFactors);
         copy.setLastCalculationDate(this.lastCalculationDate);

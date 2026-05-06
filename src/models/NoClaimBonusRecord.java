@@ -24,10 +24,16 @@ public class NoClaimBonusRecord extends BaseEntity {
     private int id;
     private int insurancePolicyId;
     private String policyNumber;
+    private String registrationNumber;  // ADDED
     private int policyYear;
     private int claimFreeYears;
     private double bonusPercentage;
     private LocalDate calculatedDate;
+
+    // ADDED FIELDS for premium calculations
+    private double basePremium;
+    private double discountedPremium;
+    private double savings;
 
     // Bonus percentage thresholds
     public static final double BONUS_1_YEAR = 10.0;
@@ -39,6 +45,7 @@ public class NoClaimBonusRecord extends BaseEntity {
     // JavaFX Properties
     private final IntegerProperty insurancePolicyIdProperty = new SimpleIntegerProperty();
     private final StringProperty policyNumberProperty = new SimpleStringProperty();
+    private final StringProperty registrationNumberProperty = new SimpleStringProperty();  // ADDED
     private final IntegerProperty policyYearProperty = new SimpleIntegerProperty();
     private final IntegerProperty claimFreeYearsProperty = new SimpleIntegerProperty();
     private final DoubleProperty bonusPercentageProperty = new SimpleDoubleProperty();
@@ -46,14 +53,25 @@ public class NoClaimBonusRecord extends BaseEntity {
     private final StringProperty bonusPercentageDisplayProperty = new SimpleStringProperty();
     private final StringProperty discountMultiplierProperty = new SimpleStringProperty();
 
+    // ADDED PROPERTIES for premium fields
+    private final DoubleProperty basePremiumProperty = new SimpleDoubleProperty();
+    private final DoubleProperty discountedPremiumProperty = new SimpleDoubleProperty();
+    private final DoubleProperty savingsProperty = new SimpleDoubleProperty();
+
     /**
      * Default constructor.
      */
     public NoClaimBonusRecord() {
         super();
         this.calculatedDate = LocalDate.now();
+        this.basePremium = 0.0;
+        this.discountedPremium = 0.0;
+        this.savings = 0.0;
 
         calculatedDateProperty.set(calculatedDate);
+        basePremiumProperty.set(0.0);
+        discountedPremiumProperty.set(0.0);
+        savingsProperty.set(0.0);
     }
 
     /**
@@ -89,11 +107,29 @@ public class NoClaimBonusRecord extends BaseEntity {
     private void updateDisplayProperties() {
         bonusPercentageDisplayProperty.set(String.format("%.0f%%", bonusPercentage));
         discountMultiplierProperty.set(String.format("%.2f", getDiscountMultiplier()));
+        updatePremiumCalculations();
+    }
+
+    private void updatePremiumCalculations() {
+        discountedPremium = basePremium * getDiscountMultiplier();
+        savings = basePremium - discountedPremium;
+        discountedPremiumProperty.set(discountedPremium);
+        savingsProperty.set(savings);
     }
 
     // ============================================
     // GETTERS AND SETTERS WITH PROPERTY UPDATES
     // ============================================
+
+    @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public int getInsurancePolicyId() {
         return insurancePolicyId;
@@ -119,6 +155,20 @@ public class NoClaimBonusRecord extends BaseEntity {
 
     public StringProperty policyNumberProperty() {
         return policyNumberProperty;
+    }
+
+    // ADDED GETTERS AND SETTERS
+    public String getRegistrationNumber() {
+        return registrationNumber;
+    }
+
+    public void setRegistrationNumber(String registrationNumber) {
+        this.registrationNumber = registrationNumber;
+        registrationNumberProperty.set(registrationNumber);
+    }
+
+    public StringProperty registrationNumberProperty() {
+        return registrationNumberProperty;
     }
 
     public int getPolicyYear() {
@@ -183,6 +233,47 @@ public class NoClaimBonusRecord extends BaseEntity {
         return discountMultiplierProperty;
     }
 
+    // ADDED GETTERS AND SETTERS FOR PREMIUM FIELDS
+    public double getBasePremium() {
+        return basePremium;
+    }
+
+    public void setBasePremium(double basePremium) {
+        this.basePremium = basePremium;
+        basePremiumProperty.set(basePremium);
+        updatePremiumCalculations();
+    }
+
+    public DoubleProperty basePremiumProperty() {
+        return basePremiumProperty;
+    }
+
+    public double getDiscountedPremium() {
+        return discountedPremium;
+    }
+
+    public void setDiscountedPremium(double discountedPremium) {
+        this.discountedPremium = discountedPremium;
+        discountedPremiumProperty.set(discountedPremium);
+    }
+
+    public DoubleProperty discountedPremiumProperty() {
+        return discountedPremiumProperty;
+    }
+
+    public double getSavings() {
+        return savings;
+    }
+
+    public void setSavings(double savings) {
+        this.savings = savings;
+        savingsProperty.set(savings);
+    }
+
+    public DoubleProperty savingsProperty() {
+        return savingsProperty;
+    }
+
     // ============================================
     // BUSINESS LOGIC METHODS
     // ============================================
@@ -218,6 +309,18 @@ public class NoClaimBonusRecord extends BaseEntity {
         return "None";
     }
 
+    public String getFormattedBasePremium() {
+        return String.format("M%,.2f", basePremium);
+    }
+
+    public String getFormattedDiscountedPremium() {
+        return String.format("M%,.2f", discountedPremium);
+    }
+
+    public String getFormattedSavings() {
+        return String.format("M%,.2f", savings);
+    }
+
     /**
      * Calculates the bonus percentage based on claim-free years.
      *
@@ -248,16 +351,6 @@ public class NoClaimBonusRecord extends BaseEntity {
     // ============================================
 
     @Override
-    public int getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    @Override
     public String toString() {
         return "Policy " + policyNumber + " - " + claimFreeYears + " claim-free years - " + getBonusPercentageDisplay() + " bonus";
     }
@@ -272,10 +365,14 @@ public class NoClaimBonusRecord extends BaseEntity {
         copy.setId(this.id);
         copy.setInsurancePolicyId(this.insurancePolicyId);
         copy.setPolicyNumber(this.policyNumber);
+        copy.setRegistrationNumber(this.registrationNumber);
         copy.setPolicyYear(this.policyYear);
         copy.setClaimFreeYears(this.claimFreeYears);
         copy.setBonusPercentage(this.bonusPercentage);
         copy.setCalculatedDate(this.calculatedDate);
+        copy.setBasePremium(this.basePremium);
+        copy.setDiscountedPremium(this.discountedPremium);
+        copy.setSavings(this.savings);
         copy.setCreatedAt(this.getCreatedAt());
         copy.setUpdatedAt(this.getUpdatedAt());
         return copy;

@@ -2,9 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
-<?import javafx.collections.FXCollections?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.CustomerController"
             stylesheets="@../css/application.css" styleClass="border-pane">
@@ -14,68 +12,69 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
-            <VBox spacing="20" alignment="TOP_CENTER"
-                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" alignment="TOP_CENTER" styleClass="dashboard-container">
+                <padding>
+                    <Insets top="25" right="40" bottom="30" left="40"/>
+                </padding>
 
-                <!-- Welcome Section -->
                 <Label fx:id="welcomeLabel" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
                 <Label text="Customer Dashboard" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
 
                 <Separator/>
 
-                <!-- Progress Indicator -->
                 <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
 
-                <!-- Stats Cards Row -->
-                <HBox spacing="15" alignment="CENTER" wrap="True">
-                    <VBox styleClass="dashboard-card" alignment="CENTER" HBox.hgrow="ALWAYS">
+                <!-- Stats Cards Row - Using FlowPane for wrapping -->
+                <FlowPane hgap="15" vgap="15" alignment="CENTER">
+                    <VBox styleClass="dashboard-card" alignment="CENTER" minWidth="160" prefWidth="180">
                         <Label text="My Vehicles" styleClass="card-title"/>
                         <Label fx:id="vehiclesCountLabel" text="0" styleClass="card-value"/>
                     </VBox>
 
-                    <VBox styleClass="dashboard-card" alignment="CENTER" HBox.hgrow="ALWAYS">
+                    <VBox styleClass="dashboard-card" alignment="CENTER" minWidth="160" prefWidth="180">
                         <Label text="Active Queries" styleClass="card-title"/>
                         <Label fx:id="activeQueriesLabel" text="0" styleClass="card-value"/>
                     </VBox>
 
-                    <VBox styleClass="dashboard-card" alignment="CENTER" HBox.hgrow="ALWAYS">
+                    <VBox styleClass="dashboard-card" alignment="CENTER" minWidth="160" prefWidth="180">
                         <Label text="Pending Complaints" styleClass="card-title"/>
                         <Label fx:id="pendingComplaintsLabel" text="0" styleClass="card-value"/>
                     </VBox>
 
-                    <VBox styleClass="dashboard-card" alignment="CENTER" HBox.hgrow="ALWAYS">
+                    <VBox styleClass="dashboard-card" alignment="CENTER" minWidth="160" prefWidth="180">
                         <Label text="Wallet Balance" styleClass="card-title"/>
                         <Label fx:id="walletBalanceLabel" text="M0.00" styleClass="card-value"/>
                     </VBox>
 
-                    <VBox styleClass="dashboard-card" alignment="CENTER" HBox.hgrow="ALWAYS">
+                    <VBox styleClass="dashboard-card" alignment="CENTER" minWidth="160" prefWidth="180">
                         <Label text="Unread Notifications" styleClass="card-title"/>
                         <Label fx:id="unreadNotificationsLabel" text="0" styleClass="card-value"/>
                     </VBox>
 
-                    <VBox styleClass="dashboard-card" alignment="CENTER" HBox.hgrow="ALWAYS">
+                    <VBox styleClass="dashboard-card" alignment="CENTER" minWidth="160" prefWidth="180">
                         <Label text="Reviews Written" styleClass="card-title"/>
                         <Label fx:id="reviewsCountLabel" text="0" styleClass="card-value"/>
                     </VBox>
-                </HBox>
+                </FlowPane>
 
                 <Separator/>
 
-                <!-- Progress Bar -->
                 <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
                 <!-- Recent Vehicles Table -->
-                <TitledPane text="Recent Vehicles" expanded="true" style="-fx-font-weight: bold;">
+                <TitledPane text="Recent Vehicles" expanded="true">
                     <VBox spacing="10" style="-fx-padding: 10;">
-                        <TableView fx:id="recentVehiclesTable" prefHeight="200" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
+                        <TableView fx:id="recentVehiclesTable" prefHeight="200" maxWidth="Infinity">
+                            <columnResizePolicy>
+                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                            </columnResizePolicy>
                             <columns>
-                                <TableColumn fx:id="vehicleRegCol" text="Registration" minWidth="100" maxWidth="130"/>
-                                <TableColumn fx:id="vehicleMakeCol" text="Make" minWidth="80" maxWidth="110"/>
-                                <TableColumn fx:id="vehicleModelCol" text="Model" minWidth="80" maxWidth="110"/>
-                                <TableColumn fx:id="vehicleYearCol" text="Year" minWidth="60" maxWidth="90"/>
-                                <TableColumn fx:id="vehicleStatusCol" text="Status" minWidth="80" maxWidth="110"/>
+                                <TableColumn text="Registration" prefWidth="120"/>
+                                <TableColumn text="Make" prefWidth="90"/>
+                                <TableColumn text="Model" prefWidth="90"/>
+                                <TableColumn text="Year" prefWidth="70"/>
+                                <TableColumn text="Status" prefWidth="100"/>
                             </columns>
                             <placeholder>
                                 <Label text="No vehicles found" styleClass="status-text"/>
@@ -88,14 +87,17 @@
                 </TitledPane>
 
                 <!-- Recent Notifications Table -->
-                <TitledPane text="Recent Notifications" expanded="true" style="-fx-font-weight: bold;">
+                <TitledPane text="Recent Notifications" expanded="true">
                     <VBox spacing="10" style="-fx-padding: 10;">
-                        <TableView fx:id="recentNotificationsTable" prefHeight="200" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
+                        <TableView fx:id="recentNotificationsTable" prefHeight="200" maxWidth="Infinity">
+                            <columnResizePolicy>
+                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                            </columnResizePolicy>
                             <columns>
-                                <TableColumn fx:id="notifMessageCol" text="Message" minWidth="250"/>
-                                <TableColumn fx:id="notifTypeCol" text="Type" minWidth="80" maxWidth="110"/>
-                                <TableColumn fx:id="notifDateCol" text="Date" minWidth="120" maxWidth="160"/>
-                                <TableColumn fx:id="notifStatusCol" text="Status" minWidth="70" maxWidth="90"/>
+                                <TableColumn text="Message" prefWidth="280"/>
+                                <TableColumn text="Type" prefWidth="90"/>
+                                <TableColumn text="Date" prefWidth="140"/>
+                                <TableColumn text="Status" prefWidth="80"/>
                             </columns>
                             <placeholder>
                                 <Label text="No notifications found" styleClass="status-text"/>
@@ -107,7 +109,6 @@
                     </VBox>
                 </TitledPane>
 
-                <!-- Status Label -->
                 <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
 
             </VBox>
@@ -117,5 +118,4 @@
     <bottom>
         <fx:include source="FooterComponent.fxml"/>
     </bottom>
-
 </BorderPane>

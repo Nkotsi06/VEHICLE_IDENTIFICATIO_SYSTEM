@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.Region?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.SystemHealthController"
             stylesheets="@../css/application.css" styleClass="border-pane">
@@ -25,10 +25,11 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
-            <VBox spacing="20" alignment="TOP_CENTER"
-                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" alignment="TOP_CENTER" styleClass="dashboard-container">
+                <padding>
+                    <Insets top="25" right="40" bottom="30" left="40"/>
+                </padding>
 
                 <Label text="System Health Dashboard" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
                 <Label text="Real-time system monitoring and health metrics (Admin Only)" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
@@ -37,7 +38,6 @@
 
                 <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
 
-                <!-- Stats Cards Row 1 -->
                 <HBox spacing="15" alignment="CENTER">
                     <VBox spacing="8" styleClass="dashboard-card" alignment="CENTER" HBox.hgrow="ALWAYS">
                         <Label text="Total Users" styleClass="card-title"/>
@@ -70,7 +70,6 @@
 
                 <Separator/>
 
-                <!-- Monthly Vehicle Registrations Section -->
                 <HBox alignment="CENTER">
                     <VBox maxWidth="900" styleClass="profile-edit-card" alignment="CENTER">
                         <Label text="Monthly Vehicle Registrations" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
@@ -83,7 +82,6 @@
 
                 <Separator/>
 
-                <!-- Vehicle Status Distribution Section -->
                 <HBox alignment="CENTER">
                     <VBox maxWidth="600" styleClass="profile-edit-card" alignment="CENTER">
                         <Label text="Vehicle Status Distribution" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
@@ -93,7 +91,6 @@
 
                 <Separator/>
 
-                <!-- Real-time Metrics Section -->
                 <Label text="Real-time Metrics" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
                 <HBox alignment="CENTER">

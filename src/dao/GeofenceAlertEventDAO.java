@@ -57,14 +57,6 @@ public class GeofenceAlertEventDAO extends BaseDAO<GeofenceAlertEvent> {
         return mapToGeofenceAlertEventList(results);
     }
 
-    /**
-     * Counts alert events within a date range.
-     *
-     * @param startDate the start date/time
-     * @param endDate the end date/time
-     * @return number of alert events in the date range
-     * @throws SQLException if database error occurs
-     */
     public int countByDateRange(LocalDateTime startDate, LocalDateTime endDate) throws SQLException {
         return viewLoader.countViewRowsWithCondition("vw_geofence_alerts",
                 "alert_timestamp BETWEEN ? AND ?", startDate, endDate);
@@ -105,71 +97,36 @@ public class GeofenceAlertEventDAO extends BaseDAO<GeofenceAlertEvent> {
     // HELPER METHODS FOR MAPPING
     // ============================================
 
-    /**
-     * Converts a Map to a GeofenceAlertEvent object.
-     *
-     * @param map The map containing the data
-     * @return GeofenceAlertEvent object
-     */
     private GeofenceAlertEvent mapToGeofenceAlertEvent(Map<String, Object> map) {
-        if (map == null) {
-            return null;
-        }
+        if (map == null) return null;
 
         GeofenceAlertEvent event = new GeofenceAlertEvent();
 
-        if (map.get("id") != null) {
-            event.setId(((Number) map.get("id")).intValue());
-        }
-        if (map.get("geofence_zone_id") != null) {
-            event.setGeofenceZoneId(((Number) map.get("geofence_zone_id")).intValue());
-        }
-        if (map.get("zone_name") != null) {
-            event.setZoneName(map.get("zone_name").toString());
-        }
-        if (map.get("zone_type") != null) {
-            event.setZoneType(map.get("zone_type").toString());
-        }
-        if (map.get("vehicle_id") != null) {
-            event.setVehicleId(((Number) map.get("vehicle_id")).intValue());
-        }
-        if (map.get("registration_number") != null) {
-            event.setRegistrationNumber(map.get("registration_number").toString());
-        }
-        if (map.get("alert_type") != null) {
-            event.setAlertType(map.get("alert_type").toString());
-        }
-        if (map.get("alert_timestamp") != null && map.get("alert_timestamp") instanceof java.sql.Timestamp) {
+        if (map.get("id") != null) event.setId(((Number) map.get("id")).intValue());
+        if (map.get("geofence_zone_id") != null) event.setGeofenceZoneId(((Number) map.get("geofence_zone_id")).intValue());
+        if (map.get("zone_name") != null) event.setZoneName(map.get("zone_name").toString());
+        if (map.get("zone_type") != null) event.setZoneType(map.get("zone_type").toString());
+        if (map.get("vehicle_id") != null) event.setVehicleId(((Number) map.get("vehicle_id")).intValue());
+        if (map.get("registration_number") != null) event.setRegistrationNumber(map.get("registration_number").toString());
+        if (map.get("alert_type") != null) event.setAlertType(map.get("alert_type").toString());
+        if (map.get("vehicle_location_lat") != null) event.setVehicleLocationLat(((Number) map.get("vehicle_location_lat")).doubleValue());
+        if (map.get("vehicle_location_lng") != null) event.setVehicleLocationLng(((Number) map.get("vehicle_location_lng")).doubleValue());
+        if (map.get("is_notified") != null) event.setNotified((Boolean) map.get("is_notified"));
+        if (map.get("priority") != null) event.setPriority(map.get("priority").toString());
+
+        if (map.get("alert_timestamp") instanceof java.sql.Timestamp) {
             event.setAlertTimestamp(((java.sql.Timestamp) map.get("alert_timestamp")).toLocalDateTime());
         }
-        if (map.get("vehicle_location_lat") != null) {
-            event.setVehicleLocationLat(((Number) map.get("vehicle_location_lat")).doubleValue());
-        }
-        if (map.get("vehicle_location_lng") != null) {
-            event.setVehicleLocationLng(((Number) map.get("vehicle_location_lng")).doubleValue());
-        }
-        if (map.get("is_notified") != null) {
-            event.setNotified((Boolean) map.get("is_notified"));
-        }
-        if (map.get("priority") != null) {
-            event.setPriority(map.get("priority").toString());
-        }
-        if (map.get("created_at") != null && map.get("created_at") instanceof java.sql.Timestamp) {
+        if (map.get("created_at") instanceof java.sql.Timestamp) {
             event.setCreatedAt(((java.sql.Timestamp) map.get("created_at")).toLocalDateTime());
         }
-        if (map.get("updated_at") != null && map.get("updated_at") instanceof java.sql.Timestamp) {
+        if (map.get("updated_at") instanceof java.sql.Timestamp) {
             event.setUpdatedAt(((java.sql.Timestamp) map.get("updated_at")).toLocalDateTime());
         }
 
         return event;
     }
 
-    /**
-     * Converts a list of Maps to a list of GeofenceAlertEvent objects.
-     *
-     * @param maps List of maps containing the data
-     * @return List of GeofenceAlertEvent objects
-     */
     private List<GeofenceAlertEvent> mapToGeofenceAlertEventList(List<Map<String, Object>> maps) {
         List<GeofenceAlertEvent> events = new ArrayList<>();
         if (maps != null) {
@@ -182,8 +139,6 @@ public class GeofenceAlertEventDAO extends BaseDAO<GeofenceAlertEvent> {
 
     @Override
     protected GeofenceAlertEvent mapRow(ResultSet rs) throws SQLException {
-        // This method is kept for compatibility but is not used when using views
-        // The actual mapping is done via mapToGeofenceAlertEvent
         GeofenceAlertEvent event = new GeofenceAlertEvent();
         event.setId(rs.getInt("id"));
         event.setGeofenceZoneId(rs.getInt("geofence_zone_id"));

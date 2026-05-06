@@ -2,7 +2,10 @@ package dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import database.ProcedureCaller;
 import database.ViewLoader;
@@ -26,18 +29,25 @@ public class VehicleStatusDAO extends BaseDAO<VehicleStatus> {
 
     @Override
     public VehicleStatus findById(int id) throws SQLException {
-        List<VehicleStatus> results = viewLoader.loadViewWithCondition("vw_vehicle_status", "id = ?", id);
-        return results.isEmpty() ? null : results.get(0);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_vehicle_status", "id = ?", id);
+        if (results.isEmpty()) {
+            return null;
+        }
+        return mapMapToVehicleStatus(results.get(0));
     }
 
     public VehicleStatus findByStatusName(String statusName) throws SQLException {
-        List<VehicleStatus> results = viewLoader.loadViewWithCondition("vw_vehicle_status", "status_name = ?", statusName);
-        return results.isEmpty() ? null : results.get(0);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_vehicle_status", "status_name = ?", statusName);
+        if (results.isEmpty()) {
+            return null;
+        }
+        return mapMapToVehicleStatus(results.get(0));
     }
 
     @Override
     public List<VehicleStatus> findAll() throws SQLException {
-        return viewLoader.loadView("vw_vehicle_status");
+        List<Map<String, Object>> results = viewLoader.loadView("vw_vehicle_status");
+        return mapMapsToVehicleStatuses(results);
     }
 
     @Override
@@ -62,6 +72,94 @@ public class VehicleStatusDAO extends BaseDAO<VehicleStatus> {
     @Override
     public boolean delete(int id) throws SQLException {
         return procedureCaller.executeDeleteVehicleStatus(id);
+    }
+
+    /**
+     * Converts a List of Maps to a List of VehicleStatus objects.
+     *
+     * @param maps the list of maps from the view loader
+     * @return list of VehicleStatus objects
+     */
+    private List<VehicleStatus> mapMapsToVehicleStatuses(List<Map<String, Object>> maps) {
+        List<VehicleStatus> statuses = new ArrayList<>();
+        if (maps == null) {
+            return statuses;
+        }
+        for (Map<String, Object> map : maps) {
+            VehicleStatus status = mapMapToVehicleStatus(map);
+            if (status != null) {
+                statuses.add(status);
+            }
+        }
+        return statuses;
+    }
+
+    /**
+     * Converts a Map to a VehicleStatus object.
+     *
+     * @param map the map from the view loader
+     * @return VehicleStatus object
+     */
+    private VehicleStatus mapMapToVehicleStatus(Map<String, Object> map) {
+        if (map == null) {
+            return null;
+        }
+
+        VehicleStatus status = new VehicleStatus();
+
+        status.setId(getIntValue(map, "id"));
+        status.setStatusName(getStringValue(map, "status_name"));
+        status.setDescription(getStringValue(map, "description"));
+        status.setColorCode(getStringValue(map, "color_code"));
+        status.setCreatedAt(getLocalDateTimeValue(map, "created_at"));
+        status.setUpdatedAt(getLocalDateTimeValue(map, "updated_at"));
+
+        return status;
+    }
+
+    /**
+     * Helper method to safely get Integer values from Map.
+     */
+    private Integer getIntValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) {
+            return 0;
+        }
+        if (value instanceof Integer) {
+            return (Integer) value;
+        }
+        if (value instanceof Long) {
+            return ((Long) value).intValue();
+        }
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        }
+        return 0;
+    }
+
+    /**
+     * Helper method to safely get String values from Map.
+     */
+    private String getStringValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        return value != null ? value.toString() : "";
+    }
+
+    /**
+     * Helper method to safely get LocalDateTime values from Map.
+     */
+    private LocalDateTime getLocalDateTimeValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof java.sql.Timestamp) {
+            return ((java.sql.Timestamp) value).toLocalDateTime();
+        }
+        if (value instanceof LocalDateTime) {
+            return (LocalDateTime) value;
+        }
+        return null;
     }
 
     @Override

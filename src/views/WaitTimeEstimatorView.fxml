@@ -2,7 +2,6 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.WaitTimeEstimatorController"
@@ -13,10 +12,11 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
-            <VBox spacing="20" alignment="TOP_CENTER"
-                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" alignment="TOP_CENTER" styleClass="dashboard-container">
+                <padding>
+                    <Insets top="25" right="40" bottom="30" left="40"/>
+                </padding>
 
                 <Label text="Wait Time Estimator" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
                 <Label text="Estimate service wait times for workshops" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
@@ -27,23 +27,21 @@
 
                 <!-- Select Workshop Section -->
                 <HBox alignment="CENTER">
-                    <VBox maxWidth="800" styleClass="profile-edit-card" alignment="CENTER">
+                    <VBox maxWidth="900" minWidth="600" styleClass="profile-edit-card" alignment="CENTER">
                         <Label text="Select Workshop" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                        <GridPane hgap="15" vgap="10" alignment="CENTER">
+                        <GridPane hgap="15" vgap="12" alignment="CENTER">
                             <columnConstraints>
-                                <ColumnConstraints halignment="RIGHT" minWidth="100"/>
-                                <ColumnConstraints minWidth="250"/>
+                                <ColumnConstraints halignment="RIGHT" minWidth="100" prefWidth="100"/>
+                                <ColumnConstraints minWidth="350" hgrow="ALWAYS"/>
                             </columnConstraints>
 
                             <Label text="Select Workshop:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <ComboBox fx:id="workshopComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="300"/>
+                            <ComboBox fx:id="workshopComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="400"/>
                         </GridPane>
 
-                        <HBox alignment="CENTER">
-                            <Button fx:id="estimateButton" text="Estimate Wait Time" styleClass="button-primary" prefWidth="140">
-                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                            </Button>
+                        <HBox alignment="CENTER" spacing="15">
+                            <Button fx:id="estimateButton" text="Estimate Wait Time" styleClass="button-primary" prefWidth="160"/>
                             <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100"/>
                         </HBox>
                     </VBox>
@@ -53,7 +51,7 @@
 
                 <!-- Wait Time Display Card -->
                 <HBox alignment="CENTER">
-                    <VBox spacing="15" styleClass="profile-card" alignment="CENTER">
+                    <VBox spacing="15" styleClass="profile-card" alignment="CENTER" minWidth="400">
                         <Label text="Current Wait Time" styleClass="card-title" alignment="CENTER" maxWidth="Infinity"/>
                         <HBox spacing="10" alignment="CENTER">
                             <Label fx:id="waitTimeLabel" style="-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: #f1c40f;"/>
@@ -67,13 +65,15 @@
 
                 <!-- Statistics Grid -->
                 <HBox alignment="CENTER">
-                    <VBox maxWidth="1000" style="-fx-background-color: #f8f9fa; -fx-padding: 15; -fx-border-radius: 8;" alignment="CENTER">
-                        <GridPane hgap="20" vgap="10" alignment="CENTER">
+                    <VBox maxWidth="1000" styleClass="profile-edit-card" alignment="CENTER">
+                        <Label text="Workshop Statistics" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+
+                        <GridPane hgap="25" vgap="12" alignment="CENTER">
                             <columnConstraints>
-                                <ColumnConstraints halignment="RIGHT" minWidth="120"/>
-                                <ColumnConstraints minWidth="150"/>
-                                <ColumnConstraints halignment="RIGHT" minWidth="120"/>
-                                <ColumnConstraints minWidth="150"/>
+                                <ColumnConstraints halignment="RIGHT" minWidth="130" prefWidth="130"/>
+                                <ColumnConstraints minWidth="150" hgrow="ALWAYS"/>
+                                <ColumnConstraints halignment="RIGHT" minWidth="130" prefWidth="130"/>
+                                <ColumnConstraints minWidth="150" hgrow="ALWAYS"/>
                             </columnConstraints>
 
                             <Label text="Active Services:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
@@ -99,20 +99,16 @@
 
                 <!-- Recommendation Section -->
                 <HBox alignment="CENTER">
-                    <VBox maxWidth="800" styleClass="profile-edit-card" alignment="CENTER">
+                    <VBox maxWidth="900" minWidth="500" styleClass="profile-edit-card" alignment="CENTER">
                         <Label text="Recommendation" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
                         <Label fx:id="recommendationLabel" styleClass="status-text" wrapText="true" alignment="CENTER" maxWidth="Infinity"/>
                     </VBox>
                 </HBox>
 
                 <!-- Action Buttons -->
-                <HBox alignment="CENTER">
-                    <Button fx:id="bookButton" text="Book Appointment" styleClass="button-success" prefWidth="150" disable="true">
-                        <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                    </Button>
-                    <Button fx:id="refreshButton" text="Refresh" styleClass="button-info" prefWidth="100">
-                        <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                    </Button>
+                <HBox alignment="CENTER" spacing="15">
+                    <Button fx:id="bookButton" text="Book Appointment" styleClass="button-success" prefWidth="160" disable="true"/>
+                    <Button fx:id="refreshButton" text="Refresh" styleClass="button-info" prefWidth="100"/>
                 </HBox>
 
                 <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>

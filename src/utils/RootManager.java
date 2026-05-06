@@ -4,11 +4,14 @@ import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -118,7 +121,7 @@ public class RootManager {
         // Validate inputs
         if (fxmlFile == null || fxmlFile.trim().isEmpty()) {
             LOGGER.warning("Cannot set root: fxmlFile is null or empty");
-            AlertUtil.showWarning("Navigation Error", "Cannot load view: File name not specified");
+            showErrorDialog("Navigation Error", "Cannot load view: File name not specified");
             return;
         }
 
@@ -132,9 +135,19 @@ public class RootManager {
             Object controller = null;
 
             if (newRoot == null) {
-                // Load the FXML
+                // Build the FXML path - FILES ARE IN views FOLDER
                 String fxmlPath = "/views/" + fxmlFile;
-                FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+                URL fxmlUrl = getClass().getResource(fxmlPath);
+
+                if (fxmlUrl == null) {
+                    LOGGER.severe("FXML file not found at: " + fxmlPath);
+                    showErrorDialog("FXML Load Error", "Cannot find FXML file: " + fxmlFile +
+                            "\n\nExpected location: /views/" + fxmlFile);
+                    return;
+                }
+
+                LOGGER.info("Loading FXML from: " + fxmlUrl);
+                FXMLLoader loader = new FXMLLoader(fxmlUrl);
                 newRoot = loader.load();
                 controller = loader.getController();
 
@@ -171,11 +184,24 @@ public class RootManager {
 
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Failed to load FXML: " + fxmlFile, e);
-            AlertUtil.showError("Scene Error", "Failed to load " + fxmlFile + ":\n" + e.getMessage());
+            showErrorDialog("Scene Error", "Failed to load " + fxmlFile + ":\n" + e.getMessage());
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Unexpected error loading " + fxmlFile, e);
-            AlertUtil.showError("Scene Error", "Unexpected error: " + e.getMessage());
+            showErrorDialog("Scene Error", "Unexpected error: " + e.getMessage());
         }
+    }
+
+    /**
+     * Shows an error dialog when FXML loading fails
+     */
+    private void showErrorDialog(String title, String message) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setTitle(title);
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            alert.showAndWait();
+        });
     }
 
     /**
@@ -270,7 +296,14 @@ public class RootManager {
 
         try {
             String fxmlPath = "/views/" + fxmlFile;
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            URL fxmlUrl = getClass().getResource(fxmlPath);
+
+            if (fxmlUrl == null) {
+                LOGGER.warning("Cannot preload: FXML not found at " + fxmlPath);
+                return false;
+            }
+
+            FXMLLoader loader = new FXMLLoader(fxmlUrl);
             Parent root = loader.load();
             Object controller = loader.getController();
 

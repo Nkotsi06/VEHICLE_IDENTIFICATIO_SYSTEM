@@ -13,10 +13,9 @@ import javafx.beans.property.StringProperty;
  * User model representing system users.
  *
  * @author Vehicle Identification System Team
- * @version 1.0
+ * @version 1.1
  */
-public class
-User extends BaseEntity {
+public class User extends BaseEntity {
 
     // Core fields
     private int id;
@@ -60,10 +59,15 @@ User extends BaseEntity {
         this.isActive = true;
 
         activeProperty.set(true);
-        updateRoleDisplay();
+        // Don't call updateRoleDisplay() here because role is null
         updateStatusDisplay();
 
-        roleProperty.addListener((obs, oldVal, newVal) -> updateRoleDisplay());
+        // Add listeners that will update displays when values change
+        roleProperty.addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                updateRoleDisplay();
+            }
+        });
         activeProperty.addListener((obs, oldVal, newVal) -> updateStatusDisplay());
     }
 
@@ -88,6 +92,9 @@ User extends BaseEntity {
         fullNameProperty.set(fullName);
         emailProperty.set(email);
         roleProperty.set(role);
+
+        // Update role display now that role is set
+        updateRoleDisplay();
     }
 
     // ============================================
@@ -95,6 +102,12 @@ User extends BaseEntity {
     // ============================================
 
     private void updateRoleDisplay() {
+        // Safety check: if role is null, set default display
+        if (role == null) {
+            roleDisplayProperty.set("Unknown");
+            return;
+        }
+
         switch (role) {
             case ROLE_ADMIN:
                 roleDisplayProperty.set("Administrator");
@@ -158,6 +171,8 @@ User extends BaseEntity {
     public void setRole(String role) {
         this.role = role;
         roleProperty.set(role);
+        // Update display immediately since role changed
+        updateRoleDisplay();
     }
 
     public StringProperty roleProperty() {
@@ -337,7 +352,9 @@ User extends BaseEntity {
 
     @Override
     public String toString() {
-        return fullName + " (" + username + ") - " + getRoleDisplay();
+        return (fullName != null ? fullName : "Unknown") +
+                " (" + (username != null ? username : "no username") +
+                ") - " + getRoleDisplay();
     }
 
     /**

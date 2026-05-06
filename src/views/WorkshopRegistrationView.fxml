@@ -2,17 +2,17 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.WorkshopRegistrationController"
             stylesheets="@../css/application.css" styleClass="border-pane">
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
-            <VBox spacing="20" alignment="TOP_CENTER"
-                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" alignment="TOP_CENTER" styleClass="dashboard-container">
+                <padding>
+                    <Insets top="25" right="40" bottom="30" left="40"/>
+                </padding>
 
                 <Label text="Workshop Registration" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
                 <Label text="Register your workshop to start servicing vehicles" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
@@ -54,13 +54,9 @@
 
                 <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
 
-                <HBox alignment="CENTER">
-                    <Button fx:id="registerButton" text="Register" styleClass="button-success" prefWidth="120">
-                        <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                    </Button>
-                    <Button fx:id="cancelButton" text="Cancel" styleClass="button-secondary" prefWidth="120">
-                        <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                    </Button>
+                <HBox alignment="CENTER" spacing="15">
+                    <Button fx:id="registerButton" text="Register" styleClass="button-success" prefWidth="130"/>
+                    <Button fx:id="cancelButton" text="Cancel" styleClass="button-secondary" prefWidth="130"/>
                 </HBox>
 
                 <Label text="Note: Your account will need admin approval before you can access the system."

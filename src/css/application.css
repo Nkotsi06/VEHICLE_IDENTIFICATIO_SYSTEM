@@ -1,7 +1,7 @@
 /* ============================================
    VEHICLE IDENTIFICATION SYSTEM - STYLESHEET
    COMPLETE CSS FOR JAVAFX
-   FIXED: Background bleed, Menu visibility, Centering
+   BACKGROUND IMAGE VISIBLE ACROSS ENTIRE SYSTEM
    ============================================ */
 
 /* Root - Custom Properties */
@@ -11,55 +11,43 @@
 }
 
 /* ============================================
-   BACKGROUND IMAGE - VISIBLE ONLY ON STAGE
+   BACKGROUND IMAGE - VISIBLE ACROSS ENTIRE SYSTEM
    ============================================ */
 
-/* Main stage/root background - IMAGE VISIBLE HERE */
+/* Main stage/root background */
 .root {
     -fx-background-image: url('../images/background.jpg');
     -fx-background-size: cover;
     -fx-background-position: center;
     -fx-background-repeat: no-repeat;
-    -fx-background-color: #2c3e50;
 }
 
-/* CRITICAL FIX: Content areas get SOLID backgrounds */
-.border-pane {
+/* ALL top-level containers must be transparent */
+.border-pane, .anchor-pane, .stack-pane, .grid-pane {
     -fx-background-color: transparent;
 }
 
-/* FIX: ScrollPane MUST have solid background to prevent bleed */
+/* ============================================
+   SCROLLPANE - TRANSPARENT TO SHOW BACKGROUND
+   ============================================ */
 .scroll-pane {
-    -fx-background-color: #f0f2f5;
-    -fx-background: #f0f2f5;
+    -fx-background-color: transparent;
+    -fx-background: transparent;
     -fx-border-color: transparent;
     -fx-padding: 0;
 }
 
 .scroll-pane > .viewport {
-    -fx-background-color: #f0f2f5;
-}
-
-/* FIX: VBox inside ScrollPane gets background */
-.scroll-pane .vbox,
-.scroll-pane VBox {
-    -fx-background-color: #f0f2f5;
-}
-
-/* Solid backgrounds for all content containers */
-.vbox, .hbox, .grid-pane, .anchor-pane, .stack-pane {
     -fx-background-color: transparent;
 }
 
-/* FIX: TabPane content area solid white */
-.tab-pane .tab-content-area {
-    -fx-background-color: white;
-    -fx-background-radius: 0 8 8 8;
-    -fx-padding: 15;
+.scroll-pane .scroll-bar:vertical,
+.scroll-pane .scroll-bar:horizontal {
+    -fx-background-color: transparent;
 }
 
 /* ============================================
-   DASHBOARD CONTAINER
+   DASHBOARD CONTAINER - TRANSPARENT
    ============================================ */
 .dashboard-container {
     -fx-background-color: transparent;
@@ -69,7 +57,7 @@
 }
 
 /* ============================================
-   TITLED PANE - SOLID BACKGROUND
+   TITLED PANE - SEMI-TRANSPARENT CONTENT
    ============================================ */
 .titled-pane {
     -fx-background-color: transparent;
@@ -87,13 +75,13 @@
 }
 
 .titled-pane > .content {
-    -fx-background-color: white;
+    -fx-background-color: rgba(255, 255, 255, 0.92);
     -fx-background-radius: 0 0 8 8;
     -fx-padding: 15;
 }
 
 /* ============================================
-   TAB PANE - CENTERED TABS & SOLID BACKGROUND
+   TAB PANE - SEMI-TRANSPARENT CONTENT
    ============================================ */
 .tab-pane {
     -fx-background-color: transparent;
@@ -109,7 +97,7 @@
 }
 
 .tab-pane .tab {
-    -fx-background-color: #f8f9fa;
+    -fx-background-color: #F8F9FA;
     -fx-border-color: #dddddd;
     -fx-border-width: 0 0 1 0;
     -fx-padding: 8 25;
@@ -129,25 +117,17 @@
     -fx-font-size: 13px;
 }
 
-/* FIX: Tab content solid white background */
 .tab-pane .tab-content-area {
-    -fx-background-color: white;
+    -fx-background-color: rgba(255, 255, 255, 0.92);
     -fx-background-radius: 0 8 8 8;
     -fx-padding: 15;
 }
 
 /* ============================================
-   CENTERED TAB PANE
-   ============================================ */
-.centered-tab-pane .tab-header-area {
-    -fx-alignment: CENTER;
-}
-
-/* ============================================
-   DASHBOARD CARDS
+   DASHBOARD CARDS - SEMI-TRANSPARENT
    ============================================ */
 .dashboard-card {
-    -fx-background-color: white;
+    -fx-background-color: rgba(255, 255, 255, 0.92);
     -fx-background-radius: 12px;
     -fx-padding: 20 15;
     -fx-spacing: 8;
@@ -173,10 +153,10 @@
 }
 
 /* ============================================
-   PROFILE CARDS
+   PROFILE CARDS - SEMI-TRANSPARENT
    ============================================ */
 .profile-card {
-    -fx-background-color: white;
+    -fx-background-color: rgba(255, 255, 255, 0.92);
     -fx-background-radius: 16px;
     -fx-padding: 25 20;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 5);
@@ -187,7 +167,7 @@
 }
 
 .profile-edit-card {
-    -fx-background-color: white;
+    -fx-background-color: rgba(255, 255, 255, 0.92);
     -fx-background-radius: 16px;
     -fx-padding: 25;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 8, 0, 0, 4);
@@ -204,7 +184,7 @@
 }
 
 /* ============================================
-   BUTTON STYLES
+   BUTTON STYLES - USING YOUR COLORS
    ============================================ */
 .button {
     -fx-background-color: #F8F9FA;
@@ -286,10 +266,10 @@
 }
 
 /* ============================================
-   TABLE VIEW STYLES - FIXED FOR FULL WIDTH
+   TABLE VIEW STYLES - SEMI-TRANSPARENT
    ============================================ */
 .table-view {
-    -fx-background-color: white;
+    -fx-background-color: rgba(255, 255, 255, 0.92);
     -fx-border-color: #dddddd;
     -fx-border-radius: 8px;
     -fx-background-radius: 8px;
@@ -320,13 +300,13 @@
 }
 
 .table-row-cell {
-    -fx-background-color: white;
+    -fx-background-color: rgba(255, 255, 255, 0.92);
     -fx-border-color: #dddddd;
     -fx-border-width: 0 0 1 0;
 }
 
 .table-row-cell:odd {
-    -fx-background-color: #f8f9fa;
+    -fx-background-color: rgba(248, 249, 250, 0.92);
 }
 
 .table-row-cell:selected {
@@ -368,10 +348,10 @@
 }
 
 /* ============================================
-   TEXT FIELDS & INPUTS
+   TEXT FIELDS & INPUTS - SEMI-TRANSPARENT
    ============================================ */
 .text-field, .password-field, .text-area {
-    -fx-background-color: white;
+    -fx-background-color: rgba(255, 255, 255, 0.95);
     -fx-text-fill: #2c3e50;
     -fx-prompt-text-fill: #95a5a6;
     -fx-border-color: #dddddd;
@@ -412,7 +392,7 @@
 }
 
 .pagination .page {
-    -fx-background-color: white;
+    -fx-background-color: rgba(255, 255, 255, 0.92);
     -fx-border-color: #dddddd;
     -fx-text-fill: #2c3e50;
     -fx-border-radius: 4px;
@@ -433,7 +413,7 @@
 }
 
 .pagination .arrow-button {
-    -fx-background-color: #f8f9fa;
+    -fx-background-color: rgba(248, 249, 250, 0.92);
     -fx-border-color: #dddddd;
     -fx-border-radius: 4px;
     -fx-background-radius: 4px;
@@ -461,10 +441,10 @@
 }
 
 /* ============================================
-   FOOTER - FIXED POSITION
+   FOOTER - SEMI-TRANSPARENT
    ============================================ */
 .footer {
-    -fx-background-color: #2c3e50;
+    -fx-background-color: rgba(44, 62, 80, 0.95);
     -fx-padding: 12;
 }
 
@@ -474,14 +454,14 @@
 }
 
 /* ============================================
-   MENU BAR STYLES - VISIBLE NOW!
+   MENU BAR STYLES - WHITE BACKGROUND WITH BLACK TEXT
    ============================================ */
 .menu-bar, .main-menu-bar {
-    -fx-background-color: #1a252f;
+    -fx-background-color: #FFFFFF;
     -fx-padding: 0;
     -fx-spacing: 0;
-    -fx-border-color: #0d1419;
-    -fx-border-width: 0 0 2 0;
+    -fx-border-color: #dddddd;
+    -fx-border-width: 0 0 1 0;
 }
 
 .menu-bar .menu {
@@ -490,7 +470,7 @@
 }
 
 .menu-bar .menu .label {
-    -fx-text-fill: #ffffff !important;
+    -fx-text-fill: #1a1a1a !important;
     -fx-font-size: 14px;
     -fx-font-weight: bold;
 }
@@ -511,31 +491,93 @@
     -fx-text-fill: white !important;
 }
 
+/* ============================================
+   DROPDOWN MENU (CONTEXT MENU) - GRAY BACKGROUND
+   ============================================ */
+
+/* Context menu container - light gray background */
 .context-menu {
-    -fx-background-color: white;
+    -fx-background-color: #e0e0e0;
     -fx-background-radius: 8px;
-    -fx-border-color: #dddddd;
+    -fx-border-color: #cccccc;
     -fx-border-radius: 8px;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 4);
     -fx-padding: 5 0;
 }
 
+/* MenuItem - gray background (NOT transparent) */
 .menu-item {
-    -fx-background-color: transparent;
+    -fx-background-color: #d3d3d3;
     -fx-padding: 10 25 10 25;
 }
 
+/* MenuItem label - black text for readability */
 .menu-item .label {
-    -fx-text-fill: #2c3e50 !important;
+    -fx-text-fill: #1a1a1a !important;
     -fx-font-size: 13px;
+    -fx-font-weight: normal;
 }
 
+/* MenuItem hover effect - darker gray */
 .menu-item:hover {
-    -fx-background-color: #006400;
+    -fx-background-color: #b0b0b0;
 }
 
+/* MenuItem hover label - keep black text */
 .menu-item:hover .label {
-    -fx-text-fill: white !important;
+    -fx-text-fill: #1a1a1a !important;
+}
+
+/* MenuItem:focused (keyboard navigation) - same as hover */
+.menu-item:focused {
+    -fx-background-color: #b0b0b0;
+}
+
+.menu-item:focused .label {
+    -fx-text-fill: #1a1a1a !important;
+}
+
+/* MenuItem:disabled - lighter gray */
+.menu-item:disabled {
+    -fx-background-color: #e8e8e8;
+    -fx-opacity: 0.6;
+}
+
+.menu-item:disabled .label {
+    -fx-text-fill: #666666 !important;
+}
+
+/* Separator in context menu */
+.context-menu .separator {
+    -fx-background-color: #cccccc;
+    -fx-padding: 0;
+}
+
+.context-menu .separator .line {
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1;
+}
+
+/* RadioMenuItem and CheckMenuItem styling */
+.radio-menu-item, .check-menu-item {
+    -fx-background-color: #d3d3d3;
+}
+
+.radio-menu-item:hover, .check-menu-item:hover {
+    -fx-background-color: #b0b0b0;
+}
+
+.radio-menu-item .label, .check-menu-item .label {
+    -fx-text-fill: #1a1a1a !important;
+}
+
+/* CustomMenuItem (if used) */
+.custom-menu-item {
+    -fx-background-color: #d3d3d3;
+}
+
+.custom-menu-item:hover {
+    -fx-background-color: #b0b0b0;
 }
 
 /* ============================================
@@ -555,10 +597,10 @@
 }
 
 /* ============================================
-   CARD CONTAINER FOR CENTERING
+   CARD CONTAINER FOR CENTERING - SEMI-TRANSPARENT
    ============================================ */
 .card-container {
-    -fx-background-color: white;
+    -fx-background-color: rgba(255, 255, 255, 0.92);
     -fx-background-radius: 12px;
     -fx-padding: 30;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);
@@ -594,7 +636,7 @@
    BANNER ALERT STYLES
    ============================================ */
 .alert-banner {
-    -fx-background-color: #dc3545;
+    -fx-background-color: #E31E2C;
     -fx-padding: 15;
     -fx-background-radius: 8px;
 }
@@ -603,4 +645,122 @@
     -fx-text-fill: white;
     -fx-font-weight: bold;
     -fx-alignment: CENTER;
+}
+
+/* ============================================
+   DARK OVERLAY FOR BETTER TEXT READABILITY
+   ============================================ */
+.background-overlay {
+    -fx-background-color: rgba(0, 0, 0, 0.35);
+}
+
+/* ============================================
+   FIX FOR TABPANE CONTENT BACKGROUNDS
+   ============================================ */
+.tab-pane .tab-content-area {
+    -fx-background-color: rgba(255, 255, 255, 0.92);
+    -fx-background-radius: 0 8 8 8;
+    -fx-padding: 15;
+}
+
+/* Ensure Tab content VBox has background */
+.tab-pane .tab .vbox,
+.tab-pane .tab VBox {
+    -fx-background-color: rgba(255, 255, 255, 0.92);
+}
+
+/* ============================================
+   FIX FOR LISTVIEW IN PROFILE CARDS
+   ============================================ */
+.list-view {
+    -fx-background-color: rgba(255, 255, 255, 0.92);
+    -fx-border-color: #dddddd;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.list-view .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #2c3e50;
+    -fx-padding: 10 15;
+}
+
+.list-view .list-cell:odd {
+    -fx-background-color: rgba(248, 249, 250, 0.9);
+}
+
+.list-view .list-cell:selected {
+    -fx-background-color: #006400;
+    -fx-text-fill: white;
+}
+
+/* ============================================
+   WELCOME SCREEN SPECIFIC STYLES
+   JavaFX CSS Compatible - No @keyframes, No -fx-scale, No -fx-transition
+   ============================================ */
+
+.welcome-container {
+    -fx-background-image: url('../images/Logo.jpg');
+    -fx-background-size: cover;
+    -fx-background-position: center;
+    -fx-background-repeat: no-repeat;
+}
+
+.welcome-card {
+    -fx-background-color: rgba(255, 255, 255, 0.92);
+    -fx-background-radius: 16px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 20, 0, 0, 10);
+    -fx-padding: 30;
+    -fx-alignment: CENTER;
+}
+
+/* Welcome screen specific card */
+.welcome-info-card {
+    -fx-background-color: rgba(255, 255, 255, 0.95);
+    -fx-background-radius: 20px;
+    -fx-padding: 25px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 20, 0, 0, 10);
+    -fx-border-color: #006400;
+    -fx-border-width: 1px;
+    -fx-border-radius: 20px;
+}
+
+/* Feature list styling */
+.feature-list {
+    -fx-spacing: 8;
+    -fx-alignment: CENTER;
+}
+
+.feature-item {
+    -fx-font-size: 12px;
+    -fx-text-fill: #2c3e50;
+    -fx-padding: 4 0;
+}
+
+/* Progress indicator styling */
+.progress-indicator {
+    -fx-progress-color: #006400;
+    -fx-effect: dropshadow(gaussian, rgba(0,100,0,0.3), 5, 0, 0, 0);
+}
+
+/* Button styling - no -fx-scale or -fx-transition in CSS (handled in Java controller) */
+.button-primary {
+    -fx-background-color: #006400;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 30;
+    -fx-background-radius: 25;
+    -fx-cursor: hand;
+}
+
+.button-primary:hover {
+    -fx-background-color: #008000;
+    -fx-effect: dropshadow(gaussian, rgba(0,100,0,0.5), 15, 0, 0, 0);
+}
+
+/* Image hover effect - no -fx-scale or -fx-transition in CSS */
+.profile-image-circle:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0,100,0,0.6), 25, 0, 0, 0);
+    -fx-cursor: hand;
 }

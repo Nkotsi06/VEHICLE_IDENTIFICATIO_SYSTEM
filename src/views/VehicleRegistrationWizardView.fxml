@@ -2,7 +2,6 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.VehicleRegistrationWizardController"
@@ -13,10 +12,11 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
-            <VBox spacing="20" alignment="TOP_CENTER"
-                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" alignment="TOP_CENTER" styleClass="dashboard-container">
+                <padding>
+                    <Insets top="25" right="40" bottom="30" left="40"/>
+                </padding>
 
                 <Label text="Vehicle Registration Wizard" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
                 <Label text="Step-by-step vehicle registration process" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
@@ -27,24 +27,24 @@
 
                 <!-- Step Progress Indicators -->
                 <HBox alignment="CENTER">
-                    <VBox maxWidth="1000" styleClass="profile-card" alignment="CENTER">
-                        <HBox spacing="20" alignment="CENTER">
-                            <HBox spacing="5" alignment="CENTER">
+                    <VBox maxWidth="1000" styleClass="profile-card" alignment="CENTER" spacing="15">
+                        <HBox spacing="25" alignment="CENTER">
+                            <HBox spacing="8" alignment="CENTER">
                                 <Label text="Step 1:" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
                                 <Label fx:id="step1Status" text="Pending" style="-fx-text-fill: #7f8c8d;"/>
                             </HBox>
                             <Label text="→" style="-fx-font-size: 18px;"/>
-                            <HBox spacing="5" alignment="CENTER">
+                            <HBox spacing="8" alignment="CENTER">
                                 <Label text="Step 2:" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
                                 <Label fx:id="step2Status" text="Pending" style="-fx-text-fill: #7f8c8d;"/>
                             </HBox>
                             <Label text="→" style="-fx-font-size: 18px;"/>
-                            <HBox spacing="5" alignment="CENTER">
+                            <HBox spacing="8" alignment="CENTER">
                                 <Label text="Step 3:" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
                                 <Label fx:id="step3Status" text="Pending" style="-fx-text-fill: #7f8c8d;"/>
                             </HBox>
                             <Label text="→" style="-fx-font-size: 18px;"/>
-                            <HBox spacing="5" alignment="CENTER">
+                            <HBox spacing="8" alignment="CENTER">
                                 <Label text="Step 4:" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
                                 <Label fx:id="step4Status" text="Pending" style="-fx-text-fill: #7f8c8d;"/>
                             </HBox>
@@ -61,8 +61,8 @@
                         <Separator/>
                         <GridPane hgap="15" vgap="12" alignment="CENTER">
                             <columnConstraints>
-                                <ColumnConstraints halignment="RIGHT" minWidth="120"/>
-                                <ColumnConstraints minWidth="250"/>
+                                <ColumnConstraints halignment="RIGHT" minWidth="120" prefWidth="120"/>
+                                <ColumnConstraints minWidth="250" hgrow="ALWAYS"/>
                             </columnConstraints>
 
                             <Label text="Registration Number:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
@@ -90,9 +90,7 @@
                             <ComboBox fx:id="ownerComboBox" GridPane.rowIndex="7" GridPane.columnIndex="1" prefWidth="250"/>
                         </GridPane>
                         <HBox alignment="CENTER_RIGHT">
-                            <Button fx:id="next1Button" text="Next →" styleClass="button-primary" prefWidth="100">
-                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                            </Button>
+                            <Button fx:id="next1Button" text="Next →" styleClass="button-primary" prefWidth="100"/>
                         </HBox>
                     </VBox>
                 </HBox>
@@ -106,8 +104,8 @@
 
                         <GridPane hgap="15" vgap="12" alignment="CENTER">
                             <columnConstraints>
-                                <ColumnConstraints halignment="RIGHT" minWidth="120"/>
-                                <ColumnConstraints minWidth="250"/>
+                                <ColumnConstraints halignment="RIGHT" minWidth="120" prefWidth="120"/>
+                                <ColumnConstraints minWidth="250" hgrow="ALWAYS"/>
                             </columnConstraints>
 
                             <Label text="Vehicle Condition:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
@@ -135,8 +133,8 @@
 
                         <GridPane hgap="15" vgap="12" alignment="CENTER">
                             <columnConstraints>
-                                <ColumnConstraints halignment="RIGHT" minWidth="120"/>
-                                <ColumnConstraints minWidth="250"/>
+                                <ColumnConstraints halignment="RIGHT" minWidth="120" prefWidth="120"/>
+                                <ColumnConstraints minWidth="250" hgrow="ALWAYS"/>
                             </columnConstraints>
 
                             <Label text="Document Type:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
@@ -166,13 +164,13 @@
                         <Separator/>
                         <Label text="Please review all information before submitting." styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
 
-                        <TitledPane text="Vehicle Details" expanded="true" style="-fx-font-weight: bold;">
+                        <TitledPane text="Vehicle Details" expanded="true">
                             <GridPane hgap="15" vgap="8" alignment="CENTER">
                                 <columnConstraints>
-                                    <ColumnConstraints halignment="RIGHT" minWidth="120"/>
-                                    <ColumnConstraints minWidth="200"/>
-                                    <ColumnConstraints halignment="RIGHT" minWidth="120"/>
-                                    <ColumnConstraints minWidth="200"/>
+                                    <ColumnConstraints halignment="RIGHT" minWidth="120" prefWidth="120"/>
+                                    <ColumnConstraints minWidth="200" hgrow="ALWAYS"/>
+                                    <ColumnConstraints halignment="RIGHT" minWidth="120" prefWidth="120"/>
+                                    <ColumnConstraints minWidth="200" hgrow="ALWAYS"/>
                                 </columnConstraints>
 
                                 <Label text="Registration:" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
@@ -188,11 +186,9 @@
 
                         <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
-                        <HBox alignment="CENTER">
+                        <HBox alignment="CENTER" spacing="15">
                             <Button fx:id="back4Button" text="← Back" styleClass="button-secondary" prefWidth="90"/>
-                            <Button fx:id="submitButton" text="Submit Registration" styleClass="button-success" prefWidth="180">
-                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                            </Button>
+                            <Button fx:id="submitButton" text="Submit Registration" styleClass="button-success" prefWidth="180"/>
                             <Button fx:id="cancelButton" text="Cancel" styleClass="button-secondary" prefWidth="90"/>
                         </HBox>
                     </VBox>

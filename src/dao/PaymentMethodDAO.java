@@ -2,7 +2,10 @@ package dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import database.ProcedureCaller;
 import database.ViewLoader;
@@ -26,26 +29,35 @@ public class PaymentMethodDAO extends BaseDAO<PaymentMethod> {
 
     @Override
     public PaymentMethod findById(int id) throws SQLException {
-        List<PaymentMethod> results = viewLoader.loadViewWithCondition("vw_payment_methods", "id = ?", id);
-        return results.isEmpty() ? null : results.get(0);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_payment_methods", "id = ?", id);
+        if (results.isEmpty()) {
+            return null;
+        }
+        return mapMapToPaymentMethod(results.get(0));
     }
 
     @Override
     public List<PaymentMethod> findAll() throws SQLException {
-        return viewLoader.loadView("vw_payment_methods");
+        List<Map<String, Object>> results = viewLoader.loadView("vw_payment_methods");
+        return mapMapsToPaymentMethods(results);
     }
 
     public List<PaymentMethod> findByWalletId(int walletId) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_payment_methods", "wallet_id = ? ORDER BY is_default DESC", walletId);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_payment_methods", "wallet_id = ? ORDER BY is_default DESC", walletId);
+        return mapMapsToPaymentMethods(results);
     }
 
     public List<PaymentMethod> findByCustomerId(int customerId) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_payment_methods", "customer_id = ? ORDER BY is_default DESC", customerId);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_payment_methods", "customer_id = ? ORDER BY is_default DESC", customerId);
+        return mapMapsToPaymentMethods(results);
     }
 
     public PaymentMethod findDefaultByWalletId(int walletId) throws SQLException {
-        List<PaymentMethod> results = viewLoader.loadViewWithCondition("vw_payment_methods", "wallet_id = ? AND is_default = true", walletId);
-        return results.isEmpty() ? null : results.get(0);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_payment_methods", "wallet_id = ? AND is_default = true", walletId);
+        if (results.isEmpty()) {
+            return null;
+        }
+        return mapMapToPaymentMethod(results.get(0));
     }
 
     @Override
@@ -82,7 +94,6 @@ public class PaymentMethodDAO extends BaseDAO<PaymentMethod> {
     }
 
     public boolean setAsDefault(int paymentMethodId, int walletId) throws SQLException {
-        // This operation needs to be transactional - clear others first, then set this one
         return procedureCaller.executeSetDefaultPaymentMethod(paymentMethodId, walletId);
     }
 
@@ -105,6 +116,71 @@ public class PaymentMethodDAO extends BaseDAO<PaymentMethod> {
 
     public boolean deleteByWalletId(int walletId) throws SQLException {
         return procedureCaller.executeDeletePaymentMethodsByWallet(walletId);
+    }
+
+    /**
+     * Converts a List of Maps to a List of PaymentMethod objects.
+     */
+    private List<PaymentMethod> mapMapsToPaymentMethods(List<Map<String, Object>> maps) {
+        List<PaymentMethod> methods = new ArrayList<>();
+        if (maps == null) {
+            return methods;
+        }
+        for (Map<String, Object> map : maps) {
+            PaymentMethod method = mapMapToPaymentMethod(map);
+            if (method != null) {
+                methods.add(method);
+            }
+        }
+        return methods;
+    }
+
+    /**
+     * Converts a Map to a PaymentMethod object.
+     */
+    private PaymentMethod mapMapToPaymentMethod(Map<String, Object> map) {
+        if (map == null) {
+            return null;
+        }
+
+        PaymentMethod method = new PaymentMethod();
+
+        method.setId(getIntValue(map, "id"));
+        method.setWalletId(getIntValue(map, "wallet_id"));
+        method.setCardLastFour(getStringValue(map, "card_last_four"));
+        method.setCardType(getStringValue(map, "card_type"));
+        method.setExpiryMonth(getIntValue(map, "expiry_month"));
+        method.setExpiryYear(getIntValue(map, "expiry_year"));
+
+        Boolean isDefault = (Boolean) map.get("is_default");
+        method.setDefault(isDefault != null && isDefault);
+
+        method.setCreatedAt(getLocalDateTimeValue(map, "created_at"));
+        method.setUpdatedAt(getLocalDateTimeValue(map, "updated_at"));
+
+        return method;
+    }
+
+    private Integer getIntValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) return 0;
+        if (value instanceof Integer) return (Integer) value;
+        if (value instanceof Long) return ((Long) value).intValue();
+        if (value instanceof Number) return ((Number) value).intValue();
+        return 0;
+    }
+
+    private String getStringValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        return value != null ? value.toString() : "";
+    }
+
+    private LocalDateTime getLocalDateTimeValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) return null;
+        if (value instanceof java.sql.Timestamp) return ((java.sql.Timestamp) value).toLocalDateTime();
+        if (value instanceof LocalDateTime) return (LocalDateTime) value;
+        return null;
     }
 
     @Override

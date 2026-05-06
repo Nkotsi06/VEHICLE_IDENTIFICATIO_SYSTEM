@@ -41,6 +41,10 @@ public class VehicleSighting extends BaseEntity {
     private Double estimatedSpeed;
     private Double distanceFromPrevious;
 
+    // ADDED FIELDS
+    private String imagePath;
+    private String alertStatus;
+
     // Source type constants
     public static final String SOURCE_TRAFFIC_CAMERA = "TRAFFIC_CAMERA";
     public static final String SOURCE_ANPR = "ANPR";
@@ -69,6 +73,10 @@ public class VehicleSighting extends BaseEntity {
     private final StringProperty sourceIconProperty = new SimpleStringProperty();
     private final StringProperty formattedTimestampProperty = new SimpleStringProperty();
     private final StringProperty confidenceDisplayProperty = new SimpleStringProperty();
+
+    // ADDED PROPERTIES
+    private final StringProperty imagePathProperty = new SimpleStringProperty();
+    private final StringProperty alertStatusProperty = new SimpleStringProperty();
 
     /**
      * Default constructor.
@@ -255,6 +263,28 @@ public class VehicleSighting extends BaseEntity {
     public Double getDistanceFromPrevious() { return distanceFromPrevious; }
     public void setDistanceFromPrevious(Double distanceFromPrevious) { this.distanceFromPrevious = distanceFromPrevious; }
 
+    // ============================================
+    // ADDED GETTERS AND SETTERS
+    // ============================================
+
+    public String getImagePath() { return imagePath; }
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
+        imagePathProperty.set(imagePath);
+    }
+    public StringProperty imagePathProperty() { return imagePathProperty; }
+
+    public String getAlertStatus() { return alertStatus; }
+    public void setAlertStatus(String alertStatus) {
+        this.alertStatus = alertStatus;
+        alertStatusProperty.set(alertStatus);
+    }
+    public StringProperty alertStatusProperty() { return alertStatusProperty; }
+
+    // ============================================
+    // DERIVED PROPERTY GETTERS
+    // ============================================
+
     public String getSourceIcon() { return sourceIconProperty.get(); }
     public StringProperty sourceIconProperty() { return sourceIconProperty; }
 
@@ -346,6 +376,8 @@ public class VehicleSighting extends BaseEntity {
         copy.setPreviousLongitude(this.previousLongitude);
         copy.setEstimatedSpeed(this.estimatedSpeed);
         copy.setDistanceFromPrevious(this.distanceFromPrevious);
+        copy.setImagePath(this.imagePath);
+        copy.setAlertStatus(this.alertStatus);
         copy.setCreatedAt(this.getCreatedAt());
         copy.setUpdatedAt(this.getUpdatedAt());
         return copy;

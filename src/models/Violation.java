@@ -30,6 +30,8 @@ public class Violation extends BaseEntity {
     private String location;
     private String officerName;
     private String description;
+    private Double latitude;
+    private Double longitude;
 
     // Violation type constants
     public static final String TYPE_SPEEDING = "SPEEDING";
@@ -59,6 +61,9 @@ public class Violation extends BaseEntity {
     private final StringProperty paymentStatusDisplayProperty = new SimpleStringProperty();
     private final StringProperty paymentColorProperty = new SimpleStringProperty();
     private final StringProperty formattedFineProperty = new SimpleStringProperty();
+    private final DoubleProperty latitudeProperty = new SimpleDoubleProperty();
+    private final DoubleProperty longitudeProperty = new SimpleDoubleProperty();
+    private final StringProperty locationProperty = new SimpleStringProperty();
 
     /**
      * Default constructor.
@@ -164,6 +169,11 @@ public class Violation extends BaseEntity {
     // GETTERS AND SETTERS WITH PROPERTY UPDATES
     // ============================================
 
+    @Override
+    public int getId() { return id; }
+    @Override
+    public void setId(int id) { this.id = id; }
+
     public int getVehicleId() { return vehicleId; }
     public void setVehicleId(int vehicleId) { this.vehicleId = vehicleId; }
 
@@ -209,7 +219,11 @@ public class Violation extends BaseEntity {
     public StringProperty paymentStatusProperty() { return paymentStatusProperty; }
 
     public String getLocation() { return location; }
-    public void setLocation(String location) { this.location = location; }
+    public void setLocation(String location) {
+        this.location = location;
+        locationProperty.set(location);
+    }
+    public StringProperty locationProperty() { return locationProperty; }
 
     public String getOfficerName() { return officerName; }
     public void setOfficerName(String officerName) {
@@ -224,6 +238,24 @@ public class Violation extends BaseEntity {
         descriptionProperty.set(description);
     }
     public StringProperty descriptionProperty() { return descriptionProperty; }
+
+    public Double getLatitude() { return latitude; }
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+        if (latitude != null) {
+            latitudeProperty.set(latitude);
+        }
+    }
+    public DoubleProperty latitudeProperty() { return latitudeProperty; }
+
+    public Double getLongitude() { return longitude; }
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+        if (longitude != null) {
+            longitudeProperty.set(longitude);
+        }
+    }
+    public DoubleProperty longitudeProperty() { return longitudeProperty; }
 
     public String getViolationTypeDisplay() { return violationTypeDisplayProperty.get(); }
     public StringProperty violationTypeDisplayProperty() { return violationTypeDisplayProperty; }
@@ -284,11 +316,6 @@ public class Violation extends BaseEntity {
     // ============================================
 
     @Override
-    public int getId() { return id; }
-    @Override
-    public void setId(int id) { this.id = id; }
-
-    @Override
     public String toString() {
         return getViolationTypeDisplay() + " - " + getFormattedViolationDate() + " - " + getFormattedFine();
     }
@@ -312,6 +339,8 @@ public class Violation extends BaseEntity {
         copy.setLocation(this.location);
         copy.setOfficerName(this.officerName);
         copy.setDescription(this.description);
+        copy.setLatitude(this.latitude);
+        copy.setLongitude(this.longitude);
         copy.setCreatedAt(this.getCreatedAt());
         copy.setUpdatedAt(this.getUpdatedAt());
         return copy;

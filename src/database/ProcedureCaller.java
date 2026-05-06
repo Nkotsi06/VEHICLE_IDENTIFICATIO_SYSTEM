@@ -137,7 +137,8 @@ public class ProcedureCaller {
     /**
      * Executes procedure returning Long OUT parameter.
      *
-     * @param procedureName procedure name     * @param params        parameters
+     * @param procedureName procedure name
+     * @param params        parameters
      * @return Long result
      * @throws SQLException if execution fails
      */
@@ -391,6 +392,10 @@ public class ProcedureCaller {
         return executeProcedure("sp_reject_claim", claimId, rejectionReason);
     }
 
+    public boolean executeDeleteInsuranceClaim(int claimId) throws SQLException {
+        return executeProcedure("sp_delete_insurance_claim", claimId);
+    }
+
     public boolean executeCalculateNoClaimBonus(int policyId) throws SQLException {
         return executeProcedure("sp_calculate_no_claim_bonus", policyId);
     }
@@ -571,6 +576,11 @@ public class ProcedureCaller {
 
     public boolean executeApproveWorkshop(int workshopId) throws SQLException {
         return executeProcedure("sp_approve_workshop", workshopId);
+    }
+
+    public boolean executeUpdateWorkshop(int id, String workshopName, String address,
+                                         String phone, String email, String licenseNumber) throws SQLException {
+        return executeProcedure("sp_update_workshop", id, workshopName, address, phone, email, licenseNumber);
     }
 
     public boolean executeDeleteWorkshop(int workshopId) throws SQLException {
@@ -785,15 +795,6 @@ public class ProcedureCaller {
     // BULK IMPORT PROCEDURES
     // ============================================
 
-    /**
-     * Executes bulk import of customers from JSON data.
-     * Calls the stored procedure sp_bulk_import_customers which processes
-     * a JSON array of customer records and imports them into the database.
-     *
-     * @param jsonData JSON string containing customer records
-     * @return number of successfully imported records
-     * @throws SQLException if database error occurs
-     */
     public int executeBulkImportCustomers(String jsonData) throws SQLException {
         return executeProcedureWithIntegerOut("sp_bulk_import_customers", jsonData);
     }
@@ -842,8 +843,7 @@ public class ProcedureCaller {
     }
 
     public boolean executeDeleteResolvedInventoryAlerts() throws SQLException {
-        Object alertId = null;
-        return executeProcedure("sp_delete_resolved_inventory_alerts", alertId);
+        return executeProcedure("sp_delete_resolved_inventory_alerts");
     }
 
     public boolean executeCheckInventoryAlerts(int workshopId) throws SQLException {
@@ -1067,7 +1067,7 @@ public class ProcedureCaller {
 
     public Integer executeAddInspectionChecklistItemWithId(int inspectionId, String itemName, String status,
                                                            String notes, String photoPath) throws SQLException {
-        return executeProcedureWithIntegerOut("sp_add_inspection_checklist_item", inspectionId, itemName, status, notes);
+        return executeProcedureWithIntegerOut("sp_add_inspection_checklist_item_with_photo", inspectionId, itemName, status, notes, photoPath);
     }
 
     public boolean executeUpdateInspectionChecklistItem(int itemId, String status, String notes, String photoPath)
@@ -1358,6 +1358,98 @@ public class ProcedureCaller {
 
     public double executeGetSumPremiumByProvider(int providerId) throws SQLException {
         return executeProcedureWithDoubleOut("sp_get_sum_premium_by_provider", providerId);
+    }
+
+    // ============================================
+    // RISK PREMIUM CALCULATION PROCEDURE
+    // ============================================
+
+    /**
+     * Executes the stored procedure to calculate risk premium for a vehicle.
+     *
+     * @param vehicleId the vehicle ID
+     * @return the calculated risk premium amount
+     * @throws SQLException if database error occurs
+     */
+    public double executeCalculateRiskPremium(int vehicleId) throws SQLException {
+        return executeProcedureWithDoubleOut("sp_calculate_risk_premium", vehicleId);
+    }
+
+    // ============================================
+    // ROLE PERMISSION PROCEDURES
+    // ============================================
+
+    /**
+     * Executes the stored procedure to insert a role permission.
+     *
+     * @param roleName the role name
+     * @param permissionKey the permission key
+     * @param permissionValue the permission value (true/false)
+     * @return true if successful, false otherwise
+     * @throws SQLException if database error occurs
+     */
+    public boolean executeInsertRolePermission(String roleName, String permissionKey, boolean permissionValue) throws SQLException {
+        return executeProcedure("sp_insert_role_permission", roleName, permissionKey, permissionValue);
+    }
+
+    /**
+     * Executes the stored procedure to update a role permission.
+     *
+     * @param roleName the role name
+     * @param permissionKey the permission key
+     * @param permissionValue the permission value (true/false)
+     * @return true if successful, false otherwise
+     * @throws SQLException if database error occurs
+     */
+    public boolean executeUpdateRolePermission(String roleName, String permissionKey, boolean permissionValue) throws SQLException {
+        return executeProcedure("sp_update_role_permission", roleName, permissionKey, permissionValue);
+    }
+
+    /**
+     * Executes the stored procedure to delete a role permission by ID.
+     *
+     * @param id the permission ID
+     * @return true if successful, false otherwise
+     * @throws SQLException if database error occurs
+     */
+    public boolean executeDeleteRolePermission(int id) throws SQLException {
+        return executeProcedure("sp_delete_role_permission", id);
+    }
+
+    /**
+     * Executes the stored procedure to delete a role permission by role and permission key.
+     *
+     * @param roleName the role name
+     * @param permissionKey the permission key
+     * @return true if successful, false otherwise
+     * @throws SQLException if database error occurs
+     */
+    public boolean executeDeleteRolePermissionByKey(String roleName, String permissionKey) throws SQLException {
+        return executeProcedure("sp_delete_role_permission_by_key", roleName, permissionKey);
+    }
+
+    /**
+     * Executes the stored procedure to grant a permission to a role.
+     *
+     * @param roleName the role name
+     * @param permissionKey the permission key
+     * @return true if successful, false otherwise
+     * @throws SQLException if database error occurs
+     */
+    public boolean executeGrantPermission(String roleName, String permissionKey) throws SQLException {
+        return executeProcedure("sp_grant_permission", roleName, permissionKey);
+    }
+
+    /**
+     * Executes the stored procedure to revoke a permission from a role.
+     *
+     * @param roleName the role name
+     * @param permissionKey the permission key
+     * @return true if successful, false otherwise
+     * @throws SQLException if database error occurs
+     */
+    public boolean executeRevokePermission(String roleName, String permissionKey) throws SQLException {
+        return executeProcedure("sp_revoke_permission", roleName, permissionKey);
     }
 
     // ============================================

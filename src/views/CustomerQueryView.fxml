@@ -2,7 +2,6 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.CustomerQueryController"
@@ -13,30 +12,34 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
-            <VBox spacing="20" alignment="TOP_CENTER"
-                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" alignment="TOP_CENTER" styleClass="dashboard-container">
+                <padding>
+                    <Insets top="25" right="40" bottom="30" left="40"/>
+                </padding>
 
                 <Label text="Customer Queries" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
                 <Label text="Submit and track your vehicle-related queries" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
 
                 <Separator/>
 
-                <HBox spacing="20" alignment="CENTER">
+                <HBox spacing="25" alignment="CENTER" fillHeight="true">
                     <!-- Left Panel - My Queries -->
-                    <VBox spacing="10" alignment="CENTER" HBox.hgrow="ALWAYS">
-                        <VBox styleClass="profile-edit-card" alignment="CENTER">
+                    <VBox spacing="15" alignment="CENTER" HBox.hgrow="ALWAYS" prefWidth="550">
+                        <VBox styleClass="profile-edit-card" alignment="CENTER" prefWidth="550">
                             <Label text="My Queries" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
                             <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="30"/>
 
-                            <TableView fx:id="queriesTable" prefHeight="400" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
+                            <TableView fx:id="queriesTable" prefHeight="450" maxWidth="Infinity">
+                                <columnResizePolicy>
+                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                                </columnResizePolicy>
                                 <columns>
-                                    <TableColumn fx:id="vehicleColumn" text="Vehicle" minWidth="120" maxWidth="160"/>
-                                    <TableColumn fx:id="queryDateColumn" text="Date" minWidth="100" maxWidth="130"/>
-                                    <TableColumn fx:id="queryTextColumn" text="Query" minWidth="200"/>
-                                    <TableColumn fx:id="queryStatusColumn" text="Status" minWidth="90" maxWidth="110"/>
+                                    <TableColumn fx:id="vehicleColumn" text="Vehicle" prefWidth="140"/>
+                                    <TableColumn fx:id="queryDateColumn" text="Date" prefWidth="110"/>
+                                    <TableColumn fx:id="queryTextColumn" text="Query" prefWidth="250"/>
+                                    <TableColumn fx:id="queryStatusColumn" text="Status" prefWidth="100"/>
                                 </columns>
                                 <placeholder>
                                     <Label text="No queries found" styleClass="status-text"/>
@@ -47,26 +50,29 @@
                                 <Pagination fx:id="queriesPagination" pageCount="1" maxPageIndicatorCount="5"/>
                             </HBox>
 
-                            <HBox spacing="10" alignment="CENTER">
+                            <HBox spacing="15" alignment="CENTER">
                                 <Button fx:id="refreshButton" text="Refresh" styleClass="button-info" prefWidth="100"/>
-                                <Button fx:id="submitButton" text="New Query" styleClass="button-success" prefWidth="120">
-                                    <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                                </Button>
+                                <Button fx:id="submitButton" text="New Query" styleClass="button-success" prefWidth="120"/>
                                 <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100"/>
                             </HBox>
                         </VBox>
                     </VBox>
 
                     <!-- Right Panel - Query Details -->
-                    <VBox spacing="15" alignment="CENTER" HBox.hgrow="ALWAYS">
-                        <VBox styleClass="profile-edit-card" alignment="CENTER">
+                    <VBox spacing="15" alignment="CENTER" HBox.hgrow="ALWAYS" prefWidth="450">
+                        <VBox styleClass="profile-edit-card" alignment="CENTER" prefWidth="450">
                             <Label text="Query Details" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
                             <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
-                            <GridPane hgap="10" vgap="10" alignment="CENTER">
+                            <GridPane hgap="15" vgap="12" alignment="CENTER">
+                                <columnConstraints>
+                                    <ColumnConstraints halignment="RIGHT" minWidth="80" prefWidth="80"/>
+                                    <ColumnConstraints minWidth="250" hgrow="ALWAYS"/>
+                                </columnConstraints>
+
                                 <Label text="Vehicle:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                                <ComboBox fx:id="vehicleComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250"/>
+                                <ComboBox fx:id="vehicleComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="280"/>
 
                                 <Label text="Status:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
                                 <TextField fx:id="statusField" GridPane.rowIndex="1" GridPane.columnIndex="1" editable="false"/>
@@ -81,10 +87,8 @@
                             <Label text="Response:" style="-fx-font-weight: bold;" alignment="CENTER" maxWidth="Infinity"/>
                             <TextArea fx:id="responseTextArea" prefHeight="80" editable="false" promptText="Response from support will appear here..."/>
 
-                            <HBox spacing="10" alignment="CENTER">
-                                <Button fx:id="sendButton" text="Send Query" styleClass="button-success" prefWidth="120">
-                                    <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                                </Button>
+                            <HBox spacing="15" alignment="CENTER">
+                                <Button fx:id="sendButton" text="Send Query" styleClass="button-success" prefWidth="120"/>
                                 <Button fx:id="closeButton" text="Close Query" styleClass="button-warning" prefWidth="120" visible="false"/>
                                 <Button fx:id="deleteButton" text="Delete" styleClass="button-danger" prefWidth="100" visible="false"/>
                             </HBox>

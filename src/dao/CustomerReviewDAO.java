@@ -65,11 +65,6 @@ public class CustomerReviewDAO extends BaseDAO<CustomerReview> {
 
     /**
      * Counts the number of reviews submitted by a specific customer.
-     * Used for displaying statistics on the customer dashboard.
-     *
-     * @param customerId The ID of the customer
-     * @return The number of reviews submitted by the customer
-     * @throws SQLException if database error occurs
      */
     public int countByCustomerId(int customerId) throws SQLException {
         return viewLoader.countViewRowsWithCondition("vw_customer_reviews", "customer_id = ?", customerId);
@@ -123,12 +118,6 @@ public class CustomerReviewDAO extends BaseDAO<CustomerReview> {
     // HELPER METHODS FOR MAPPING
     // ============================================
 
-    /**
-     * Converts a Map to a CustomerReview object.
-     *
-     * @param map The map containing the data
-     * @return CustomerReview object
-     */
     private CustomerReview mapToCustomerReview(Map<String, Object> map) {
         if (map == null) {
             return null;
@@ -136,27 +125,14 @@ public class CustomerReviewDAO extends BaseDAO<CustomerReview> {
 
         CustomerReview review = new CustomerReview();
 
-        if (map.get("id") != null) {
-            review.setId(((Number) map.get("id")).intValue());
-        }
-        if (map.get("customer_id") != null) {
-            review.setCustomerId(((Number) map.get("customer_id")).intValue());
-        }
-        if (map.get("customer_name") != null) {
-            review.setCustomerName(map.get("customer_name").toString());
-        }
-        if (map.get("workshop_id") != null) {
-            review.setWorkshopId(((Number) map.get("workshop_id")).intValue());
-        }
-        if (map.get("workshop_name") != null) {
-            review.setWorkshopName(map.get("workshop_name").toString());
-        }
-        if (map.get("rating") != null) {
-            review.setRating(((Number) map.get("rating")).intValue());
-        }
-        if (map.get("review_text") != null) {
-            review.setReviewText(map.get("review_text").toString());
-        }
+        if (map.get("id") != null) review.setId(((Number) map.get("id")).intValue());
+        if (map.get("customer_id") != null) review.setCustomerId(((Number) map.get("customer_id")).intValue());
+        if (map.get("customer_name") != null) review.setCustomerName(map.get("customer_name").toString());
+        if (map.get("workshop_id") != null) review.setWorkshopId(((Number) map.get("workshop_id")).intValue());
+        if (map.get("workshop_name") != null) review.setWorkshopName(map.get("workshop_name").toString());
+        if (map.get("rating") != null) review.setRating(((Number) map.get("rating")).intValue());
+        if (map.get("review_text") != null) review.setReviewText(map.get("review_text").toString());
+
         if (map.get("review_date") != null) {
             Object reviewDateObj = map.get("review_date");
             if (reviewDateObj instanceof java.sql.Timestamp) {
@@ -165,22 +141,16 @@ public class CustomerReviewDAO extends BaseDAO<CustomerReview> {
                 review.setReviewDate((LocalDateTime) reviewDateObj);
             }
         }
-        if (map.get("created_at") != null && map.get("created_at") instanceof java.sql.Timestamp) {
+        if (map.get("created_at") instanceof java.sql.Timestamp) {
             review.setCreatedAt(((java.sql.Timestamp) map.get("created_at")).toLocalDateTime());
         }
-        if (map.get("updated_at") != null && map.get("updated_at") instanceof java.sql.Timestamp) {
+        if (map.get("updated_at") instanceof java.sql.Timestamp) {
             review.setUpdatedAt(((java.sql.Timestamp) map.get("updated_at")).toLocalDateTime());
         }
 
         return review;
     }
 
-    /**
-     * Converts a list of Maps to a list of CustomerReview objects.
-     *
-     * @param maps List of maps containing the data
-     * @return List of CustomerReview objects
-     */
     private List<CustomerReview> mapToCustomerReviewList(List<Map<String, Object>> maps) {
         List<CustomerReview> reviews = new ArrayList<>();
         if (maps != null) {
@@ -193,8 +163,6 @@ public class CustomerReviewDAO extends BaseDAO<CustomerReview> {
 
     @Override
     protected CustomerReview mapRow(ResultSet rs) throws SQLException {
-        // This method is kept for compatibility but is not used when using views
-        // The actual mapping is done via mapToCustomerReview
         CustomerReview review = new CustomerReview();
         review.setId(rs.getInt("id"));
         review.setCustomerId(rs.getInt("customer_id"));

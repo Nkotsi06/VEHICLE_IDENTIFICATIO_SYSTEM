@@ -83,8 +83,9 @@ public class ConnectionPool {
      *
      * @return a database connection
      * @throws InterruptedException if the thread is interrupted while waiting
+     * @throws SQLException if connection creation fails
      */
-    public Connection getConnection() throws InterruptedException {
+    public Connection getConnection() throws InterruptedException, SQLException {
         if (isShutdown) {
             throw new IllegalStateException("Connection pool is shutdown");
         }
@@ -99,11 +100,10 @@ public class ConnectionPool {
             // Replace invalid connection
             try {
                 conn.close();
-                conn = createConnection();
             } catch (SQLException e) {
-                System.err.println("Failed to replace invalid connection: " + e.getMessage());
-                conn = createConnection();
+                // Ignore close error
             }
+            conn = createConnection();
         }
 
         activeConnections.incrementAndGet();
@@ -117,8 +117,9 @@ public class ConnectionPool {
      * @param unit    the timeout unit
      * @return a database connection, or null if timeout occurs
      * @throws InterruptedException if the thread is interrupted while waiting
+     * @throws SQLException if connection creation fails
      */
-    public Connection getConnection(long timeout, TimeUnit unit) throws InterruptedException {
+    public Connection getConnection(long timeout, TimeUnit unit) throws InterruptedException, SQLException {
         if (isShutdown) {
             throw new IllegalStateException("Connection pool is shutdown");
         }
@@ -128,11 +129,10 @@ public class ConnectionPool {
             if (!isConnectionValid(conn)) {
                 try {
                     conn.close();
-                    conn = createConnection();
                 } catch (SQLException e) {
-                    System.err.println("Failed to replace invalid connection: " + e.getMessage());
-                    return null;
+                    // Ignore close error
                 }
+                conn = createConnection();
             }
             activeConnections.incrementAndGet();
         }
@@ -160,6 +160,9 @@ public class ConnectionPool {
                     connection = createConnection();
                 } catch (SQLException ex) {
                     System.err.println("Failed to create replacement connection: " + ex.getMessage());
+                    // If we can't create a new one, just return without adding to pool
+                    activeConnections.decrementAndGet();
+                    return;
                 }
             }
 

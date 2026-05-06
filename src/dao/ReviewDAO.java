@@ -4,7 +4,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import database.ProcedureCaller;
 import database.ViewLoader;
@@ -28,45 +30,57 @@ public class ReviewDAO extends BaseDAO<CustomerReview> {
 
     @Override
     public CustomerReview findById(int id) throws SQLException {
-        List<CustomerReview> results = viewLoader.loadViewWithCondition("vw_customer_reviews", "id = ?", id);
-        return results.isEmpty() ? null : results.get(0);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_reviews", "id = ?", id);
+        if (results.isEmpty()) {
+            return null;
+        }
+        return mapMapToCustomerReview(results.get(0));
     }
 
     @Override
     public List<CustomerReview> findAll() throws SQLException {
-        return viewLoader.loadView("vw_customer_reviews");
+        List<Map<String, Object>> results = viewLoader.loadView("vw_customer_reviews");
+        return mapMapsToCustomerReviews(results);
     }
 
     public List<CustomerReview> findByCustomerId(int customerId) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_customer_reviews", "customer_id = ? ORDER BY review_date DESC", customerId);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_reviews", "customer_id = ? ORDER BY review_date DESC", customerId);
+        return mapMapsToCustomerReviews(results);
     }
 
     public List<CustomerReview> findByCustomerName(String customerName) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_customer_reviews", "customer_name ILIKE ? ORDER BY review_date DESC", "%" + customerName + "%");
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_reviews", "customer_name ILIKE ? ORDER BY review_date DESC", "%" + customerName + "%");
+        return mapMapsToCustomerReviews(results);
     }
 
     public List<CustomerReview> findByWorkshopId(int workshopId) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_customer_reviews", "workshop_id = ? ORDER BY review_date DESC", workshopId);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_reviews", "workshop_id = ? ORDER BY review_date DESC", workshopId);
+        return mapMapsToCustomerReviews(results);
     }
 
     public List<CustomerReview> findByWorkshopName(String workshopName) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_customer_reviews", "workshop_name ILIKE ? ORDER BY review_date DESC", "%" + workshopName + "%");
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_reviews", "workshop_name ILIKE ? ORDER BY review_date DESC", "%" + workshopName + "%");
+        return mapMapsToCustomerReviews(results);
     }
 
     public List<CustomerReview> findByRating(int rating) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_customer_reviews", "rating = ? ORDER BY review_date DESC", rating);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_reviews", "rating = ? ORDER BY review_date DESC", rating);
+        return mapMapsToCustomerReviews(results);
     }
 
     public List<CustomerReview> findHighRatedReviews(int minRating) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_customer_reviews", "rating >= ? ORDER BY rating DESC, review_date DESC", minRating);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_reviews", "rating >= ? ORDER BY rating DESC, review_date DESC", minRating);
+        return mapMapsToCustomerReviews(results);
     }
 
     public List<CustomerReview> findLowRatedReviews(int maxRating) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_customer_reviews", "rating <= ? ORDER BY rating ASC, review_date DESC", maxRating);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_reviews", "rating <= ? ORDER BY rating ASC, review_date DESC", maxRating);
+        return mapMapsToCustomerReviews(results);
     }
 
     public List<CustomerReview> findByDateRange(LocalDateTime startDate, LocalDateTime endDate) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_customer_reviews", "review_date BETWEEN ? AND ? ORDER BY review_date DESC", startDate, endDate);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_reviews", "review_date BETWEEN ? AND ? ORDER BY review_date DESC", startDate, endDate);
+        return mapMapsToCustomerReviews(results);
     }
 
     @Override
@@ -123,23 +137,39 @@ public class ReviewDAO extends BaseDAO<CustomerReview> {
 
     public List<WorkshopRatingSummary> getWorkshopRatingSummaries() throws SQLException {
         List<WorkshopRatingSummary> summaries = new ArrayList<>();
-        List<Map<String, Object>> results = viewLoader.loadViewWithGroupBy(
-                "vw_customer_reviews",
-                "workshop_id, workshop_name, COUNT(*) as review_count, AVG(rating) as avg_rating, " +
-                        "MIN(rating) as min_rating, MAX(rating) as max_rating",
-                "workshop_id, workshop_name ORDER BY avg_rating DESC"
-        );
+        // Note: loadViewWithGroupBy may not exist in ViewLoader - need alternative
+        List<Map<String, Object>> results = viewLoader.loadView("vw_customer_reviews");
 
+        // Group manually
+        Map<Integer, WorkshopRatingSummary> summaryMap = new HashMap<>();
         for (Map<String, Object> row : results) {
-            WorkshopRatingSummary summary = new WorkshopRatingSummary();
-            summary.workshopId = (Integer) row.get("workshop_id");
-            summary.workshopName = (String) row.get("workshop_name");
-            summary.reviewCount = ((Number) row.get("review_count")).intValue();
-            summary.averageRating = ((Number) row.get("avg_rating")).doubleValue();
-            summary.minRating = ((Number) row.get("min_rating")).intValue();
-            summary.maxRating = ((Number) row.get("max_rating")).intValue();
+            Integer workshopId = getIntValue(row, "workshop_id");
+            String workshopName = getStringValue(row, "workshop_name");
+            Integer rating = getIntValue(row, "rating");
+
+            WorkshopRatingSummary summary = summaryMap.get(workshopId);
+            if (summary == null) {
+                summary = new WorkshopRatingSummary();
+                summary.workshopId = workshopId;
+                summary.workshopName = workshopName;
+                summary.reviewCount = 0;
+                summary.totalRating = 0;
+                summary.minRating = 5;
+                summary.maxRating = 0;
+                summaryMap.put(workshopId, summary);
+            }
+            summary.reviewCount++;
+            summary.totalRating += rating;
+            summary.minRating = Math.min(summary.minRating, rating);
+            summary.maxRating = Math.max(summary.maxRating, rating);
+        }
+
+        for (WorkshopRatingSummary summary : summaryMap.values()) {
+            summary.averageRating = summary.totalRating / (double) summary.reviewCount;
             summaries.add(summary);
         }
+
+        summaries.sort((a, b) -> Double.compare(b.averageRating, a.averageRating));
         return summaries;
     }
 
@@ -150,6 +180,71 @@ public class ReviewDAO extends BaseDAO<CustomerReview> {
         public double averageRating;
         public int minRating;
         public int maxRating;
+        public int totalRating;
+    }
+
+    /**
+     * Converts a List of Maps to a List of CustomerReview objects.
+     */
+    private List<CustomerReview> mapMapsToCustomerReviews(List<Map<String, Object>> maps) {
+        List<CustomerReview> reviews = new ArrayList<>();
+        if (maps == null) {
+            return reviews;
+        }
+        for (Map<String, Object> map : maps) {
+            CustomerReview review = mapMapToCustomerReview(map);
+            if (review != null) {
+                reviews.add(review);
+            }
+        }
+        return reviews;
+    }
+
+    /**
+     * Converts a Map to a CustomerReview object.
+     */
+    private CustomerReview mapMapToCustomerReview(Map<String, Object> map) {
+        if (map == null) {
+            return null;
+        }
+
+        CustomerReview review = new CustomerReview();
+
+        review.setId(getIntValue(map, "id"));
+        review.setCustomerId(getIntValue(map, "customer_id"));
+        review.setCustomerName(getStringValue(map, "customer_name"));
+        review.setWorkshopId(getIntValue(map, "workshop_id"));
+        review.setWorkshopName(getStringValue(map, "workshop_name"));
+        review.setRating(getIntValue(map, "rating"));
+        review.setReviewText(getStringValue(map, "review_text"));
+
+        review.setReviewDate(getLocalDateTimeValue(map, "review_date"));
+        review.setCreatedAt(getLocalDateTimeValue(map, "created_at"));
+        review.setUpdatedAt(getLocalDateTimeValue(map, "updated_at"));
+
+        return review;
+    }
+
+    private Integer getIntValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) return 0;
+        if (value instanceof Integer) return (Integer) value;
+        if (value instanceof Long) return ((Long) value).intValue();
+        if (value instanceof Number) return ((Number) value).intValue();
+        return 0;
+    }
+
+    private String getStringValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        return value != null ? value.toString() : "";
+    }
+
+    private LocalDateTime getLocalDateTimeValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) return null;
+        if (value instanceof java.sql.Timestamp) return ((java.sql.Timestamp) value).toLocalDateTime();
+        if (value instanceof LocalDateTime) return (LocalDateTime) value;
+        return null;
     }
 
     @Override

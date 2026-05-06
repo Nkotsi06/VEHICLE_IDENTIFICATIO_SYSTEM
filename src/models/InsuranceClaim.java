@@ -36,6 +36,19 @@ public class InsuranceClaim extends BaseEntity {
     private LocalDate incidentDate;
     private String incidentLocation;
 
+    // JavaFX Properties for TableView binding
+    private final IntegerProperty idProperty = new SimpleIntegerProperty();
+    private final IntegerProperty policyIdProperty = new SimpleIntegerProperty();
+    private final StringProperty policyNumberProperty = new SimpleStringProperty();
+    private final ObjectProperty<LocalDate> claimDateProperty = new SimpleObjectProperty<>();
+    private final DoubleProperty claimAmountProperty = new SimpleDoubleProperty();
+    private final StringProperty descriptionProperty = new SimpleStringProperty();
+    private final StringProperty statusProperty = new SimpleStringProperty();
+    private final DoubleProperty approvedAmountProperty = new SimpleDoubleProperty();
+    private final StringProperty rejectionReasonProperty = new SimpleStringProperty();
+    private final StringProperty registrationNumberProperty = new SimpleStringProperty();
+    private final StringProperty vehicleInfoProperty = new SimpleStringProperty();
+
     // Status constants
     public static final String STATUS_PENDING = "PENDING";
     public static final String STATUS_UNDER_REVIEW = "UNDER_REVIEW";
@@ -55,18 +68,6 @@ public class InsuranceClaim extends BaseEntity {
         STATUS_DISPLAY.put(STATUS_CLOSED, "Closed");
     }
 
-    // JavaFX Properties for TableView binding
-    private final IntegerProperty policyIdProperty = new SimpleIntegerProperty();
-    private final StringProperty policyNumberProperty = new SimpleStringProperty();
-    private final ObjectProperty<LocalDate> claimDateProperty = new SimpleObjectProperty<>();
-    private final DoubleProperty claimAmountProperty = new SimpleDoubleProperty();
-    private final StringProperty descriptionProperty = new SimpleStringProperty();
-    private final StringProperty statusProperty = new SimpleStringProperty();
-    private final DoubleProperty approvedAmountProperty = new SimpleDoubleProperty();
-    private final StringProperty rejectionReasonProperty = new SimpleStringProperty();
-    private final StringProperty registrationNumberProperty = new SimpleStringProperty();
-    private final StringProperty vehicleInfoProperty = new SimpleStringProperty();
-
     /**
      * Default constructor - initializes with PENDING status and current date.
      */
@@ -75,6 +76,7 @@ public class InsuranceClaim extends BaseEntity {
         this.status = STATUS_PENDING;
         this.claimDate = LocalDate.now();
 
+        idProperty.set(0);
         statusProperty.set(STATUS_PENDING);
         claimDateProperty.set(claimDate);
     }
@@ -100,6 +102,21 @@ public class InsuranceClaim extends BaseEntity {
     // ============================================
     // GETTERS AND SETTERS WITH PROPERTY UPDATES
     // ============================================
+
+    @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(int id) {
+        this.id = id;
+        idProperty.set(id);
+    }
+
+    public IntegerProperty idProperty() {
+        return idProperty;
+    }
 
     public int getPolicyId() {
         return policyId;
@@ -433,16 +450,6 @@ public class InsuranceClaim extends BaseEntity {
     // ============================================
     // OVERRIDE METHODS
     // ============================================
-
-    @Override
-    public int getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(int id) {
-        this.id = id;
-    }
 
     @Override
     public String toString() {

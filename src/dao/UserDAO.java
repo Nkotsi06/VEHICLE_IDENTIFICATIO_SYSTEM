@@ -43,15 +43,79 @@ public class UserDAO extends BaseDAO<User> {
         return results.isEmpty() ? null : mapToUser(results.get(0));
     }
 
+    /**
+     * Authenticates a user by username and password
+     * @param username the username
+     * @param password the password (plain text)
+     * @return User object if authenticated, null otherwise
+     */
     public User login(String username, String password) throws SQLException {
+        System.out.println("\n========== UserDAO.login() ==========");
+        System.out.println("Username: '" + username + "'");
+        System.out.println("Password: '" + password + "'");
+        System.out.println("=====================================\n");
+
+        // First, check if user exists (case-insensitive for debugging)
+        List<Map<String, Object>> userCheck = viewLoader.loadViewWithCondition("vw_users",
+                "username ILIKE ?", username);
+
+        if (userCheck != null && !userCheck.isEmpty()) {
+            Map<String, Object> foundUser = userCheck.get(0);
+            String dbUsername = foundUser.get("username").toString();
+            String dbPassword = foundUser.get("password").toString();
+            boolean isActive = (Boolean) foundUser.get("is_active");
+
+            System.out.println("User found in database:");
+            System.out.println("  Username: '" + dbUsername + "'");
+            System.out.println("  Password in DB: '" + dbPassword + "'");
+            System.out.println("  Active: " + isActive);
+            System.out.println("  Password match: " + (dbPassword.equals(password)));
+
+            if (!isActive) {
+                System.out.println("  WARNING: User is INACTIVE!");
+            }
+        } else {
+            System.out.println("User NOT found in database: '" + username + "'");
+            System.out.println("  Try checking case sensitivity or if user exists.");
+        }
+
+        // Attempt exact match login
         List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_users",
                 "username = ? AND password = ? AND is_active = true", username, password);
+
+        if (results != null && !results.isEmpty()) {
+            System.out.println("LOGIN SUCCESSFUL for user: " + username);
+            return mapToUser(results.get(0));
+        }
+
+        // Try case-insensitive login as fallback (for debugging)
+        List<Map<String, Object>> caseInsensitiveResults = viewLoader.loadViewWithCondition("vw_users",
+                "username ILIKE ? AND password = ? AND is_active = true", username, password);
+
+        if (caseInsensitiveResults != null && !caseInsensitiveResults.isEmpty()) {
+            System.out.println("Case-insensitive login SUCCESSFUL for user: " + username);
+            return mapToUser(caseInsensitiveResults.get(0));
+        }
+
+        System.out.println("LOGIN FAILED for user: " + username);
+        System.out.println("=====================================\n");
+        return null;
+    }
+
+    /**
+     * Authenticates a user by username only (no password check)
+     * Used for debugging
+     */
+    public User loginDebug(String username) throws SQLException {
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_users",
+                "username = ? AND is_active = true", username);
         return results.isEmpty() ? null : mapToUser(results.get(0));
     }
 
     @Override
     public List<User> findAll() throws SQLException {
         List<Map<String, Object>> results = viewLoader.loadView("vw_users");
+        System.out.println("findAll() returned " + (results != null ? results.size() : 0) + " users");
         return mapToUserList(results);
     }
 
@@ -69,6 +133,7 @@ public class UserDAO extends BaseDAO<User> {
 
     @Override
     public boolean insert(User entity) throws SQLException {
+        System.out.println("Inserting user: " + entity.getUsername());
         Integer userId = procedureCaller.executeCreateUserWithId(
                 entity.getUsername(),
                 entity.getPassword(),
@@ -78,8 +143,10 @@ public class UserDAO extends BaseDAO<User> {
         );
         if (userId != null && userId > 0) {
             entity.setId(userId);
+            System.out.println("User inserted with ID: " + userId);
             return true;
         }
+        System.out.println("Failed to insert user");
         return false;
     }
 
@@ -160,6 +227,35 @@ public class UserDAO extends BaseDAO<User> {
         return mapToUserList(results);
     }
 
+    /**
+     * Debug method to print all users in the database
+     */
+    public void debugPrintAllUsers() {
+        try {
+            System.out.println("\n========== ALL USERS IN DATABASE ==========");
+            List<Map<String, Object>> results = viewLoader.loadView("vw_users");
+            if (results == null || results.isEmpty()) {
+                System.out.println("No users found in database!");
+            } else {
+                for (Map<String, Object> map : results) {
+                    String username = map.get("username") != null ? map.get("username").toString() : "NULL";
+                    String role = map.get("role") != null ? map.get("role").toString() : "NULL";
+                    boolean isActive = map.get("is_active") != null && (Boolean) map.get("is_active");
+                    String password = map.get("password") != null ? map.get("password").toString() : "NULL";
+                    System.out.println("  ID: " + map.get("id") +
+                            " | Username: " + username +
+                            " | Role: " + role +
+                            " | Active: " + isActive +
+                            " | Password: '" + password + "'");
+                }
+            }
+            System.out.println("===========================================\n");
+        } catch (SQLException e) {
+            System.err.println("Error printing users: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     // ============================================
     // HELPER METHODS FOR MAPPING
     // ============================================
@@ -194,7 +290,10 @@ public class UserDAO extends BaseDAO<User> {
         List<User> users = new ArrayList<>();
         if (maps != null) {
             for (Map<String, Object> map : maps) {
-                users.add(mapToUser(map));
+                User user = mapToUser(map);
+                if (user != null) {
+                    users.add(user);
+                }
             }
         }
         return users;

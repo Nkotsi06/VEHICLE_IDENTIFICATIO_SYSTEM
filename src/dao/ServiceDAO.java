@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;  // ADDED MISSING IMPORT
 
 import database.ProcedureCaller;
 import database.ViewLoader;
@@ -151,12 +152,12 @@ public class ServiceDAO extends BaseDAO<ServiceRecord> {
 
         for (Map<String, Object> row : results) {
             WorkshopPerformance perf = new WorkshopPerformance();
-            perf.workshopId = (Integer) row.get("workshop_id");
-            perf.workshopName = (String) row.get("workshop_name");
-            perf.serviceCount = ((Number) row.get("service_count")).intValue();
-            perf.totalRevenue = ((Number) row.get("total_revenue")).doubleValue();
-            perf.averageServiceCost = ((Number) row.get("average_service_cost")).doubleValue();
-            perf.averageRating = ((Number) row.get("avg_rating")).doubleValue();
+            perf.workshopId = getIntValue(row, "workshop_id");
+            perf.workshopName = getStringValue(row, "workshop_name");
+            perf.serviceCount = getIntValue(row, "service_count");
+            perf.totalRevenue = getDoubleValue(row, "total_revenue");
+            perf.averageServiceCost = getDoubleValue(row, "average_service_cost");
+            perf.averageRating = getDoubleValue(row, "avg_rating");
             performances.add(perf);
         }
         return performances;
@@ -165,7 +166,32 @@ public class ServiceDAO extends BaseDAO<ServiceRecord> {
     public int estimateWaitTime(int workshopId) throws SQLException {
         List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_wait_time_estimator", "workshop_id = ?", workshopId);
         if (results.isEmpty()) return 0;
-        return (int) Math.ceil(((Number) results.get(0).get("estimated_wait_hours")).doubleValue());
+        return (int) Math.ceil(getDoubleValue(results.get(0), "estimated_wait_hours"));
+    }
+
+    // Helper methods for safe type conversion
+    private Integer getIntValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) return 0;
+        if (value instanceof Integer) return (Integer) value;
+        if (value instanceof Long) return ((Long) value).intValue();
+        if (value instanceof Number) return ((Number) value).intValue();
+        return 0;
+    }
+
+    private Double getDoubleValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) return 0.0;
+        if (value instanceof Double) return (Double) value;
+        if (value instanceof Integer) return ((Integer) value).doubleValue();
+        if (value instanceof Long) return ((Long) value).doubleValue();
+        if (value instanceof Number) return ((Number) value).doubleValue();
+        return 0.0;
+    }
+
+    private String getStringValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        return value != null ? value.toString() : "";
     }
 
     public static class WorkshopPerformance {

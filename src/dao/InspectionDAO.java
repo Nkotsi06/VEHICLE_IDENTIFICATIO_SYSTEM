@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import database.ProcedureCaller;
 import database.ViewLoader;
@@ -104,8 +105,9 @@ public class InspectionDAO extends BaseDAO<DigitalInspection> {
     }
 
     public List<DigitalInspection> getInspectionsByDateRange(LocalDate startDate, LocalDate endDate) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_digital_inspections",
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_digital_inspections",
                 "inspection_date BETWEEN ? AND ? ORDER BY inspection_date DESC", startDate, endDate);
+        return inspectionDAO.mapMapsToDigitalInspections(results);
     }
 
     @Override

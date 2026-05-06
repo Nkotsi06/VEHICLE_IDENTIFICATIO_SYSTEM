@@ -2,7 +2,10 @@ package dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import database.ProcedureCaller;
 import database.ViewLoader;
@@ -27,34 +30,42 @@ public class CustomerQueryDAO extends BaseDAO<CustomerQuery> {
     @Override
     public CustomerQuery findById(int id) throws SQLException {
         // Use view - NO direct SQL
-        List<CustomerQuery> results = viewLoader.loadViewWithCondition("vw_customer_queries", "id = ?", id);
-        return results.isEmpty() ? null : results.get(0);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_queries", "id = ?", id);
+        if (results.isEmpty()) {
+            return null;
+        }
+        return mapMapToCustomerQuery(results.get(0));
     }
 
     @Override
     public List<CustomerQuery> findAll() throws SQLException {
         // Use view - NO direct SQL
-        return viewLoader.loadView("vw_customer_queries");
+        List<Map<String, Object>> results = viewLoader.loadView("vw_customer_queries");
+        return mapMapsToCustomerQueries(results);
     }
 
     public List<CustomerQuery> findByCustomerId(int customerId) throws SQLException {
         // Use view - NO direct SQL
-        return viewLoader.loadViewWithCondition("vw_customer_queries", "customer_id = ? ORDER BY query_date DESC", customerId);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_queries", "customer_id = ? ORDER BY query_date DESC", customerId);
+        return mapMapsToCustomerQueries(results);
     }
 
     public List<CustomerQuery> findByVehicleId(int vehicleId) throws SQLException {
         // Use view - NO direct SQL
-        return viewLoader.loadViewWithCondition("vw_customer_queries", "vehicle_id = ? ORDER BY query_date DESC", vehicleId);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_queries", "vehicle_id = ? ORDER BY query_date DESC", vehicleId);
+        return mapMapsToCustomerQueries(results);
     }
 
     public List<CustomerQuery> findPendingQueries() throws SQLException {
         // Use view - NO direct SQL
-        return viewLoader.loadViewWithCondition("vw_pending_queries", "1=1 ORDER BY query_date");
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_pending_queries", "1=1 ORDER BY query_date");
+        return mapMapsToCustomerQueries(results);
     }
 
     public List<CustomerQuery> findByStatus(String status) throws SQLException {
         // Use view - NO direct SQL
-        return viewLoader.loadViewWithCondition("vw_customer_queries", "status = ? ORDER BY query_date DESC", status);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_queries", "status = ? ORDER BY query_date DESC", status);
+        return mapMapsToCustomerQueries(results);
     }
 
     public int countPendingByCustomerId(int customerId) throws SQLException {
@@ -107,6 +118,101 @@ public class CustomerQueryDAO extends BaseDAO<CustomerQuery> {
     public int countAnsweredQueries() throws SQLException {
         // Use view - NO direct SQL
         return viewLoader.countViewRowsWithCondition("customer_queries", "status = 'ANSWERED'");
+    }
+
+    /**
+     * Converts a List of Maps to a List of CustomerQuery objects.
+     *
+     * @param maps the list of maps from the view loader
+     * @return list of CustomerQuery objects
+     */
+    private List<CustomerQuery> mapMapsToCustomerQueries(List<Map<String, Object>> maps) {
+        List<CustomerQuery> queries = new ArrayList<>();
+        if (maps == null) {
+            return queries;
+        }
+        for (Map<String, Object> map : maps) {
+            CustomerQuery query = mapMapToCustomerQuery(map);
+            if (query != null) {
+                queries.add(query);
+            }
+        }
+        return queries;
+    }
+
+    /**
+     * Converts a Map to a CustomerQuery object.
+     *
+     * @param map the map from the view loader
+     * @return CustomerQuery object
+     */
+    private CustomerQuery mapMapToCustomerQuery(Map<String, Object> map) {
+        if (map == null) {
+            return null;
+        }
+
+        CustomerQuery query = new CustomerQuery();
+
+        query.setId(getIntValue(map, "id"));
+        query.setCustomerId(getIntValue(map, "customer_id"));
+        query.setCustomerName(getStringValue(map, "customer_name"));
+        query.setVehicleId(getIntValue(map, "vehicle_id"));
+        query.setRegistrationNumber(getStringValue(map, "registration_number"));
+        query.setQueryText(getStringValue(map, "query_text"));
+        query.setResponseText(getStringValue(map, "response_text"));
+        query.setStatus(getStringValue(map, "status"));
+
+        query.setQueryDate(getLocalDateTimeValue(map, "query_date"));
+        query.setResponseDate(getLocalDateTimeValue(map, "response_date"));
+        query.setCreatedAt(getLocalDateTimeValue(map, "created_at"));
+        query.setUpdatedAt(getLocalDateTimeValue(map, "updated_at"));
+
+        return query;
+    }
+
+    /**
+     * Helper method to safely get Integer values from Map.
+     */
+    private Integer getIntValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) {
+            return 0;
+        }
+        if (value instanceof Integer) {
+            return (Integer) value;
+        }
+        if (value instanceof Long) {
+            return ((Long) value).intValue();
+        }
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        }
+        return 0;
+    }
+
+    /**
+     * Helper method to safely get String values from Map.
+     */
+    private String getStringValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        return value != null ? value.toString() : "";
+    }
+
+    /**
+     * Helper method to safely get LocalDateTime values from Map.
+     */
+    private LocalDateTime getLocalDateTimeValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof java.sql.Timestamp) {
+            return ((java.sql.Timestamp) value).toLocalDateTime();
+        }
+        if (value instanceof LocalDateTime) {
+            return (LocalDateTime) value;
+        }
+        return null;
     }
 
     @Override

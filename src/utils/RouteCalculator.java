@@ -33,7 +33,7 @@ public class RouteCalculator {
     private static final long SUSPICIOUS_TIME_GAP_THRESHOLD = 28800; // 8 hours
 
     private RouteCalculator() {
-        // Private constructor - utility class
+        // Private constructor - utility class (prevents instantiation)
     }
 
     /**
@@ -45,7 +45,7 @@ public class RouteCalculator {
      * @param lng2 longitude of second point
      * @return distance in kilometers
      */
-    public double calculateDistance(double lat1, double lng1, double lat2, double lng2) {
+    public static double calculateDistance(double lat1, double lng1, double lat2, double lng2) {
         // Validate coordinates
         if (!isValidCoordinate(lat1, lng1) || !isValidCoordinate(lat2, lng2)) {
             LOGGER.warning("Invalid coordinates for distance calculation");
@@ -69,7 +69,7 @@ public class RouteCalculator {
      * @param sightings list of vehicle sightings in chronological order
      * @return total distance in kilometers
      */
-    public double calculateTotalDistance(List<VehicleSighting> sightings) {
+    public static double calculateTotalDistance(List<VehicleSighting> sightings) {
         if (sightings == null || sightings.size() < 2) {
             return 0.0;
         }
@@ -97,7 +97,7 @@ public class RouteCalculator {
      * @param sightings list of vehicle sightings in chronological order
      * @return average speed in km/h
      */
-    public double calculateAverageSpeed(List<VehicleSighting> sightings) {
+    public static double calculateAverageSpeed(List<VehicleSighting> sightings) {
         if (sightings == null || sightings.size() < 2) {
             return 0.0;
         }
@@ -126,7 +126,7 @@ public class RouteCalculator {
      * @param curr current sighting
      * @return speed in km/h
      */
-    public double calculateSegmentSpeed(VehicleSighting prev, VehicleSighting curr) {
+    public static double calculateSegmentSpeed(VehicleSighting prev, VehicleSighting curr) {
         if (prev == null || curr == null) return 0.0;
 
         double distance = calculateDistance(
@@ -148,7 +148,7 @@ public class RouteCalculator {
      * @param sightings list of vehicle sightings in chronological order
      * @return list of route segments
      */
-    public List<RouteSegment> calculateRouteSegments(List<VehicleSighting> sightings) {
+    public static List<RouteSegment> calculateRouteSegments(List<VehicleSighting> sightings) {
         List<RouteSegment> segments = new ArrayList<>();
 
         if (sightings == null || sightings.size() < 2) {
@@ -192,8 +192,8 @@ public class RouteCalculator {
      * @param speedKmph current/average speed in km/h
      * @return estimated hours to arrival, or -1 if invalid
      */
-    public double estimateArrivalTime(double currentLat, double currentLng,
-                                      double destLat, double destLng, double speedKmph) {
+    public static double estimateArrivalTime(double currentLat, double currentLng,
+                                             double destLat, double destLng, double speedKmph) {
         double distance = calculateDistance(currentLat, currentLng, destLat, destLng);
         if (speedKmph <= 0) return -1.0;
         return distance / speedKmph;
@@ -207,7 +207,7 @@ public class RouteCalculator {
      * @param fraction fraction from start to end (0.0 to 1.0)
      * @return interpolated point
      */
-    public GeoPoint interpolatePosition(GeoPoint start, GeoPoint end, double fraction) {
+    public static GeoPoint interpolatePosition(GeoPoint start, GeoPoint end, double fraction) {
         if (start == null || end == null) return null;
 
         double clampedFraction = Math.max(0.0, Math.min(1.0, fraction));
@@ -225,7 +225,7 @@ public class RouteCalculator {
      * @param lng2 end longitude
      * @return bearing in degrees (0-360)
      */
-    public double calculateBearing(double lat1, double lng1, double lat2, double lng2) {
+    public static double calculateBearing(double lat1, double lng1, double lat2, double lng2) {
         double dLng = Math.toRadians(lng2 - lng1);
         double y = Math.sin(dLng) * Math.cos(Math.toRadians(lat2));
         double x = Math.cos(Math.toRadians(lat1)) * Math.sin(Math.toRadians(lat2)) -
@@ -240,7 +240,7 @@ public class RouteCalculator {
      * @param speedKmph speed in km/h
      * @return true if suspicious, false otherwise
      */
-    public boolean isSuspiciousSpeed(double speedKmph) {
+    public static boolean isSuspiciousSpeed(double speedKmph) {
         return speedKmph > SPEEDING_THRESHOLD_KMPH;
     }
 
@@ -250,7 +250,7 @@ public class RouteCalculator {
      * @param secondsGap time gap in seconds
      * @return true if large, false otherwise
      */
-    public boolean isLargeTimeGap(long secondsGap) {
+    public static boolean isLargeTimeGap(long secondsGap) {
         return secondsGap > LARGE_TIME_GAP_THRESHOLD;
     }
 
@@ -261,7 +261,7 @@ public class RouteCalculator {
      * @param longitude longitude value
      * @return true if valid, false otherwise
      */
-    private boolean isValidCoordinate(double latitude, double longitude) {
+    private static boolean isValidCoordinate(double latitude, double longitude) {
         return latitude >= -90 && latitude <= 90 && longitude >= -180 && longitude <= 180;
     }
 

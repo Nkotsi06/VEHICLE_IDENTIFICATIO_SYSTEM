@@ -2,7 +2,6 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 
@@ -14,16 +13,17 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
-            <VBox spacing="20" alignment="TOP_CENTER"
-                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" alignment="TOP_CENTER" styleClass="dashboard-container">
+                <padding>
+                    <Insets top="25" right="40" bottom="30" left="40"/>
+                </padding>
 
-                <TabPane maxWidth="Infinity" tabClosingPolicy="UNAVAILABLE">
+                <TabPane maxWidth="Infinity" styleClass="centered-tab-pane" tabClosingPolicy="UNAVAILABLE">
 
                     <!-- Profile Tab -->
                     <Tab text="Profile" closable="false">
-                        <VBox spacing="20" alignment="TOP_CENTER" style="-fx-background-color: white; -fx-padding: 25;">
+                        <VBox spacing="20" alignment="TOP_CENTER" style="-fx-padding: 20;">
 
                             <Label text="Workshop Profile" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
                             <Label text="View and update your workshop information" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
@@ -43,8 +43,8 @@
                                 <VBox spacing="15" HBox.hgrow="ALWAYS">
                                     <GridPane hgap="15" vgap="12" alignment="CENTER">
                                         <columnConstraints>
-                                            <ColumnConstraints halignment="RIGHT" minWidth="120"/>
-                                            <ColumnConstraints minWidth="250"/>
+                                            <ColumnConstraints halignment="RIGHT" minWidth="120" prefWidth="120"/>
+                                            <ColumnConstraints minWidth="250" hgrow="ALWAYS"/>
                                         </columnConstraints>
 
                                         <Label text="Workshop Name:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
@@ -79,12 +79,12 @@
 
                             <Label text="Statistics" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                            <GridPane hgap="20" vgap="10" alignment="CENTER">
+                            <GridPane hgap="25" vgap="10" alignment="CENTER">
                                 <columnConstraints>
-                                    <ColumnConstraints halignment="RIGHT" minWidth="120"/>
-                                    <ColumnConstraints minWidth="150"/>
-                                    <ColumnConstraints halignment="RIGHT" minWidth="120"/>
-                                    <ColumnConstraints minWidth="150"/>
+                                    <ColumnConstraints halignment="RIGHT" minWidth="120" prefWidth="120"/>
+                                    <ColumnConstraints minWidth="150" hgrow="ALWAYS"/>
+                                    <ColumnConstraints halignment="RIGHT" minWidth="120" prefWidth="120"/>
+                                    <ColumnConstraints minWidth="150" hgrow="ALWAYS"/>
                                 </columnConstraints>
 
                                 <Label text="Total Services:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
@@ -103,12 +103,10 @@
 
                             <Separator/>
 
-                            <HBox alignment="CENTER_RIGHT">
-                                <Button fx:id="updateProfileButton" text="Update Profile" styleClass="button-success" prefWidth="120">
-                                    <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                                </Button>
+                            <HBox alignment="CENTER_RIGHT" spacing="15">
+                                <Button fx:id="updateProfileButton" text="Update Profile" styleClass="button-success" prefWidth="130"/>
                                 <Button fx:id="cancelButton" text="Cancel" styleClass="button-secondary" prefWidth="100"/>
-                                <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-primary" prefWidth="150"/>
+                                <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-primary" prefWidth="160"/>
                             </HBox>
 
                             <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
@@ -117,16 +115,15 @@
 
                     <!-- Change Password Tab -->
                     <Tab text="Change Password" closable="false">
-                        <VBox spacing="20" alignment="TOP_CENTER" style="-fx-background-color: white; -fx-padding: 30;">
-
+                        <VBox spacing="20" alignment="TOP_CENTER" style="-fx-padding: 25;">
                             <Label text="Change Password" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
 
                             <Separator/>
 
                             <GridPane hgap="15" vgap="12" alignment="CENTER">
                                 <columnConstraints>
-                                    <ColumnConstraints halignment="RIGHT" minWidth="120"/>
-                                    <ColumnConstraints minWidth="250"/>
+                                    <ColumnConstraints halignment="RIGHT" minWidth="120" prefWidth="120"/>
+                                    <ColumnConstraints minWidth="250" hgrow="ALWAYS"/>
                                 </columnConstraints>
 
                                 <Label text="Current Password:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
@@ -140,9 +137,7 @@
                             </GridPane>
 
                             <HBox alignment="CENTER">
-                                <Button fx:id="changePasswordButton" text="Change Password" styleClass="button-warning" prefWidth="150">
-                                    <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                                </Button>
+                                <Button fx:id="changePasswordButton" text="Change Password" styleClass="button-warning" prefWidth="160"/>
                             </HBox>
 
                             <Label fx:id="passwordStatusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>

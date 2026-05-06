@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.shape.Circle?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.WelcomeController"
+            stylesheets="@../css/application.css" styleClass="border-pane">
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="30" alignment="TOP_CENTER" styleClass="dashboard-container">
+                <padding>
+                    <Insets top="40" right="60" bottom="40" left="60"/>
+                </padding>
+
+                <!-- Round Logo Section -->
+                <StackPane alignment="CENTER">
+                    <Circle radius="100" fill="#006400" stroke="#008000" strokeWidth="3"/>
+                    <ImageView fx:id="logoImageView" fitWidth="180" fitHeight="180" preserveRatio="true">
+                        <clip>
+                            <Circle radius="90" centerX="90" centerY="90"/>
+                        </clip>
+                    </ImageView>
+                </StackPane>
+
+                <!-- System Title -->
+                <Text fx:id="titleText" text="VEHICLE IDENTIFICATION SYSTEM"
+                      style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-fill: #006400; -fx-font-family: 'Segoe UI';"/>
+
+                <Separator prefWidth="400" style="-fx-background-color: #006400;"/>
+
+                <!-- Subtitle -->
+                <Text text="Comprehensive Vehicle Lifecycle Management Platform"
+                      style="-fx-font-size: 18px; -fx-fill: #2c3e50; -fx-font-family: 'Segoe UI';"/>
+
+                <!-- System Description Card -->
+                <VBox spacing="20" styleClass="welcome-info-card" maxWidth="900" alignment="CENTER">
+                    <Label text="ABOUT THE SYSTEM"
+                           style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #006400;"/>
+
+                    <Label text="The Vehicle Identification System (VIS) is an enterprise-grade integrated solution designed to streamline vehicle registration, tracking, and management across multiple stakeholders. This platform serves law enforcement agencies, vehicle owners, insurance providers, and workshops through a unified, secure interface."
+                           style="-fx-font-size: 14px; -fx-text-fill: #2c3e50; -fx-wrap-text: true;"
+                           alignment="CENTER" maxWidth="Infinity"/>
+
+                    <Separator/>
+
+                    <Label text="KEY FEATURES"
+                           style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #006400;"/>
+
+                    <!-- Key Features - Wrapped in FlowPane to prevent overlap -->
+                    <FlowPane hgap="40" vgap="15" alignment="CENTER">
+                        <VBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="✓ Vehicle Registration &amp; Documentation" style="-fx-font-size: 14px; -fx-text-fill: #2c3e50;"/>
+                            <Label text="✓ Stolen Vehicle Tracking &amp; Recovery" style="-fx-font-size: 14px; -fx-text-fill: #2c3e50;"/>
+                            <Label text="✓ Real-time Vehicle Location Tracking" style="-fx-font-size: 14px; -fx-text-fill: #2c3e50;"/>
+                            <Label text="✓ Digital Document Management" style="-fx-font-size: 14px; -fx-text-fill: #2c3e50;"/>
+                        </VBox>
+                        <VBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="✓ Insurance Policy Management" style="-fx-font-size: 14px; -fx-text-fill: #2c3e50;"/>
+                            <Label text="✓ Workshop Service Management" style="-fx-font-size: 14px; -fx-text-fill: #2c3e50;"/>
+                            <Label text="✓ Automated Reporting &amp; Analytics" style="-fx-font-size: 14px; -fx-text-fill: #2c3e50;"/>
+                            <Label text="✓ Multi-role Access Control (RBAC)" style="-fx-font-size: 14px; -fx-text-fill: #2c3e50;"/>
+                        </VBox>
+                    </FlowPane>
+
+                    <Separator/>
+
+                    <!-- Statistics - REMOVED hardcoded figures, these will be loaded from database -->
+                    <Label text="SYSTEM STATISTICS"
+                           style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #006400;"/>
+
+                    <HBox spacing="40" alignment="CENTER">
+                        <VBox alignment="CENTER" spacing="5">
+                            <Label fx:id="totalVehiclesLabel" text="Loading..." style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #006400;"/>
+                            <Label text="Registered Vehicles" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;"/>
+                        </VBox>
+                        <VBox alignment="CENTER" spacing="5">
+                            <Label fx:id="totalCustomersLabel" text="Loading..." style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #006400;"/>
+                            <Label text="Registered Customers" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;"/>
+                        </VBox>
+                        <VBox alignment="CENTER" spacing="5">
+                            <Label fx:id="totalWorkshopsLabel" text="Loading..." style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #006400;"/>
+                            <Label text="Partner Workshops" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;"/>
+                        </VBox>
+                        <VBox alignment="CENTER" spacing="5">
+                            <Label fx:id="totalPoliceLabel" text="Loading..." style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #006400;"/>
+                            <Label text="Police Officers" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
+
+                <!-- System Modules Section - Increased font size -->
+                <Label text="SYSTEM MODULES"
+                       style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #006400;"/>
+
+                <!-- Modules - Using FlowPane for better wrapping -->
+                <FlowPane hgap="30" vgap="15" alignment="CENTER">
+                    <VBox spacing="8" alignment="CENTER" styleClass="feature-item" minWidth="120">
+                        <Label text="POLICE" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                        <Label text="Stolen vehicle tracking" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;"/>
+                        <Label text="Violation management" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;"/>
+                        <Label text="Warrant processing" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;"/>
+                    </VBox>
+                    <VBox spacing="8" alignment="CENTER" styleClass="feature-item" minWidth="120">
+                        <Label text="CUSTOMER" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                        <Label text="Vehicle ownership" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;"/>
+                        <Label text="Digital wallet" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;"/>
+                        <Label text="Service history" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;"/>
+                    </VBox>
+                    <VBox spacing="8" alignment="CENTER" styleClass="feature-item" minWidth="120">
+                        <Label text="WORKSHOP" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                        <Label text="Service management" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;"/>
+                        <Label text="Inventory control" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;"/>
+                        <Label text="Mechanic scheduling" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;"/>
+                    </VBox>
+                    <VBox spacing="8" alignment="CENTER" styleClass="feature-item" minWidth="120">
+                        <Label text="INSURANCE" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                        <Label text="Policy management" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;"/>
+                        <Label text="Claims processing" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;"/>
+                        <Label text="Risk assessment" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;"/>
+                    </VBox>
+                    <VBox spacing="8" alignment="CENTER" styleClass="feature-item" minWidth="120">
+                        <Label text="ADMIN" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                        <Label text="System oversight" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;"/>
+                        <Label text="User management" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;"/>
+                        <Label text="Audit logs" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;"/>
+                    </VBox>
+                </FlowPane>
+
+                <!-- Progress Indicator -->
+                <VBox spacing="10" alignment="CENTER">
+                    <ProgressIndicator fx:id="loadingProgress" visible="false" maxWidth="40"/>
+                    <Label fx:id="loadingLabel" text="Loading system modules..." styleClass="status-text" visible="false"/>
+                </VBox>
+
+                <!-- Access Button -->
+                <Button fx:id="continueButton" text="ACCESS SYSTEM" styleClass="button-primary" prefWidth="250" prefHeight="45">
+                    <effect>
+                        <DropShadow radius="5" color="rgba(0,0,0,0.2)"/>
+                    </effect>
+                </Button>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <fx:include source="FooterComponent.fxml"/>
+    </bottom>
+
+</BorderPane>

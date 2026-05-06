@@ -31,6 +31,10 @@ public class VehicleDocument extends BaseEntity {
     private int daysRemaining;
     private String expiryStatus;
 
+    // ADDED FIELDS for vehicle make and model
+    private String vehicleMake;
+    private String vehicleModel;
+
     // Document type constants
     public static final String TYPE_LICENSE_DISC = "LICENSE_DISC";
     public static final String TYPE_ROAD_WORTHY = "ROAD_WORTHY";
@@ -63,6 +67,10 @@ public class VehicleDocument extends BaseEntity {
     private final StringProperty expiryStatusProperty = new SimpleStringProperty();
     private final StringProperty documentTypeDisplayProperty = new SimpleStringProperty();
     private final StringProperty expiryColorProperty = new SimpleStringProperty();
+
+    // ADDED PROPERTIES
+    private final StringProperty vehicleMakeProperty = new SimpleStringProperty();
+    private final StringProperty vehicleModelProperty = new SimpleStringProperty();
 
     /**
      * Default constructor - initializes with ACTIVE status.
@@ -160,6 +168,16 @@ public class VehicleDocument extends BaseEntity {
     // GETTERS AND SETTERS WITH PROPERTY UPDATES
     // ============================================
 
+    @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public int getVehicleId() {
         return vehicleId;
     }
@@ -184,6 +202,33 @@ public class VehicleDocument extends BaseEntity {
 
     public StringProperty registrationNumberProperty() {
         return registrationNumberProperty;
+    }
+
+    // ADDED GETTERS AND SETTERS
+    public String getVehicleMake() {
+        return vehicleMake;
+    }
+
+    public void setVehicleMake(String vehicleMake) {
+        this.vehicleMake = vehicleMake;
+        vehicleMakeProperty.set(vehicleMake);
+    }
+
+    public StringProperty vehicleMakeProperty() {
+        return vehicleMakeProperty;
+    }
+
+    public String getVehicleModel() {
+        return vehicleModel;
+    }
+
+    public void setVehicleModel(String vehicleModel) {
+        this.vehicleModel = vehicleModel;
+        vehicleModelProperty.set(vehicleModel);
+    }
+
+    public StringProperty vehicleModelProperty() {
+        return vehicleModelProperty;
     }
 
     public String getDocumentType() {
@@ -362,19 +407,17 @@ public class VehicleDocument extends BaseEntity {
         }
     }
 
+    public String getVehicleInfo() {
+        String info = registrationNumber != null ? registrationNumber : "";
+        if (vehicleMake != null && vehicleModel != null) {
+            info += " (" + vehicleMake + " " + vehicleModel + ")";
+        }
+        return info;
+    }
+
     // ============================================
     // OVERRIDE METHODS
     // ============================================
-
-    @Override
-    public int getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(int id) {
-        this.id = id;
-    }
 
     @Override
     public String toString() {
@@ -391,6 +434,8 @@ public class VehicleDocument extends BaseEntity {
         copy.setId(this.id);
         copy.setVehicleId(this.vehicleId);
         copy.setRegistrationNumber(this.registrationNumber);
+        copy.setVehicleMake(this.vehicleMake);
+        copy.setVehicleModel(this.vehicleModel);
         copy.setDocumentType(this.documentType);
         copy.setDocumentNumber(this.documentNumber);
         copy.setIssueDate(this.issueDate);

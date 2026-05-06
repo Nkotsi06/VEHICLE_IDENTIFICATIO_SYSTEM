@@ -18,6 +18,7 @@ import dao.AuditDAO;
 import models.StolenVehicle;
 import models.Vehicle;
 import java.time.LocalDate;
+import java.util.List;
 
 public class StolenVehicleController {
 
@@ -28,13 +29,17 @@ public class StolenVehicleController {
     @FXML private TableColumn<StolenVehicle, String> caseNumberColumn;
     @FXML private TableColumn<StolenVehicle, String> statusColumn;
     @FXML private TableColumn<StolenVehicle, String> officerColumn;
+    @FXML private TableColumn<StolenVehicle, String> stolenDateColumn;  // ADDED
 
     @FXML private ComboBox<Vehicle> vehicleComboBox;
     @FXML private TextField caseNumberField;
     @FXML private TextField assignedOfficerField;
+    @FXML private TextField badgeNumberField;  // ADDED
     @FXML private TextArea descriptionArea;
     @FXML private DatePicker reportedDatePicker;
     @FXML private ComboBox<String> statusComboBox;
+    @FXML private TextField latitudeField;  // ADDED
+    @FXML private TextField longitudeField;  // ADDED
 
     @FXML private Button reportButton;
     @FXML private Button markRecoveredButton;
@@ -42,6 +47,7 @@ public class StolenVehicleController {
     @FXML private Button backButton;
     @FXML private Button fadeButton;
 
+    @FXML private Pagination stolenPagination;  // ADDED
     @FXML private ProgressIndicator loadProgress;
     @FXML private ProgressBar operationProgress;
     @FXML private Label statusLabel;
@@ -50,6 +56,9 @@ public class StolenVehicleController {
     private VehicleDAO vehicleDAO;
     private AuditDAO auditDAO;
     private StolenVehicle selectedStolenVehicle;
+    private List<StolenVehicle> fullData;
+    private int currentPage = 0;
+    private int pageSize = 20;
 
     @FXML
     public void initialize() {
@@ -62,6 +71,7 @@ public class StolenVehicleController {
         loadStolenVehicles();
         setupButtonHandlers();
         setupTableSelection();
+        setupPagination();
         applyVisualEffects();
 
         statusComboBox.getItems().setAll("ACTIVE", "RECOVERED", "CLOSED");
@@ -77,17 +87,43 @@ public class StolenVehicleController {
         statusColumn.setCellValueFactory(cellData -> cellData.getValue().statusProperty());
         officerColumn.setCellValueFactory(cellData -> cellData.getValue().assignedOfficerProperty());
 
+        // Setup stolen date column if it exists in the view
+        if (stolenDateColumn != null) {
+            stolenDateColumn.setCellValueFactory(cellData -> cellData.getValue().reportedDateProperty().asString());
+        }
+
         regNumberColumn.setStyle("-fx-alignment: CENTER;");
         makeColumn.setStyle("-fx-alignment: CENTER-LEFT;");
         modelColumn.setStyle("-fx-alignment: CENTER-LEFT;");
         caseNumberColumn.setStyle("-fx-alignment: CENTER;");
         statusColumn.setStyle("-fx-alignment: CENTER;");
         officerColumn.setStyle("-fx-alignment: CENTER-LEFT;");
+        if (stolenDateColumn != null) stolenDateColumn.setStyle("-fx-alignment: CENTER;");
+    }
+
+    private void setupPagination() {
+        if (stolenPagination != null) {
+            stolenPagination.setPageCount(1);
+            stolenPagination.setMaxPageIndicatorCount(5);
+            stolenPagination.currentPageIndexProperty().addListener((obs, old, newPage) -> {
+                currentPage = newPage.intValue();
+                updateTablePage();
+            });
+        }
+    }
+
+    private void updateTablePage() {
+        if (fullData == null || fullData.isEmpty()) return;
+        int start = currentPage * pageSize;
+        int end = Math.min(start + pageSize, fullData.size());
+        if (start < fullData.size()) {
+            stolenVehiclesTable.getItems().setAll(fullData.subList(start, end));
+        }
     }
 
     private void loadComboBoxes() {
         try {
-            java.util.List<Vehicle> vehicles = vehicleDAO.findAll();
+            List<Vehicle> vehicles = vehicleDAO.findAll();
             vehicleComboBox.getItems().setAll(vehicles);
         } catch (Exception e) {
             e.printStackTrace();
@@ -100,9 +136,11 @@ public class StolenVehicleController {
         statusLabel.setText("Loading stolen vehicles...");
 
         try {
-            java.util.List<StolenVehicle> stolenVehicles = stolenVehicleDAO.findAll();
-            stolenVehiclesTable.getItems().setAll(stolenVehicles);
-            statusLabel.setText("Loaded " + stolenVehicles.size() + " records");
+            fullData = stolenVehicleDAO.findAll();
+            int totalPages = (int) Math.ceil((double) fullData.size() / pageSize);
+            if (stolenPagination != null) stolenPagination.setPageCount(Math.max(1, totalPages));
+            updateTablePage();
+            statusLabel.setText("Loaded " + fullData.size() + " records");
         } catch (Exception e) {
             e.printStackTrace();
             statusLabel.setText("Error loading data");
@@ -148,6 +186,11 @@ public class StolenVehicleController {
         reportedDatePicker.setValue(stolen.getReportedDate());
         statusComboBox.setValue(stolen.getStatus());
         descriptionArea.setText(stolen.getDescription());
+
+        // Clear location fields as they're not typically displayed
+        if (latitudeField != null) latitudeField.clear();
+        if (longitudeField != null) longitudeField.clear();
+        if (badgeNumberField != null) badgeNumberField.clear();
     }
 
     private void handleReportStolen() {
@@ -164,22 +207,51 @@ public class StolenVehicleController {
             return;
         }
 
+        if (!utils.ValidationUtil.isNotEmpty(assignedOfficerField.getText())) {
+            AlertUtil.showWarning("Validation Error", "Assigned officer name is required.");
+            assignedOfficerField.requestFocus();
+            return;
+        }
+
         showOperationProgress(true);
         statusLabel.setText("Reporting stolen vehicle...");
         updateProgress(0.3);
 
         try {
-            String officerName = SessionManager.getInstance().getFullName();
-            if (officerName == null || officerName.isEmpty()) {
-                officerName = SessionManager.getInstance().getUsername();
+            String officerName = assignedOfficerField.getText().trim();
+            String badgeNumber = (badgeNumberField != null && badgeNumberField.getText() != null)
+                    ? badgeNumberField.getText().trim() : "";
+
+            // Parse latitude and longitude if provided
+            double latitude = 0.0;
+            double longitude = 0.0;
+
+            if (latitudeField != null && latitudeField.getText() != null && !latitudeField.getText().trim().isEmpty()) {
+                try {
+                    latitude = Double.parseDouble(latitudeField.getText().trim());
+                } catch (NumberFormatException e) {
+                    // Use default 0.0
+                }
+            }
+
+            if (longitudeField != null && longitudeField.getText() != null && !longitudeField.getText().trim().isEmpty()) {
+                try {
+                    longitude = Double.parseDouble(longitudeField.getText().trim());
+                } catch (NumberFormatException e) {
+                    // Use default 0.0
+                }
             }
 
             updateProgress(0.6);
 
+            // Pass all 7 required parameters
             boolean success = stolenVehicleDAO.insertStolenVehicle(
                     selectedVehicle.getId(),
                     caseNumberField.getText().trim(),
                     officerName,
+                    badgeNumber,
+                    latitude,
+                    longitude,
                     descriptionArea.getText()
             );
 
@@ -204,7 +276,7 @@ public class StolenVehicleController {
         } catch (Exception e) {
             e.printStackTrace();
             statusLabel.setText("Error: " + e.getMessage());
-            AlertUtil.showError("Database Error", "An error occurred while reporting the stolen vehicle.");
+            AlertUtil.showError("Database Error", "An error occurred while reporting the stolen vehicle: " + e.getMessage());
         } finally {
             hideProgressAfterDelay();
         }
@@ -264,6 +336,9 @@ public class StolenVehicleController {
         vehicleComboBox.getSelectionModel().clearSelection();
         caseNumberField.clear();
         assignedOfficerField.clear();
+        if (badgeNumberField != null) badgeNumberField.clear();
+        if (latitudeField != null) latitudeField.clear();
+        if (longitudeField != null) longitudeField.clear();
         descriptionArea.clear();
         reportedDatePicker.setValue(LocalDate.now());
         statusComboBox.setValue(null);

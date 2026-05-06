@@ -171,8 +171,9 @@ public class ExpiryDetector {
         alert.setExpiryDate(doc.getExpiryDate());
         alert.setDaysOverdue(daysRemaining < 0 ? Math.abs(daysRemaining) : 0);
         alert.setIssueDate(doc.getIssueDate());
-        alert.setVehicleMake(doc.getVehicleMake());
-        alert.setVehicleModel(doc.getVehicleModel());
+        // FIXED: Use getVehicleMake and getVehicleModel
+        alert.setMake(doc.getVehicleMake());
+        alert.setModel(doc.getVehicleModel());
         return alert;
     }
 

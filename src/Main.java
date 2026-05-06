@@ -1,5 +1,3 @@
-
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Rectangle2D;
@@ -63,8 +61,10 @@ public class Main extends Application {
             sceneManager = SceneManager.getInstance();
             sceneManager.setPrimaryStage(stage);
 
-            // Load the login view
-            sceneManager.switchToLogin();
+            // ============================================
+            // CHANGED: Load Welcome view first, not Login
+            // ============================================
+            sceneManager.switchToWelcome();
 
             // Set up shutdown hook
             stage.setOnCloseRequest(event -> shutdown());
@@ -73,7 +73,6 @@ public class Main extends Application {
             stage.show();
 
             // CRITICAL: Maximize the window AFTER showing
-            // This gives a normal maximized window with title bar and taskbar
             Platform.runLater(() -> {
                 stage.setMaximized(true);
             });

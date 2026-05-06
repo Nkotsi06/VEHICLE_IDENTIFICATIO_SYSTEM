@@ -409,9 +409,20 @@ public class BackupUtil {
             return new String[0];
         }
 
-        return dir.listFiles((d, name) ->
+        // FIXED: Convert File[] to String[] using filename method
+        File[] files = dir.listFiles((d, name) ->
                 name.endsWith(".csv") || name.endsWith(".zip")
         );
+
+        if (files == null || files.length == 0) {
+            return new String[0];
+        }
+
+        String[] fileNames = new String[files.length];
+        for (int i = 0; i < files.length; i++) {
+            fileNames[i] = files[i].getName();
+        }
+        return fileNames;
     }
 
     // ============================================

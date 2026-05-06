@@ -3,7 +3,9 @@ package dao;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import database.ProcedureCaller;
 import database.ViewLoader;
@@ -28,49 +30,60 @@ public class ComplaintDAO extends BaseDAO<CustomerComplaint> {
     @Override
     public CustomerComplaint findById(int id) throws SQLException {
         // Use view - NO direct SQL
-        List<CustomerComplaint> results = viewLoader.loadViewWithCondition("vw_customer_complaints", "id = ?", id);
-        return results.isEmpty() ? null : results.get(0);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_complaints", "id = ?", id);
+        if (results.isEmpty()) {
+            return null;
+        }
+        return mapMapToCustomerComplaint(results.get(0));
     }
 
     @Override
     public List<CustomerComplaint> findAll() throws SQLException {
         // Use view - NO direct SQL
-        return viewLoader.loadView("vw_customer_complaints");
+        List<Map<String, Object>> results = viewLoader.loadView("vw_customer_complaints");
+        return mapMapsToCustomerComplaints(results);
     }
 
     public List<CustomerComplaint> findByCustomerId(int customerId) throws SQLException {
         // Use view - NO direct SQL
-        return viewLoader.loadViewWithCondition("vw_customer_complaints", "customer_id = ? ORDER BY complaint_date DESC", customerId);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_complaints", "customer_id = ? ORDER BY complaint_date DESC", customerId);
+        return mapMapsToCustomerComplaints(results);
     }
 
     public List<CustomerComplaint> findByCustomerName(String customerName) throws SQLException {
         // Use view - NO direct SQL
-        return viewLoader.loadViewWithCondition("vw_customer_complaints", "customer_name ILIKE ? ORDER BY complaint_date DESC", "%" + customerName + "%");
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_complaints", "customer_name ILIKE ? ORDER BY complaint_date DESC", "%" + customerName + "%");
+        return mapMapsToCustomerComplaints(results);
     }
 
     public List<CustomerComplaint> findByWorkshopId(int workshopId) throws SQLException {
         // Use view - NO direct SQL
-        return viewLoader.loadViewWithCondition("vw_customer_complaints", "workshop_id = ? ORDER BY complaint_date DESC", workshopId);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_complaints", "workshop_id = ? ORDER BY complaint_date DESC", workshopId);
+        return mapMapsToCustomerComplaints(results);
     }
 
     public List<CustomerComplaint> findByWorkshopName(String workshopName) throws SQLException {
         // Use view - NO direct SQL
-        return viewLoader.loadViewWithCondition("vw_customer_complaints", "workshop_name ILIKE ? ORDER BY complaint_date DESC", "%" + workshopName + "%");
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_complaints", "workshop_name ILIKE ? ORDER BY complaint_date DESC", "%" + workshopName + "%");
+        return mapMapsToCustomerComplaints(results);
     }
 
     public List<CustomerComplaint> findPendingComplaints() throws SQLException {
         // Use view - NO direct SQL
-        return viewLoader.loadViewWithCondition("vw_customer_complaints", "resolution_status = 'PENDING' ORDER BY complaint_date");
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_complaints", "resolution_status = 'PENDING' ORDER BY complaint_date");
+        return mapMapsToCustomerComplaints(results);
     }
 
     public List<CustomerComplaint> findByStatus(String status) throws SQLException {
         // Use view - NO direct SQL
-        return viewLoader.loadViewWithCondition("vw_customer_complaints", "resolution_status = ? ORDER BY complaint_date DESC", status);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_complaints", "resolution_status = ? ORDER BY complaint_date DESC", status);
+        return mapMapsToCustomerComplaints(results);
     }
 
     public List<CustomerComplaint> findByDateRange(LocalDateTime startDate, LocalDateTime endDate) throws SQLException {
         // Use view - NO direct SQL
-        return viewLoader.loadViewWithCondition("vw_customer_complaints", "complaint_date BETWEEN ? AND ? ORDER BY complaint_date DESC", startDate, endDate);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_complaints", "complaint_date BETWEEN ? AND ? ORDER BY complaint_date DESC", startDate, endDate);
+        return mapMapsToCustomerComplaints(results);
     }
 
     @Override
@@ -139,6 +152,71 @@ public class ComplaintDAO extends BaseDAO<CustomerComplaint> {
         if (total == 0) return 0;
         int resolved = viewLoader.countViewRowsWithCondition("customer_complaints", "resolution_status != 'PENDING'");
         return (double) resolved / total * 100;
+    }
+
+    /**
+     * Converts a List of Maps to a List of CustomerComplaint objects.
+     */
+    private List<CustomerComplaint> mapMapsToCustomerComplaints(List<Map<String, Object>> maps) {
+        List<CustomerComplaint> complaints = new ArrayList<>();
+        if (maps == null) {
+            return complaints;
+        }
+        for (Map<String, Object> map : maps) {
+            CustomerComplaint complaint = mapMapToCustomerComplaint(map);
+            if (complaint != null) {
+                complaints.add(complaint);
+            }
+        }
+        return complaints;
+    }
+
+    /**
+     * Converts a Map to a CustomerComplaint object.
+     */
+    private CustomerComplaint mapMapToCustomerComplaint(Map<String, Object> map) {
+        if (map == null) {
+            return null;
+        }
+
+        CustomerComplaint complaint = new CustomerComplaint();
+
+        complaint.setId(getIntValue(map, "id"));
+        complaint.setCustomerId(getIntValue(map, "customer_id"));
+        complaint.setCustomerName(getStringValue(map, "customer_name"));
+        complaint.setWorkshopId(getIntValue(map, "workshop_id"));
+        complaint.setWorkshopName(getStringValue(map, "workshop_name"));
+        complaint.setComplaintText(getStringValue(map, "complaint_text"));
+        complaint.setResolutionStatus(getStringValue(map, "resolution_status"));
+        complaint.setResolutionNotes(getStringValue(map, "resolution_notes"));
+
+        complaint.setComplaintDate(getLocalDateTimeValue(map, "complaint_date"));
+        complaint.setCreatedAt(getLocalDateTimeValue(map, "created_at"));
+        complaint.setUpdatedAt(getLocalDateTimeValue(map, "updated_at"));
+
+        return complaint;
+    }
+
+    private Integer getIntValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) return 0;
+        if (value instanceof Integer) return (Integer) value;
+        if (value instanceof Long) return ((Long) value).intValue();
+        if (value instanceof Number) return ((Number) value).intValue();
+        return 0;
+    }
+
+    private String getStringValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        return value != null ? value.toString() : "";
+    }
+
+    private LocalDateTime getLocalDateTimeValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) return null;
+        if (value instanceof java.sql.Timestamp) return ((java.sql.Timestamp) value).toLocalDateTime();
+        if (value instanceof LocalDateTime) return (LocalDateTime) value;
+        return null;
     }
 
     @Override

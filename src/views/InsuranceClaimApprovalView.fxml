@@ -2,7 +2,6 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.InsuranceClaimApprovalController"
@@ -13,32 +12,36 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
-            <VBox spacing="20" alignment="TOP_CENTER"
-                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" alignment="TOP_CENTER" styleClass="dashboard-container">
+                <padding>
+                    <Insets top="25" right="40" bottom="30" left="40"/>
+                </padding>
 
                 <Label text="Claim Approval" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
                 <Label text="Review and process insurance claims" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
 
                 <Separator/>
 
-                <HBox spacing="20" alignment="CENTER">
+                <HBox spacing="25" alignment="CENTER" fillHeight="true">
                     <!-- Left Panel - Pending Claims -->
-                    <VBox spacing="10" alignment="CENTER" HBox.hgrow="ALWAYS">
-                        <VBox styleClass="profile-edit-card" alignment="CENTER">
+                    <VBox spacing="15" alignment="CENTER" HBox.hgrow="ALWAYS" prefWidth="550">
+                        <VBox styleClass="profile-edit-card" alignment="CENTER" prefWidth="550">
                             <Label text="Pending Claims" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
                             <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="30"/>
 
-                            <TableView fx:id="pendingClaimsTable" prefHeight="400" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
+                            <TableView fx:id="pendingClaimsTable" prefHeight="450" maxWidth="Infinity">
+                                <columnResizePolicy>
+                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                                </columnResizePolicy>
                                 <columns>
-                                    <TableColumn fx:id="claimIdColumn" text="Claim ID" minWidth="70" maxWidth="90"/>
-                                    <TableColumn fx:id="policyNumberColumn" text="Policy #" minWidth="100" maxWidth="130"/>
-                                    <TableColumn fx:id="vehicleColumn" text="Vehicle" minWidth="120" maxWidth="160"/>
-                                    <TableColumn fx:id="claimAmountColumn" text="Amount (M)" minWidth="100" maxWidth="130"/>
-                                    <TableColumn fx:id="claimDateColumn" text="Claim Date" minWidth="90" maxWidth="110"/>
-                                    <TableColumn fx:id="priorityColumn" text="Priority" minWidth="70" maxWidth="90"/>
+                                    <TableColumn fx:id="claimIdColumn" text="Claim ID" prefWidth="80"/>
+                                    <TableColumn fx:id="policyNumberColumn" text="Policy #" prefWidth="110"/>
+                                    <TableColumn fx:id="vehicleColumn" text="Vehicle" prefWidth="140"/>
+                                    <TableColumn fx:id="claimAmountColumn" text="Amount (M)" prefWidth="110"/>
+                                    <TableColumn fx:id="claimDateColumn" text="Claim Date" prefWidth="100"/>
+                                    <TableColumn fx:id="priorityColumn" text="Priority" prefWidth="80"/>
                                 </columns>
                                 <placeholder>
                                     <Label text="No pending claims" styleClass="status-text"/>
@@ -49,32 +52,34 @@
                                 <Pagination fx:id="claimsPagination" pageCount="1" maxPageIndicatorCount="5"/>
                             </HBox>
 
-                            <HBox alignment="CENTER">
+                            <HBox alignment="CENTER" spacing="15">
                                 <Button fx:id="refreshButton" text="Refresh" styleClass="button-info" prefWidth="100"/>
-                                <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100">
-                                    <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                                </Button>
+                                <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100"/>
                             </HBox>
                         </VBox>
                     </VBox>
 
                     <!-- Right Panel - Claim Review -->
-                    <VBox spacing="15" alignment="CENTER" HBox.hgrow="ALWAYS">
-                        <VBox styleClass="profile-edit-card" alignment="CENTER">
+                    <VBox spacing="15" alignment="CENTER" HBox.hgrow="ALWAYS" prefWidth="450">
+                        <VBox styleClass="profile-edit-card" alignment="CENTER" prefWidth="450">
                             <Label text="Claim Review" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
                             <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
-                            <TitledPane text="Claim Details" expanded="true" style="-fx-font-weight: bold;">
+                            <TitledPane text="Claim Details" expanded="true">
                                 <GridPane hgap="15" vgap="8" alignment="CENTER">
-                                    <Label text="Claim ID:" style="-fx-font-weight: bold;"/>
-                                    <Label fx:id="claimIdLabel"/>
-                                    <Label text="Policy Holder:" style="-fx-font-weight: bold;"/>
-                                    <Label fx:id="policyHolderLabel"/>
-                                    <Label text="Incident Date:" style="-fx-font-weight: bold;"/>
-                                    <Label fx:id="incidentDateLabel"/>
-                                    <Label text="Incident Location:" style="-fx-font-weight: bold;"/>
-                                    <Label fx:id="incidentLocationLabel"/>
+                                    <columnConstraints>
+                                        <ColumnConstraints halignment="RIGHT" minWidth="100" prefWidth="100"/>
+                                        <ColumnConstraints minWidth="200" hgrow="ALWAYS"/>
+                                    </columnConstraints>
+                                    <Label text="Claim ID:" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                                    <Label fx:id="claimIdLabel" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                                    <Label text="Policy Holder:" style="-fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                                    <Label fx:id="policyHolderLabel" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                                    <Label text="Incident Date:" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                                    <Label fx:id="incidentDateLabel" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                                    <Label text="Incident Location:" style="-fx-font-weight: bold;" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                                    <Label fx:id="incidentLocationLabel" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
                                 </GridPane>
                             </TitledPane>
 
@@ -86,7 +91,11 @@
 
                             <Separator/>
 
-                            <GridPane hgap="15" vgap="10" alignment="CENTER">
+                            <GridPane hgap="15" vgap="12" alignment="CENTER">
+                                <columnConstraints>
+                                    <ColumnConstraints halignment="RIGHT" minWidth="120" prefWidth="120"/>
+                                    <ColumnConstraints minWidth="200" hgrow="ALWAYS"/>
+                                </columnConstraints>
                                 <Label text="Approved Amount (M):" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
                                 <TextField fx:id="approvedAmountField" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="150"/>
 
@@ -94,12 +103,10 @@
                                 <TextArea fx:id="rejectionReasonArea" GridPane.rowIndex="1" GridPane.columnIndex="1" prefHeight="60"/>
                             </GridPane>
 
-                            <HBox alignment="CENTER">
-                                <Button fx:id="approveButton" text="Approve Claim" styleClass="button-success">
-                                    <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                                </Button>
-                                <Button fx:id="rejectButton" text="Reject Claim" styleClass="button-danger"/>
-                                <Button fx:id="requestInfoButton" text="Request Info" styleClass="button-warning"/>
+                            <HBox alignment="CENTER" spacing="15">
+                                <Button fx:id="approveButton" text="Approve Claim" styleClass="button-success" prefWidth="120"/>
+                                <Button fx:id="rejectButton" text="Reject Claim" styleClass="button-danger" prefWidth="120"/>
+                                <Button fx:id="requestInfoButton" text="Request Info" styleClass="button-warning" prefWidth="110"/>
                             </HBox>
 
                             <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>

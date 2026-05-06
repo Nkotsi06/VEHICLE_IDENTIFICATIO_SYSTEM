@@ -26,6 +26,7 @@ public class NoClaimBonusController {
     @FXML private TableColumn<NoClaimBonusRecord, Integer> claimFreeYearsColumn;
     @FXML private TableColumn<NoClaimBonusRecord, String> bonusPercentageColumn;
     @FXML private TableColumn<NoClaimBonusRecord, String> calculatedDateColumn;
+    @FXML private TableColumn<NoClaimBonusRecord, String> savedAmountColumn;  // ADDED - missing from FXML
 
     @FXML private ComboBox<InsurancePolicy> policyComboBox;
     @FXML private Label currentBonusLabel;
@@ -33,6 +34,7 @@ public class NoClaimBonusController {
     @FXML private Label nextYearBonusLabel;
     @FXML private Label currentPremiumLabel;
     @FXML private Label discountedPremiumLabel;
+    @FXML private Label claimFreeYearsLabel;  // ADDED - missing from FXML
     @FXML private Label statusLabel;
 
     @FXML private Button calculateButton;
@@ -70,14 +72,26 @@ public class NoClaimBonusController {
         policyColumn.setCellValueFactory(cellData -> cellData.getValue().policyNumberProperty());
         yearColumn.setCellValueFactory(cellData -> cellData.getValue().policyYearProperty().asObject());
         claimFreeYearsColumn.setCellValueFactory(cellData -> cellData.getValue().claimFreeYearsProperty().asObject());
-        bonusPercentageColumn.setCellValueFactory(cellData -> cellData.getValue().bonusPercentageProperty());
+        // FIXED: Convert DoubleProperty to String using .asString()
+        bonusPercentageColumn.setCellValueFactory(cellData -> cellData.getValue().bonusPercentageProperty().asString());
         calculatedDateColumn.setCellValueFactory(cellData -> cellData.getValue().calculatedDateProperty().asString());
+
+        // Setup saved amount column if it exists
+        if (savedAmountColumn != null) {
+            savedAmountColumn.setCellValueFactory(cellData -> {
+                double basePremium = cellData.getValue().getBasePremium();
+                double bonusPercent = cellData.getValue().getBonusPercentage();
+                double savings = basePremium * (bonusPercent / 100);
+                return new javafx.beans.property.SimpleStringProperty(CurrencyUtil.format(savings));
+            });
+        }
 
         policyColumn.setStyle("-fx-alignment: CENTER;");
         yearColumn.setStyle("-fx-alignment: CENTER;");
         claimFreeYearsColumn.setStyle("-fx-alignment: CENTER;");
         bonusPercentageColumn.setStyle("-fx-alignment: CENTER;");
         calculatedDateColumn.setStyle("-fx-alignment: CENTER;");
+        if (savedAmountColumn != null) savedAmountColumn.setStyle("-fx-alignment: CENTER;");
     }
 
     private void setupPagination() {
@@ -216,6 +230,11 @@ public class NoClaimBonusController {
                 discountedPremiumLabel.setText(CurrencyUtil.format(discountedPremium));
                 savingsLabel.setText(CurrencyUtil.format(savings));
 
+                // Update claim free years label
+                if (claimFreeYearsLabel != null) {
+                    claimFreeYearsLabel.setText(record.getClaimFreeYears() + " years");
+                }
+
                 int nextYearBonus = (int) Math.min(bonusPercent + 10, 50);
                 nextYearBonusLabel.setText(nextYearBonus + "% (if claim-free)");
 
@@ -239,6 +258,10 @@ public class NoClaimBonusController {
 
     private void showProgress(boolean show) {
         if (loadProgress != null) loadProgress.setVisible(show);
+        if (operationProgress != null) {
+            operationProgress.setVisible(show);
+            operationProgress.setProgress(0);
+        }
     }
 
     private void updateProgress(double progress) {

@@ -2,7 +2,6 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ReportScheduleController"
@@ -13,49 +12,53 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
-            <VBox spacing="20" alignment="TOP_CENTER"
-                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" alignment="TOP_CENTER" styleClass="dashboard-container">
+                <padding>
+                    <Insets top="25" right="40" bottom="30" left="40"/>
+                </padding>
 
                 <Label text="Report Scheduling" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
                 <Label text="Schedule automated report generation" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
 
                 <Separator/>
 
-                <HBox spacing="20" alignment="CENTER">
-                    <!-- Scheduled Reports Panel -->
-                    <VBox spacing="15" alignment="CENTER" HBox.hgrow="ALWAYS">
-                        <VBox styleClass="profile-edit-card" alignment="CENTER">
+                <HBox spacing="30" alignment="CENTER" fillHeight="true">
+                    <!-- LEFT PANEL - Scheduled Reports -->
+                    <VBox spacing="15" alignment="CENTER" HBox.hgrow="ALWAYS" prefWidth="400">
+                        <VBox styleClass="profile-edit-card" alignment="CENTER" prefWidth="400">
                             <Label text="Scheduled Reports" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
                             <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="30"/>
 
-                            <ListView fx:id="scheduledReportsList" prefHeight="350" maxWidth="Infinity">
+                            <ListView fx:id="scheduledReportsList" prefHeight="400" minHeight="350" maxWidth="Infinity">
                                 <placeholder>
                                     <Label text="No scheduled reports found" styleClass="status-text"/>
                                 </placeholder>
                             </ListView>
 
-                            <HBox alignment="CENTER">
-                                <Button fx:id="unscheduleButton" text="Unschedule Selected" styleClass="button-danger" prefWidth="150"/>
-                                <Button fx:id="refreshButton" text="Refresh" styleClass="button-info"/>
-                                <Button fx:id="fadeButton" text="Animate" styleClass="button-warning">
-                                    <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                                </Button>
+                            <HBox alignment="CENTER" spacing="15">
+                                <Button fx:id="unscheduleButton" text="Unschedule Selected" styleClass="button-danger" prefWidth="160"/>
+                                <Button fx:id="refreshButton" text="Refresh" styleClass="button-info" prefWidth="100"/>
+                                <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100"/>
                             </HBox>
                         </VBox>
                     </VBox>
 
-                    <!-- Schedule New Report Panel -->
-                    <VBox spacing="15" alignment="CENTER" HBox.hgrow="ALWAYS">
-                        <VBox styleClass="profile-edit-card" alignment="CENTER">
+                    <!-- RIGHT PANEL - Schedule New Report -->
+                    <VBox spacing="15" alignment="CENTER" HBox.hgrow="ALWAYS" prefWidth="500">
+                        <VBox styleClass="profile-edit-card" alignment="CENTER" prefWidth="500">
                             <Label text="Schedule New Report" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
                             <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
-                            <TitledPane text="Report Configuration" expanded="true" style="-fx-font-weight: bold;">
+                            <TitledPane text="Report Configuration" expanded="true">
                                 <GridPane hgap="15" vgap="15" style="-fx-padding: 15;" alignment="CENTER">
+                                    <columnConstraints>
+                                        <ColumnConstraints halignment="RIGHT" minWidth="100" prefWidth="100"/>
+                                        <ColumnConstraints minWidth="250" hgrow="ALWAYS"/>
+                                    </columnConstraints>
+
                                     <Label text="Report Type:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
                                     <ComboBox fx:id="reportTypeComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="300" promptText="Select report type"/>
 
@@ -63,21 +66,32 @@
                                     <ComboBox fx:id="frequencyComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="300" promptText="Select frequency"/>
 
                                     <Label text="Report Name:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                                    <TextField fx:id="reportNameField" GridPane.rowIndex="2" GridPane.columnIndex="1" promptText="Optional - custom report name"/>
+                                    <TextField fx:id="reportNameField" GridPane.rowIndex="2" GridPane.columnIndex="1" promptText="Optional - custom report name" prefWidth="300"/>
                                 </GridPane>
                             </TitledPane>
 
-                            <TitledPane text="Recipient Information" expanded="true" style="-fx-font-weight: bold;">
+                            <TitledPane text="Recipient Information" expanded="true">
                                 <GridPane hgap="15" vgap="15" style="-fx-padding: 15;" alignment="CENTER">
+                                    <columnConstraints>
+                                        <ColumnConstraints halignment="RIGHT" minWidth="100" prefWidth="100"/>
+                                        <ColumnConstraints minWidth="250" hgrow="ALWAYS"/>
+                                    </columnConstraints>
+
                                     <Label text="Recipient Email:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
                                     <TextField fx:id="recipientEmailField" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="350" promptText="email@example.com"/>
+
                                     <Label text="Format:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
                                     <ComboBox fx:id="formatComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="150"/>
                                 </GridPane>
                             </TitledPane>
 
-                            <TitledPane text="Schedule Period" expanded="true" style="-fx-font-weight: bold;">
+                            <TitledPane text="Schedule Period" expanded="true">
                                 <GridPane hgap="15" vgap="15" style="-fx-padding: 15;" alignment="CENTER">
+                                    <columnConstraints>
+                                        <ColumnConstraints halignment="RIGHT" minWidth="100" prefWidth="100"/>
+                                        <ColumnConstraints minWidth="250" hgrow="ALWAYS"/>
+                                    </columnConstraints>
+
                                     <Label text="Start Date:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
                                     <DatePicker fx:id="startDatePicker" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="200"/>
 
@@ -89,10 +103,8 @@
                                 </GridPane>
                             </TitledPane>
 
-                            <HBox alignment="CENTER">
-                                <Button fx:id="scheduleButton" text="Schedule Report" styleClass="button-success" prefWidth="150">
-                                    <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                                </Button>
+                            <HBox alignment="CENTER" spacing="15">
+                                <Button fx:id="scheduleButton" text="Schedule Report" styleClass="button-success" prefWidth="150"/>
                                 <Button fx:id="clearButton" text="Clear Form" styleClass="button-secondary" prefWidth="120"/>
                             </HBox>
 

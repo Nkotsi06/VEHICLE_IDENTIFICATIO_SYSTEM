@@ -49,6 +49,16 @@ public class DigitalWallet extends BaseEntity {
     // GETTERS AND SETTERS
     // ============================================
 
+    @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public int getCustomerId() {
         return customerId;
     }
@@ -122,7 +132,7 @@ public class DigitalWallet extends BaseEntity {
      */
     public double getTotalDeposits() {
         return transactions.stream()
-                .filter(t -> t != null && "DEPOSIT".equals(t.getType()))
+                .filter(t -> t != null && WalletTransaction.TYPE_DEPOSIT.equals(t.getTransactionType()))
                 .mapToDouble(WalletTransaction::getAmount)
                 .sum();
     }
@@ -134,7 +144,7 @@ public class DigitalWallet extends BaseEntity {
      */
     public double getTotalWithdrawals() {
         return transactions.stream()
-                .filter(t -> t != null && "WITHDRAWAL".equals(t.getType()))
+                .filter(t -> t != null && WalletTransaction.TYPE_WITHDRAWAL.equals(t.getTransactionType()))
                 .mapToDouble(WalletTransaction::getAmount)
                 .sum();
     }
@@ -146,7 +156,7 @@ public class DigitalWallet extends BaseEntity {
      */
     public double getTotalPayments() {
         return transactions.stream()
-                .filter(t -> t != null && "PAYMENT".equals(t.getType()))
+                .filter(t -> t != null && WalletTransaction.TYPE_PAYMENT.equals(t.getTransactionType()))
                 .mapToDouble(WalletTransaction::getAmount)
                 .sum();
     }
@@ -215,8 +225,8 @@ public class DigitalWallet extends BaseEntity {
         if (amount <= 0) return false;
 
         this.balance += amount;
-        WalletTransaction transaction = new WalletTransaction(customerId, "DEPOSIT", amount, source);
-        transaction.setWalletId(this.id);
+        // FIXED: Use correct constructor signature
+        WalletTransaction transaction = new WalletTransaction(this.id, amount, WalletTransaction.TYPE_DEPOSIT, null, source);
         transactions.add(transaction);
 
         return true;
@@ -234,9 +244,8 @@ public class DigitalWallet extends BaseEntity {
         if (amount <= 0 || !canPay(amount)) return false;
 
         this.balance -= amount;
-        WalletTransaction transaction = new WalletTransaction(customerId, "PAYMENT", amount, recipient);
-        transaction.setReference(reference);
-        transaction.setWalletId(this.id);
+        // FIXED: Use correct constructor signature
+        WalletTransaction transaction = new WalletTransaction(this.id, amount, WalletTransaction.TYPE_PAYMENT, reference, "Payment to " + recipient);
         transactions.add(transaction);
 
         return true;
@@ -252,25 +261,11 @@ public class DigitalWallet extends BaseEntity {
         if (amount <= 0 || !canPay(amount)) return false;
 
         this.balance -= amount;
-        WalletTransaction transaction = new WalletTransaction(customerId, "WITHDRAWAL", amount, "Cash Withdrawal");
-        transaction.setWalletId(this.id);
+        // FIXED: Use correct constructor signature
+        WalletTransaction transaction = new WalletTransaction(this.id, amount, WalletTransaction.TYPE_WITHDRAWAL, null, "Cash Withdrawal");
         transactions.add(transaction);
 
         return true;
-    }
-
-    // ============================================
-    // OVERRIDE METHODS
-    // ============================================
-
-    @Override
-    public int getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(int id) {
-        this.id = id;
     }
 
     @Override
@@ -289,7 +284,6 @@ public class DigitalWallet extends BaseEntity {
         copy.setCustomerId(this.customerId);
         copy.setCustomerName(this.customerName);
         copy.setBalance(this.balance);
-        // Note: Doesn't copy transactions - use separate method if needed
         copy.setCreatedAt(this.getCreatedAt());
         copy.setUpdatedAt(this.getUpdatedAt());
         return copy;

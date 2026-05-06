@@ -21,6 +21,7 @@ import dao.UserDAO;
 import models.PoliceOfficer;
 import models.OfficerActivityLog;
 import models.RankChangeRequest;
+import models.User;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,6 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -256,11 +258,11 @@ public class PoliceProfileController {
     }
 
     // ============================================
-    // PROFILE LOADING METHODS
+    // PROFILE LOADING METHODS (UPDATED WITH AUTO-CREATE)
     // ============================================
 
     /**
-     * Loads police officer profile from database for current user
+     * Loads police officer profile from database with auto-create fallback
      */
     private void loadPoliceProfile() {
         showProgress(true);
@@ -268,23 +270,40 @@ public class PoliceProfileController {
 
         try {
             int userId = SessionManager.getInstance().getUserId();
-            currentOfficer = policeOfficerDAO.findByUserId(userId);
+
+            // Check if user exists and has POLICE role
+            User user = userDAO.findById(userId);
+            if (user == null) {
+                AlertUtil.showError("Load Failed", "User account not found. Please log out and try again.");
+                statusLabel.setText("User not found");
+                disableProfileFeatures();
+                return;
+            }
+
+            if (!"POLICE".equals(user.getRole())) {
+                AlertUtil.showError("Access Denied", "This profile is only for police officers.");
+                statusLabel.setText("Access denied - Not a police officer");
+                disableProfileFeatures();
+                return;
+            }
+
+            // Try to find existing officer record or create one using the new method
+            currentOfficer = policeOfficerDAO.findByUserIdOrCreate(userId);
 
             if (currentOfficer != null) {
                 displayProfileData();
                 loadActivityLog();
                 statusLabel.setText("Profile loaded successfully");
             } else {
-                AlertUtil.showError("Load Failed", "Could not find police officer record for this user.");
+                AlertUtil.showError("Load Failed", "Could not find or create police officer record for this user.");
                 statusLabel.setText("Profile load failed");
-                // Disable editing features when no officer record exists
-                setEditMode(false);
                 disableProfileFeatures();
             }
         } catch (Exception e) {
             e.printStackTrace();
             AlertUtil.showError("Error", "Failed to load profile: " + e.getMessage());
             statusLabel.setText("Error loading profile");
+            disableProfileFeatures();
         } finally {
             hideProgressAfterDelay();
         }
@@ -502,10 +521,8 @@ public class PoliceProfileController {
 
     /**
      * Handles uploading a new profile picture
-     * FIXED: Added null check for currentOfficer
      */
     private void handleUploadPhoto() {
-        // Check if currentOfficer is null before proceeding
         if (currentOfficer == null) {
             AlertUtil.showError("Profile Not Loaded",
                     "Your police officer profile could not be loaded. Please refresh the page and try again.\n\n" +
@@ -526,24 +543,20 @@ public class PoliceProfileController {
             statusLabel.setText("Uploading photo...");
 
             try {
-                // Generate unique filename
                 String fileExtension = getFileExtension(selectedFile.getName());
                 String newFileName = "police_" + currentOfficer.getId() + "_" + System.currentTimeMillis() + fileExtension;
                 String destinationPath = profileImageDirectory + newFileName;
                 File destinationFile = new File(destinationPath);
 
-                // Create directory if not exists
                 Path path = Paths.get(profileImageDirectory);
                 if (!Files.exists(path)) {
                     Files.createDirectories(path);
                 }
 
-                // Copy file to destination
                 try (FileInputStream in = new FileInputStream(selectedFile)) {
                     Files.copy(selectedFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 }
 
-                // Update database with image path
                 boolean success = policeOfficerDAO.updateProfileImage(currentOfficer.getId(), destinationPath);
 
                 if (success) {
@@ -588,8 +601,6 @@ public class PoliceProfileController {
 
     /**
      * Handles changing user password
-     * Prompts for new password and confirmation
-     * FIXED: Added null check for currentOfficer
      */
     private void handleChangePassword() {
         if (currentOfficer == null) {
@@ -614,7 +625,6 @@ public class PoliceProfileController {
                 return;
             }
 
-            // Confirm password
             TextInputDialog confirmDialog = new TextInputDialog();
             confirmDialog.setTitle("Confirm Password");
             confirmDialog.setHeaderText("Confirm New Password");
@@ -657,8 +667,6 @@ public class PoliceProfileController {
 
     /**
      * Handles requesting a rank change/promotion
-     * Submits request for admin approval
-     * FIXED: Added null check for currentOfficer
      */
     private void handleRequestRankChange() {
         if (currentOfficer == null) {

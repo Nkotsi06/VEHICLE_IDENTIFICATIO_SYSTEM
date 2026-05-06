@@ -8,6 +8,8 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 
 /**
  * PoliceReport model representing police reports for vehicles.
@@ -31,6 +33,10 @@ public class PoliceReport extends BaseEntity {
     private String caseNumber;
     private String location;
     private String status;
+
+    // ADDED FIELDS
+    private double latitude;
+    private double longitude;
 
     // Report type constants
     public static final String TYPE_STOLEN = "STOLEN";
@@ -62,6 +68,10 @@ public class PoliceReport extends BaseEntity {
     private final StringProperty statusDisplayProperty = new SimpleStringProperty();
     private final StringProperty statusColorProperty = new SimpleStringProperty();
 
+    // ADDED PROPERTIES
+    private final DoubleProperty latitudeProperty = new SimpleDoubleProperty();
+    private final DoubleProperty longitudeProperty = new SimpleDoubleProperty();
+
     /**
      * Default constructor.
      */
@@ -69,9 +79,13 @@ public class PoliceReport extends BaseEntity {
         super();
         this.reportDate = LocalDate.now();
         this.status = STATUS_SUBMITTED;
+        this.latitude = 0.0;
+        this.longitude = 0.0;
 
         reportDateProperty.set(reportDate);
         statusProperty.set(STATUS_SUBMITTED);
+        latitudeProperty.set(0.0);
+        longitudeProperty.set(0.0);
         updateDisplayProperties();
 
         reportTypeProperty.addListener((obs, oldVal, newVal) -> updateDisplayProperties());
@@ -164,6 +178,16 @@ public class PoliceReport extends BaseEntity {
     // ============================================
     // GETTERS AND SETTERS WITH PROPERTY UPDATES
     // ============================================
+
+    @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public int getVehicleId() {
         return vehicleId;
@@ -316,6 +340,33 @@ public class PoliceReport extends BaseEntity {
         return statusProperty;
     }
 
+    // ADDED GETTERS AND SETTERS
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+        latitudeProperty.set(latitude);
+    }
+
+    public DoubleProperty latitudeProperty() {
+        return latitudeProperty;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+        longitudeProperty.set(longitude);
+    }
+
+    public DoubleProperty longitudeProperty() {
+        return longitudeProperty;
+    }
+
     public String getReportTypeDisplay() {
         return reportTypeDisplayProperty.get();
     }
@@ -357,6 +408,13 @@ public class PoliceReport extends BaseEntity {
         return info;
     }
 
+    public String getFormattedLocation() {
+        if (latitude != 0.0 || longitude != 0.0) {
+            return String.format("(%.6f, %.6f)", latitude, longitude);
+        }
+        return location != null ? location : "";
+    }
+
     public boolean isStolenReport() {
         return TYPE_STOLEN.equals(reportType);
     }
@@ -388,16 +446,6 @@ public class PoliceReport extends BaseEntity {
     // ============================================
 
     @Override
-    public int getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    @Override
     public String toString() {
         return getReportTypeDisplay() + " - " + caseNumber + " - " + getFormattedReportDate();
     }
@@ -422,6 +470,8 @@ public class PoliceReport extends BaseEntity {
         copy.setCaseNumber(this.caseNumber);
         copy.setLocation(this.location);
         copy.setStatus(this.status);
+        copy.setLatitude(this.latitude);
+        copy.setLongitude(this.longitude);
         copy.setCreatedAt(this.getCreatedAt());
         copy.setUpdatedAt(this.getUpdatedAt());
         return copy;

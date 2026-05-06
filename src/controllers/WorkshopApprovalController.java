@@ -158,7 +158,8 @@ public class WorkshopApprovalController {
             reset.play();
         });
         backButton.setOnAction(event -> SceneManager.getInstance().switchToAdminView());
-        if (fadeButton != null) fadeButton.OnAction(event -> showFadeAnimation());
+        // FIXED: Changed from OnAction to setOnAction
+        if (fadeButton != null) fadeButton.setOnAction(event -> showFadeAnimation());
     }
 
     private void applyVisualEffects() {

@@ -5,6 +5,7 @@ import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import utils.AlertUtil;
@@ -39,10 +40,18 @@ public class VehicleTrackingController {
     @FXML private Label lastUpdatedLabel;
     @FXML private Label statusMessageLabel;
     @FXML private TextArea alertMessageArea;
-    @FXML private TitledPane trackingDetailsBox;
+
+    // FIXED: Changed from TitledPane to VBox to match FXML
+    @FXML private VBox trackingDetailsBox;
 
     @FXML private ProgressIndicator loadProgress;
     @FXML private ProgressBar operationProgress;
+
+    // Table columns for location history
+    @FXML private TableColumn<Object, String> historyDateColumn;
+    @FXML private TableColumn<Object, String> historyLocationColumn;
+    @FXML private TableColumn<Object, String> historySourceColumn;
+    @FXML private Pagination historyPagination;
 
     // ============================================
     // DAO INSTANCES & DATA MODELS
@@ -66,11 +75,29 @@ public class VehicleTrackingController {
 
         setupButtonHandlers();
         applyVisualEffects();
+        setupTableColumns();
 
-        // Hide tracking details initially
+        // Hide tracking details initially (VBox doesn't have setExpanded, only setVisible)
         trackingDetailsBox.setVisible(false);
-        trackingDetailsBox.setExpanded(false);
         statusMessageLabel.setText("Ready");
+    }
+
+    /**
+     * Sets up table column cell value factories
+     */
+    private void setupTableColumns() {
+        if (historyDateColumn != null) {
+            historyDateColumn.setCellValueFactory(cellData ->
+                    new javafx.beans.property.SimpleStringProperty(""));
+        }
+        if (historyLocationColumn != null) {
+            historyLocationColumn.setCellValueFactory(cellData ->
+                    new javafx.beans.property.SimpleStringProperty(""));
+        }
+        if (historySourceColumn != null) {
+            historySourceColumn.setCellValueFactory(cellData ->
+                    new javafx.beans.property.SimpleStringProperty(""));
+        }
     }
 
     /**
@@ -144,9 +171,8 @@ public class VehicleTrackingController {
             updateProgress(0.8);
 
             if (currentVehicle != null) {
-                // Display vehicle information
+                // Display vehicle information - VBox only has setVisible, not setExpanded
                 trackingDetailsBox.setVisible(true);
-                trackingDetailsBox.setExpanded(true);
 
                 registrationInfoLabel.setText(currentVehicle.getRegistrationNumber());
                 vehicleInfoLabel.setText(currentVehicle.getMake() + " " + currentVehicle.getModel() +
@@ -197,6 +223,8 @@ public class VehicleTrackingController {
                             "This vehicle has been reported as stolen!\nCase Number: " + stolen.getCaseNumber());
                     statusLabel.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold;");
                     statusLabel.setText("STOLEN - " + currentVehicle.getStatusName());
+                } else {
+                    statusLabel.setStyle("-fx-text-fill: #27ae60; -fx-font-weight: normal;");
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -213,10 +241,13 @@ public class VehicleTrackingController {
             return;
         }
 
-        AlertUtil.showInfo("Location", "Vehicle location tracking:\n\n" +
-                "Registration: " + currentVehicle.getRegistrationNumber() + "\n" +
-                "Last Known Location: " + lastLocationLabel.getText() + "\n" +
-                "Last Updated: " + lastUpdatedLabel.getText());
+        AlertUtil.showInfo("Location Information",
+                "Vehicle Location Details:\n\n" +
+                        "Registration: " + currentVehicle.getRegistrationNumber() + "\n" +
+                        "Make/Model: " + currentVehicle.getMake() + " " + currentVehicle.getModel() + "\n" +
+                        "Status: " + currentVehicle.getStatusName() + "\n\n" +
+                        "Last Known Location: " + lastLocationLabel.getText() + "\n" +
+                        "Last Updated: " + lastUpdatedLabel.getText());
     }
 
     /**
@@ -236,18 +267,23 @@ public class VehicleTrackingController {
         }
 
         boolean confirmed = AlertUtil.showConfirmation("Send Alert",
-                "Send alert for vehicle " + currentVehicle.getRegistrationNumber() + "?");
+                "Send alert for vehicle " + currentVehicle.getRegistrationNumber() + "?\n\n" +
+                        "Message: " + alertMessage);
 
         if (confirmed) {
             try {
                 // In production, this would send to all police units
                 String fullMessage = "ALERT: " + alertMessage + " - Vehicle: " + currentVehicle.getRegistrationNumber();
-                AlertUtil.showSuccess("Alert sent successfully to all police units.");
+
+                // Log the alert (in production, this would send to backend)
+                System.out.println("Alert sent: " + fullMessage);
+
+                AlertUtil.showSuccess("Alert Sent", "Alert sent successfully to all police units.");
                 alertMessageArea.clear();
                 statusMessageLabel.setText("Alert sent successfully");
             } catch (Exception e) {
                 e.printStackTrace();
-                AlertUtil.showError("Alert Failed", "Failed to send alert.");
+                AlertUtil.showError("Alert Failed", "Failed to send alert. Please try again.");
                 statusMessageLabel.setText("Failed to send alert");
             }
         }
@@ -264,7 +300,12 @@ public class VehicleTrackingController {
     private void showOperationProgress(boolean show) {
         if (operationProgress != null) {
             operationProgress.setVisible(show);
-            operationProgress.setProgress(0);
+            if (show) {
+                operationProgress.setProgress(0);
+            }
+        }
+        if (loadProgress != null) {
+            loadProgress.setVisible(show);
         }
     }
 
@@ -273,7 +314,9 @@ public class VehicleTrackingController {
      * @param progress value between 0 and 1
      */
     private void updateProgress(double progress) {
-        if (operationProgress != null) operationProgress.setProgress(progress);
+        if (operationProgress != null) {
+            operationProgress.setProgress(progress);
+        }
     }
 
     /**
@@ -285,6 +328,9 @@ public class VehicleTrackingController {
             if (operationProgress != null) {
                 operationProgress.setVisible(false);
                 operationProgress.setProgress(0);
+            }
+            if (loadProgress != null) {
+                loadProgress.setVisible(false);
             }
         });
         delay.play();

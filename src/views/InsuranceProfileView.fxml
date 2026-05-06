@@ -2,7 +2,6 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 
@@ -14,10 +13,11 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
-            <VBox spacing="20" alignment="TOP_CENTER"
-                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" alignment="TOP_CENTER" styleClass="dashboard-container">
+                <padding>
+                    <Insets top="25" right="40" bottom="30" left="40"/>
+                </padding>
 
                 <Label text="Insurance Provider Profile" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
                 <Label text="View and manage your company information" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
@@ -26,18 +26,17 @@
 
                 <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
 
-                <HBox spacing="30" alignment="CENTER" wrap="True">
-
+                <HBox spacing="30" alignment="CENTER" fillHeight="true">
                     <!-- Left Panel -->
-                    <VBox spacing="15" styleClass="profile-card" prefWidth="300" alignment="CENTER">
-                        <ImageView fx:id="logoImageView" fitHeight="120" fitWidth="120" style="-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 5);"/>
-                        <Button fx:id="uploadLogoButton" text="Upload Logo" styleClass="button-info"/>
+                    <VBox spacing="15" styleClass="profile-card" prefWidth="320" alignment="CENTER">
+                        <ImageView fx:id="logoImageView" fitHeight="120" fitWidth="120" styleClass="profile-image-circle"/>
+                        <Button fx:id="uploadLogoButton" text="Upload Logo" styleClass="button-info" prefWidth="120"/>
 
                         <Separator/>
 
                         <Label text="Company Information" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" alignment="CENTER" maxWidth="Infinity"/>
 
-                        <GridPane hgap="10" vgap="8" alignment="CENTER">
+                        <GridPane hgap="15" vgap="10" alignment="CENTER">
                             <Label text="License #:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
                             <Label fx:id="licenseNumberLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-text-fill: #2c3e50;"/>
 
@@ -53,11 +52,14 @@
                     </VBox>
 
                     <!-- Right Panel -->
-                    <VBox spacing="15" styleClass="profile-edit-card" HBox.hgrow="ALWAYS" alignment="CENTER">
-
+                    <VBox spacing="15" styleClass="profile-edit-card" HBox.hgrow="ALWAYS" alignment="CENTER" prefWidth="550">
                         <Label text="Company Information" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
                         <GridPane hgap="15" vgap="12" alignment="CENTER">
+                            <columnConstraints>
+                                <ColumnConstraints halignment="RIGHT" minWidth="120" prefWidth="120"/>
+                                <ColumnConstraints minWidth="250" hgrow="ALWAYS"/>
+                            </columnConstraints>
                             <Label text="Company Name:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
                             <TextField fx:id="companyNameField" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="300"/>
 
@@ -82,13 +84,17 @@
                         <Label text="Account Security" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
                         <GridPane hgap="15" vgap="12" alignment="CENTER">
+                            <columnConstraints>
+                                <ColumnConstraints halignment="RIGHT" minWidth="120" prefWidth="120"/>
+                                <ColumnConstraints minWidth="200" hgrow="ALWAYS"/>
+                            </columnConstraints>
                             <Label text="Username:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
                             <Label fx:id="usernameLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-text-fill: #7f8c8d;"/>
 
                             <Label text="Account Status:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
                             <Label fx:id="accountStatusLabel" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-                            <Button fx:id="changePasswordButton" text="Change Password" GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" styleClass="button-info" prefWidth="150"/>
+                            <Button fx:id="changePasswordButton" text="Change Password" GridPane.rowIndex="2" GridPane.columnIndex="1" styleClass="button-info" prefWidth="160"/>
                         </GridPane>
 
                         <Separator/>
@@ -96,6 +102,10 @@
                         <Label text="Statistics" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
                         <GridPane hgap="15" vgap="12" alignment="CENTER">
+                            <columnConstraints>
+                                <ColumnConstraints halignment="RIGHT" minWidth="120" prefWidth="120"/>
+                                <ColumnConstraints minWidth="200" hgrow="ALWAYS"/>
+                            </columnConstraints>
                             <Label text="Active Policies:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
                             <Label fx:id="activePoliciesLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-text-fill: #27ae60; -fx-font-size: 18px; -fx-font-weight: bold;"/>
 
@@ -103,7 +113,7 @@
                             <Label fx:id="pendingClaimsLabel" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-text-fill: #e67e22; -fx-font-size: 18px; -fx-font-weight: bold;"/>
 
                             <Label text="Total Premium Collected:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <Label fx:id="totalPremiumLabel" GridPane.rowIndex="2" GridPane.columnIndex="1" style="-fx-text-fill: #2980b9; -fx-font-size: 18px; -fx-font-weight: bold;"/>
+                            <Label fx:id="totalPremiumLabel" GridPane.rowIndex="2" GridPane.columnIndex="1" style="-fx-text-fill: #2980b9; -fx-font-size: 16px; -fx-font-weight: bold;"/>
 
                             <Label text="Customer Satisfaction:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
                             <ProgressBar fx:id="satisfactionProgress" prefWidth="200" progress="0.85"/>
@@ -112,11 +122,9 @@
                         <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
                         <HBox spacing="15" alignment="CENTER">
-                            <Button fx:id="saveButton" text="Save Changes" styleClass="button-success" prefWidth="120">
-                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                            </Button>
+                            <Button fx:id="saveButton" text="Save Changes" styleClass="button-success" prefWidth="130"/>
                             <Button fx:id="cancelButton" text="Cancel" styleClass="button-secondary" prefWidth="100"/>
-                            <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-secondary" prefWidth="150"/>
+                            <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-secondary" prefWidth="160"/>
                         </HBox>
                     </VBox>
                 </HBox>

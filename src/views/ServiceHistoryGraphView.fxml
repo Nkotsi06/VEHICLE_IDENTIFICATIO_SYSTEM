@@ -6,7 +6,6 @@
 <?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.CategoryAxis?>
 <?import javafx.scene.chart.NumberAxis?>
-<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ServiceHistoryGraphController"
@@ -17,10 +16,11 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
-            <VBox spacing="20" alignment="TOP_CENTER"
-                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" alignment="TOP_CENTER" styleClass="dashboard-container">
+                <padding>
+                    <Insets top="25" right="40" bottom="30" left="40"/>
+                </padding>
 
                 <Label text="Service History Graph" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
                 <Label text="Visualize service history and cost trends" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
@@ -31,20 +31,22 @@
 
                 <!-- Select Vehicle -->
                 <HBox alignment="CENTER">
-                    <VBox maxWidth="800" styleClass="profile-edit-card" alignment="CENTER">
+                    <VBox maxWidth="800" minWidth="550" styleClass="profile-edit-card" alignment="CENTER">
                         <Label text="Select Vehicle" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                        <GridPane hgap="10" vgap="10" alignment="CENTER">
+                        <GridPane hgap="15" vgap="12" alignment="CENTER">
+                            <columnConstraints>
+                                <ColumnConstraints halignment="RIGHT" minWidth="100" prefWidth="100"/>
+                                <ColumnConstraints minWidth="280" hgrow="ALWAYS"/>
+                            </columnConstraints>
                             <Label text="Select Vehicle:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                            <ComboBox fx:id="vehicleComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="300"/>
+                            <ComboBox fx:id="vehicleComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="350"/>
                         </GridPane>
 
-                        <HBox alignment="CENTER">
-                            <Button fx:id="loadButton" text="Load Data" styleClass="button-primary">
-                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                            </Button>
-                            <Button fx:id="refreshButton" text="Refresh" styleClass="button-info"/>
-                            <Button fx:id="fadeButton" text="Animate" styleClass="button-warning"/>
+                        <HBox alignment="CENTER" spacing="15">
+                            <Button fx:id="loadButton" text="Load Data" styleClass="button-primary" prefWidth="100"/>
+                            <Button fx:id="refreshButton" text="Refresh" styleClass="button-info" prefWidth="100"/>
+                            <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100"/>
                         </HBox>
                     </VBox>
                 </HBox>
@@ -55,8 +57,8 @@
 
                 <!-- Stats Grid -->
                 <HBox alignment="CENTER">
-                    <VBox maxWidth="900" style="-fx-background-color: #f8f9fa; -fx-padding: 15; -fx-border-radius: 8;" alignment="CENTER">
-                        <GridPane hgap="20" vgap="10" alignment="CENTER">
+                    <VBox maxWidth="900" styleClass="profile-card" alignment="CENTER" spacing="15">
+                        <GridPane hgap="25" vgap="10" alignment="CENTER">
                             <Label text="Total Services:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
                             <Label fx:id="totalServicesLabel" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
 

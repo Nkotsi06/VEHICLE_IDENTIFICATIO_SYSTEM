@@ -1,6 +1,7 @@
 package utils;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.logging.Logger;
 
 /**
@@ -25,6 +26,7 @@ public class SessionManager {
     private String phone;
     private String address;
     private LocalDateTime loginTime;
+    private String lastLoginTime;
 
     // Role-specific IDs
     private int customerId;
@@ -74,6 +76,7 @@ public class SessionManager {
         this.fullName = fullName;
         this.email = email;
         this.loginTime = LocalDateTime.now();
+        this.lastLoginTime = loginTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
         // Reset role-specific IDs
         this.customerId = -1;
@@ -96,6 +99,7 @@ public class SessionManager {
         this.phone = null;
         this.address = null;
         this.loginTime = null;
+        this.lastLoginTime = null;
         this.customerId = -1;
         this.workshopId = -1;
         this.insuranceProviderId = -1;
@@ -188,7 +192,16 @@ public class SessionManager {
     public boolean isSessionExpired() {
         if (loginTime == null) return true;
         long hours = java.time.Duration.between(loginTime, LocalDateTime.now()).toHours();
-        return hours >= 8; // 8-hour session timeout
+        return hours >= 8;
+    }
+
+    /**
+     * Gets the formatted last login time.
+     *
+     * @return formatted last login time
+     */
+    public String getLastLoginTime() {
+        return lastLoginTime;
     }
 
     // ============================================

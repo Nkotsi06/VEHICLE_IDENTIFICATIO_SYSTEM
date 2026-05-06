@@ -2,16 +2,11 @@ package models;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+
+import javafx.beans.property.*;
 
 /**
- * ExpiredDocumentAlert model representing alerts for expired or soon-to-expire vehicle documents.
- * Used by police for enforcement actions.
+ * ExpiredDocumentAlert model representing alerts for expired or soon-to-expire documents.
  *
  * @author Vehicle Identification System Team
  * @version 1.0
@@ -24,85 +19,91 @@ public class ExpiredDocumentAlert extends BaseEntity {
     private String registrationNumber;
     private String make;
     private String model;
-    private int documentId;
     private String documentType;
     private String documentNumber;
     private LocalDate issueDate;
     private LocalDate expiryDate;
-    private int daysOverdue;
     private String alertLevel;
     private String recommendedAction;
-    private boolean isNotified;
-    private LocalDate notifiedDate;
+    private int daysOverdue;
+    private boolean notified;
 
     // Alert level constants
     public static final String ALERT_CRITICAL = "CRITICAL";
     public static final String ALERT_HIGH = "HIGH";
     public static final String ALERT_MEDIUM = "MEDIUM";
     public static final String ALERT_LOW = "LOW";
+    public static final String ALERT_NONE = "NONE";
 
     // Recommended action constants
-    public static final String ACTION_IMMEDIATE_IMPOUND = "IMMEDIATE_VEHICLE_IMPOUND";
-    public static final String ACTION_COURT_SUMMONS = "COURT_SUMMONS";
+    public static final String ACTION_IMMEDIATE_VEHICLE_IMPOUND = "IMMEDIATE_VEHICLE_IMPOUND";
     public static final String ACTION_ON_THE_SPOT_FINE = "ON_THE_SPOT_FINE";
     public static final String ACTION_WARNING_NOTICE = "WARNING_NOTICE";
+    public static final String ACTION_REMINDER = "REMINDER";
+    public static final String ACTION_NO_ACTION = "NO_ACTION";
 
-    // Threshold constants
-    private static final int CRITICAL_THRESHOLD_DAYS = 90;
-    private static final int HIGH_THRESHOLD_DAYS = 30;
-    private static final int MEDIUM_THRESHOLD_DAYS = 1;
-
-    // JavaFX Properties for TableView binding
+    // JavaFX Properties
+    private final IntegerProperty vehicleIdProperty = new SimpleIntegerProperty();
     private final StringProperty registrationNumberProperty = new SimpleStringProperty();
-    private final StringProperty documentTypeProperty = new SimpleStringProperty();
-    private final ObjectProperty<LocalDate> expiryDateProperty = new SimpleObjectProperty<>();
-    private final IntegerProperty daysOverdueProperty = new SimpleIntegerProperty();
-    private final StringProperty alertLevelProperty = new SimpleStringProperty();
-    private final StringProperty recommendedActionProperty = new SimpleStringProperty();
     private final StringProperty makeProperty = new SimpleStringProperty();
     private final StringProperty modelProperty = new SimpleStringProperty();
+    private final StringProperty documentTypeProperty = new SimpleStringProperty();
+    private final StringProperty documentNumberProperty = new SimpleStringProperty();
+    private final ObjectProperty<LocalDate> issueDateProperty = new SimpleObjectProperty<>();
+    private final ObjectProperty<LocalDate> expiryDateProperty = new SimpleObjectProperty<>();
+    private final StringProperty alertLevelProperty = new SimpleStringProperty();
+    private final StringProperty recommendedActionProperty = new SimpleStringProperty();
+    private final IntegerProperty daysOverdueProperty = new SimpleIntegerProperty();
+    private final BooleanProperty notifiedProperty = new SimpleBooleanProperty();
+    private final StringProperty alertColorProperty = new SimpleStringProperty();
+    private final StringProperty daysRemainingDisplayProperty = new SimpleStringProperty();
 
     /**
-     * Default constructor - initializes alert state.
+     * Default constructor.
      */
     public ExpiredDocumentAlert() {
         super();
-        this.isNotified = false;
-        this.daysOverdue = 0;
-        this.alertLevel = ALERT_LOW;
-        this.recommendedAction = ACTION_WARNING_NOTICE;
-
-        alertLevelProperty.set(ALERT_LOW);
-        recommendedActionProperty.set(ACTION_WARNING_NOTICE);
-        daysOverdueProperty.set(0);
+        this.notified = false;
+        notifiedProperty.set(false);
+        updateAlertColor();
     }
 
-    /**
-     * Constructor for creating an alert from a document.
-     *
-     * @param vehicleId    the vehicle ID
-     * @param documentId   the document ID
-     * @param documentType the type of document
-     * @param expiryDate   the expiry date
-     */
-    public ExpiredDocumentAlert(int vehicleId, int documentId, String documentType, LocalDate expiryDate) {
-        this();
-        this.vehicleId = vehicleId;
-        this.documentId = documentId;
-        this.documentType = documentType;
-        this.expiryDate = expiryDate;
+    // ============================================
+    // PRIVATE UPDATE METHODS
+    // ============================================
 
-        documentTypeProperty.set(documentType);
-        expiryDateProperty.set(expiryDate);
-
-        calculateDaysOverdue();
-        determineAlertLevel();
-        determineRecommendedAction();
+    private void updateAlertColor() {
+        switch (alertLevel) {
+            case ALERT_CRITICAL:
+                alertColorProperty.set("#D32F2F");
+                break;
+            case ALERT_HIGH:
+                alertColorProperty.set("#F44336");
+                break;
+            case ALERT_MEDIUM:
+                alertColorProperty.set("#FF9800");
+                break;
+            case ALERT_LOW:
+                alertColorProperty.set("#FFC107");
+                break;
+            default:
+                alertColorProperty.set("#4CAF50");
+        }
     }
 
     // ============================================
     // GETTERS AND SETTERS WITH PROPERTY UPDATES
     // ============================================
+
+    @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public int getVehicleId() {
         return vehicleId;
@@ -110,6 +111,11 @@ public class ExpiredDocumentAlert extends BaseEntity {
 
     public void setVehicleId(int vehicleId) {
         this.vehicleId = vehicleId;
+        vehicleIdProperty.set(vehicleId);
+    }
+
+    public IntegerProperty vehicleIdProperty() {
+        return vehicleIdProperty;
     }
 
     public String getRegistrationNumber() {
@@ -151,14 +157,6 @@ public class ExpiredDocumentAlert extends BaseEntity {
         return modelProperty;
     }
 
-    public int getDocumentId() {
-        return documentId;
-    }
-
-    public void setDocumentId(int documentId) {
-        this.documentId = documentId;
-    }
-
     public String getDocumentType() {
         return documentType;
     }
@@ -178,6 +176,11 @@ public class ExpiredDocumentAlert extends BaseEntity {
 
     public void setDocumentNumber(String documentNumber) {
         this.documentNumber = documentNumber;
+        documentNumberProperty.set(documentNumber);
+    }
+
+    public StringProperty documentNumberProperty() {
+        return documentNumberProperty;
     }
 
     public LocalDate getIssueDate() {
@@ -186,6 +189,11 @@ public class ExpiredDocumentAlert extends BaseEntity {
 
     public void setIssueDate(LocalDate issueDate) {
         this.issueDate = issueDate;
+        issueDateProperty.set(issueDate);
+    }
+
+    public ObjectProperty<LocalDate> issueDateProperty() {
+        return issueDateProperty;
     }
 
     public LocalDate getExpiryDate() {
@@ -195,39 +203,11 @@ public class ExpiredDocumentAlert extends BaseEntity {
     public void setExpiryDate(LocalDate expiryDate) {
         this.expiryDate = expiryDate;
         expiryDateProperty.set(expiryDate);
-        calculateDaysOverdue();
-        determineAlertLevel();
-        determineRecommendedAction();
+        updateDaysRemainingDisplay();
     }
 
     public ObjectProperty<LocalDate> expiryDateProperty() {
         return expiryDateProperty;
-    }
-
-    public int getDaysOverdue() {
-        return daysOverdue;
-    }
-
-    public void setDaysOverdue(int daysOverdue) {
-        this.daysOverdue = daysOverdue;
-        daysOverdueProperty.set(daysOverdue);
-    }
-
-    public IntegerProperty daysOverdueProperty() {
-        return daysOverdueProperty;
-    }
-
-    /**
-     * Calculates days overdue based on expiry date.
-     */
-    private void calculateDaysOverdue() {
-        if (expiryDate != null) {
-            this.daysOverdue = (int) (LocalDate.now().toEpochDay() - expiryDate.toEpochDay());
-            if (this.daysOverdue < 0) this.daysOverdue = 0;
-            daysOverdueProperty.set(this.daysOverdue);
-        } else {
-            this.daysOverdue = 0;
-        }
     }
 
     public String getAlertLevel() {
@@ -237,26 +217,11 @@ public class ExpiredDocumentAlert extends BaseEntity {
     public void setAlertLevel(String alertLevel) {
         this.alertLevel = alertLevel;
         alertLevelProperty.set(alertLevel);
+        updateAlertColor();
     }
 
     public StringProperty alertLevelProperty() {
         return alertLevelProperty;
-    }
-
-    /**
-     * Determines alert level based on days overdue.
-     */
-    private void determineAlertLevel() {
-        if (daysOverdue >= CRITICAL_THRESHOLD_DAYS) {
-            this.alertLevel = ALERT_CRITICAL;
-        } else if (daysOverdue >= HIGH_THRESHOLD_DAYS) {
-            this.alertLevel = ALERT_HIGH;
-        } else if (daysOverdue >= MEDIUM_THRESHOLD_DAYS) {
-            this.alertLevel = ALERT_MEDIUM;
-        } else {
-            this.alertLevel = ALERT_LOW;
-        }
-        alertLevelProperty.set(this.alertLevel);
     }
 
     public String getRecommendedAction() {
@@ -272,36 +237,47 @@ public class ExpiredDocumentAlert extends BaseEntity {
         return recommendedActionProperty;
     }
 
-    /**
-     * Determines recommended action based on alert level.
-     */
-    private void determineRecommendedAction() {
-        if (daysOverdue >= CRITICAL_THRESHOLD_DAYS) {
-            this.recommendedAction = ACTION_IMMEDIATE_IMPOUND;
-        } else if (daysOverdue >= HIGH_THRESHOLD_DAYS) {
-            this.recommendedAction = ACTION_COURT_SUMMONS;
-        } else if (daysOverdue >= MEDIUM_THRESHOLD_DAYS) {
-            this.recommendedAction = ACTION_ON_THE_SPOT_FINE;
-        } else {
-            this.recommendedAction = ACTION_WARNING_NOTICE;
-        }
-        recommendedActionProperty.set(this.recommendedAction);
+    public int getDaysOverdue() {
+        return daysOverdue;
+    }
+
+    public void setDaysOverdue(int daysOverdue) {
+        this.daysOverdue = daysOverdue;
+        daysOverdueProperty.set(daysOverdue);
+        updateDaysRemainingDisplay();
+    }
+
+    public IntegerProperty daysOverdueProperty() {
+        return daysOverdueProperty;
     }
 
     public boolean isNotified() {
-        return isNotified;
+        return notified;
     }
 
     public void setNotified(boolean notified) {
-        isNotified = notified;
+        this.notified = notified;
+        notifiedProperty.set(notified);
     }
 
-    public LocalDate getNotifiedDate() {
-        return notifiedDate;
+    public BooleanProperty notifiedProperty() {
+        return notifiedProperty;
     }
 
-    public void setNotifiedDate(LocalDate notifiedDate) {
-        this.notifiedDate = notifiedDate;
+    public String getAlertColor() {
+        return alertColorProperty.get();
+    }
+
+    public StringProperty alertColorProperty() {
+        return alertColorProperty;
+    }
+
+    public String getDaysRemainingDisplay() {
+        return daysRemainingDisplayProperty.get();
+    }
+
+    public StringProperty daysRemainingDisplayProperty() {
+        return daysRemainingDisplayProperty;
     }
 
     // ============================================
@@ -309,104 +285,62 @@ public class ExpiredDocumentAlert extends BaseEntity {
     // ============================================
 
     /**
-     * Gets the CSS color for the alert level.
+     * Gets the days remaining until expiry.
+     * Returns negative value if expired.
      *
-     * @return hex color code
+     * @return days remaining (negative if expired)
      */
-    public String getAlertLevelColor() {
-        switch (alertLevel) {
-            case ALERT_CRITICAL: return "#D32F2F";
-            case ALERT_HIGH: return "#F44336";
-            case ALERT_MEDIUM: return "#FF9800";
-            case ALERT_LOW: return "#FFC107";
-            default: return "#9E9E9E";
-        }
+    public int getDaysRemaining() {
+        if (expiryDate == null) return 0;
+        return (int) java.time.temporal.ChronoUnit.DAYS.between(LocalDate.now(), expiryDate);
     }
 
     /**
-     * Gets the alert level display name.
+     * Gets the formatted days remaining string.
      *
-     * @return human-readable alert level
+     * @return formatted string (e.g., "5 days left" or "Expired 3 days ago")
      */
+    public String getFormattedDaysRemaining() {
+        int days = getDaysRemaining();
+        if (days < 0) {
+            return "Expired " + Math.abs(days) + " days ago";
+        } else if (days == 0) {
+            return "Expires today";
+        } else {
+            return days + " days left";
+        }
+    }
+
+    private void updateDaysRemainingDisplay() {
+        daysRemainingDisplayProperty.set(getFormattedDaysRemaining());
+    }
+
+    public String getFormattedIssueDate() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        return issueDate != null ? issueDate.format(formatter) : "";
+    }
+
+    public String getFormattedExpiryDate() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        return expiryDate != null ? expiryDate.format(formatter) : "";
+    }
+
     public String getAlertLevelDisplay() {
         switch (alertLevel) {
             case ALERT_CRITICAL: return "Critical";
             case ALERT_HIGH: return "High";
             case ALERT_MEDIUM: return "Medium";
             case ALERT_LOW: return "Low";
-            default: return alertLevel;
+            default: return "None";
         }
     }
 
-    /**
-     * Gets the recommended action display name.
-     *
-     * @return human-readable action
-     */
-    public String getRecommendedActionDisplay() {
-        switch (recommendedAction) {
-            case ACTION_IMMEDIATE_IMPOUND: return "Immediate Vehicle Impound";
-            case ACTION_COURT_SUMMONS: return "Court Summons";
-            case ACTION_ON_THE_SPOT_FINE: return "On-the-Spot Fine";
-            case ACTION_WARNING_NOTICE: return "Warning Notice";
-            default: return recommendedAction;
+    public String getVehicleInfo() {
+        String info = registrationNumber != null ? registrationNumber : "";
+        if (make != null && model != null) {
+            info += " (" + make + " " + model + ")";
         }
-    }
-
-    /**
-     * Gets the formatted expiry date.
-     *
-     * @return formatted date string
-     */
-    public String getFormattedExpiryDate() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        return expiryDate != null ? expiryDate.format(formatter) : "";
-    }
-
-    /**
-     * Gets the formatted issue date.
-     *
-     * @return formatted date string
-     */
-    public String getFormattedIssueDate() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        return issueDate != null ? issueDate.format(formatter) : "";
-    }
-
-    /**
-     * Gets the formatted notified date.
-     *
-     * @return formatted date string
-     */
-    public String getFormattedNotifiedDate() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        return notifiedDate != null ? notifiedDate.format(formatter) : "";
-    }
-
-    /**
-     * Checks if the alert is critical.
-     *
-     * @return true if critical
-     */
-    public boolean isCritical() {
-        return ALERT_CRITICAL.equals(alertLevel);
-    }
-
-    /**
-     * Checks if the alert is high priority.
-     *
-     * @return true if critical or high
-     */
-    public boolean isHighPriority() {
-        return ALERT_CRITICAL.equals(alertLevel) || ALERT_HIGH.equals(alertLevel);
-    }
-
-    /**
-     * Marks the alert as notified.
-     */
-    public void markNotified() {
-        this.isNotified = true;
-        this.notifiedDate = LocalDate.now();
+        return info;
     }
 
     // ============================================
@@ -414,18 +348,8 @@ public class ExpiredDocumentAlert extends BaseEntity {
     // ============================================
 
     @Override
-    public int getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    @Override
     public String toString() {
-        return documentType + " expired for " + registrationNumber + " (" + daysOverdue + " days) - " + getAlertLevelDisplay();
+        return getAlertLevelDisplay() + " Alert: " + documentType + " - " + getFormattedDaysRemaining();
     }
 
     /**
@@ -440,16 +364,14 @@ public class ExpiredDocumentAlert extends BaseEntity {
         copy.setRegistrationNumber(this.registrationNumber);
         copy.setMake(this.make);
         copy.setModel(this.model);
-        copy.setDocumentId(this.documentId);
         copy.setDocumentType(this.documentType);
         copy.setDocumentNumber(this.documentNumber);
         copy.setIssueDate(this.issueDate);
         copy.setExpiryDate(this.expiryDate);
-        copy.setDaysOverdue(this.daysOverdue);
         copy.setAlertLevel(this.alertLevel);
         copy.setRecommendedAction(this.recommendedAction);
-        copy.setNotified(this.isNotified);
-        copy.setNotifiedDate(this.notifiedDate);
+        copy.setDaysOverdue(this.daysOverdue);
+        copy.setNotified(this.notified);
         copy.setCreatedAt(this.getCreatedAt());
         copy.setUpdatedAt(this.getUpdatedAt());
         return copy;

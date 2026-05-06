@@ -181,9 +181,17 @@ public class AuditLogController {
 
             try {
                 updateProgress(0.5);
-                int deleted = auditDAO.deleteLogsOlderThanDays(30);
+                // FIXED: Changed from int deleted = auditDAO.deleteLogsOlderThanDays(30)
+                // to boolean success = auditDAO.deleteLogsOlderThanDays(30)
+                boolean success = auditDAO.deleteLogsOlderThanDays(30);
                 updateProgress(1.0);
-                AlertUtil.showSuccess(deleted + " audit logs deleted successfully.");
+
+                if (success) {
+                    AlertUtil.showSuccess("Audit logs older than 30 days have been deleted successfully.");
+                } else {
+                    AlertUtil.showWarning("Partial Success", "Some logs may not have been deleted.");
+                }
+
                 loadAllLogs();
             } catch (Exception e) {
                 e.printStackTrace();

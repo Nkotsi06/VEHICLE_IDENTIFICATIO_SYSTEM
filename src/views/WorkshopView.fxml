@@ -2,7 +2,6 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.WorkshopController"
@@ -13,107 +12,106 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
-            <VBox spacing="20" alignment="TOP_CENTER"
-                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" alignment="TOP_CENTER" styleClass="dashboard-container">
+                <padding>
+                    <Insets top="25" right="40" bottom="30" left="40"/>
+                </padding>
 
-                <!-- Welcome Section -->
                 <Label fx:id="welcomeLabel" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
                 <Label text="Workshop Dashboard" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
 
                 <Separator/>
 
-                <!-- Progress Indicator -->
                 <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
 
-                <!-- Statistics Cards Row 1 -->
-                <HBox spacing="15" alignment="CENTER" wrap="True">
-                    <VBox styleClass="dashboard-card" alignment="CENTER" HBox.hgrow="ALWAYS">
+                <!-- Statistics Cards Row 1 - Using FlowPane for proper wrapping -->
+                <FlowPane hgap="15" vgap="15" alignment="CENTER">
+                    <VBox styleClass="dashboard-card" alignment="CENTER" minWidth="160" prefWidth="180">
                         <Label text="Total Services" styleClass="card-title"/>
                         <Label fx:id="totalServicesLabel" text="0" styleClass="card-value" style="-fx-text-fill: #3498db;"/>
                     </VBox>
 
-                    <VBox styleClass="dashboard-card" alignment="CENTER" HBox.hgrow="ALWAYS">
+                    <VBox styleClass="dashboard-card" alignment="CENTER" minWidth="160" prefWidth="180">
                         <Label text="Total Revenue" styleClass="card-title"/>
                         <Label fx:id="totalRevenueLabel" text="M0.00" styleClass="card-value" style="-fx-text-fill: #27ae60;"/>
                     </VBox>
 
-                    <VBox styleClass="dashboard-card" alignment="CENTER" HBox.hgrow="ALWAYS">
+                    <VBox styleClass="dashboard-card" alignment="CENTER" minWidth="160" prefWidth="180">
                         <Label text="Active Mechanics" styleClass="card-title"/>
                         <Label fx:id="activeMechanicsLabel" text="0" styleClass="card-value" style="-fx-text-fill: #9b59b6;"/>
                     </VBox>
 
-                    <VBox styleClass="dashboard-card" alignment="CENTER" HBox.hgrow="ALWAYS">
+                    <VBox styleClass="dashboard-card" alignment="CENTER" minWidth="160" prefWidth="180">
                         <Label text="Low Stock Items" styleClass="card-title"/>
                         <Label fx:id="lowStockLabel" text="0" styleClass="card-value" style="-fx-text-fill: #e74c3c;"/>
                     </VBox>
 
-                    <VBox styleClass="dashboard-card" alignment="CENTER" HBox.hgrow="ALWAYS">
+                    <VBox styleClass="dashboard-card" alignment="CENTER" minWidth="160" prefWidth="180">
                         <Label text="Vehicles This Month" styleClass="card-title"/>
                         <Label fx:id="monthlyVehiclesLabel" text="0" styleClass="card-value" style="-fx-text-fill: #f39c12;"/>
                     </VBox>
 
-                    <VBox styleClass="dashboard-card" alignment="CENTER" HBox.hgrow="ALWAYS">
+                    <VBox styleClass="dashboard-card" alignment="CENTER" minWidth="160" prefWidth="180">
                         <Label text="Avg Service Cost" styleClass="card-title"/>
                         <Label fx:id="avgServiceCostLabel" text="M0.00" styleClass="card-value" style="-fx-text-fill: #1abc9c;"/>
                     </VBox>
-                </HBox>
+                </FlowPane>
 
                 <Separator/>
 
-                <!-- Progress Bar -->
                 <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
                 <!-- Recent Services Table -->
-                <HBox alignment="CENTER">
-                    <VBox maxWidth="1200" styleClass="profile-edit-card" alignment="CENTER">
-                        <Label text="Recent Services" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+                <VBox maxWidth="1300" styleClass="profile-edit-card" alignment="CENTER" VBox.vgrow="ALWAYS">
+                    <Label text="Recent Services" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                        <TableView fx:id="recentServicesTable" prefHeight="300" minHeight="200" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
-                            <columns>
-                                <TableColumn fx:id="serviceDateCol" text="Date" minWidth="100" maxWidth="130"/>
-                                <TableColumn fx:id="serviceVehicleCol" text="Vehicle" minWidth="130" maxWidth="160"/>
-                                <TableColumn fx:id="serviceTypeCol" text="Service Type" minWidth="180"/>
-                                <TableColumn fx:id="serviceCostCol" text="Cost (M)" minWidth="100" maxWidth="130"/>
-                                <TableColumn fx:id="serviceStatusCol" text="Status" minWidth="80" maxWidth="110"/>
-                            </columns>
-                            <placeholder>
-                                <Label text="No recent services" styleClass="status-text"/>
-                            </placeholder>
-                        </TableView>
+                    <TableView fx:id="recentServicesTable" prefHeight="300" maxWidth="Infinity">
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
+                        <columns>
+                            <TableColumn fx:id="serviceDateCol" text="Date" prefWidth="120"/>
+                            <TableColumn fx:id="serviceVehicleCol" text="Vehicle" prefWidth="150"/>
+                            <TableColumn fx:id="serviceTypeCol" text="Service Type" prefWidth="200"/>
+                            <TableColumn fx:id="serviceCostCol" text="Cost (M)" prefWidth="110"/>
+                            <TableColumn fx:id="serviceStatusCol" text="Status" prefWidth="100"/>
+                        </columns>
+                        <placeholder>
+                            <Label text="No recent services" styleClass="status-text"/>
+                        </placeholder>
+                    </TableView>
 
-                        <HBox alignment="CENTER">
-                            <Pagination fx:id="servicesPagination" pageCount="1" maxPageIndicatorCount="5"/>
-                        </HBox>
-                    </VBox>
-                </HBox>
+                    <HBox alignment="CENTER">
+                        <Pagination fx:id="servicesPagination" pageCount="1" maxPageIndicatorCount="5"/>
+                    </HBox>
+                </VBox>
 
                 <!-- Low Stock Items Table -->
-                <HBox alignment="CENTER">
-                    <VBox maxWidth="1200" styleClass="profile-edit-card" alignment="CENTER">
-                        <Label text="Low Stock Alert" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
+                <VBox maxWidth="1300" styleClass="profile-edit-card" alignment="CENTER">
+                    <Label text="Low Stock Alert" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                        <TableView fx:id="lowStockTable" prefHeight="200" minHeight="150" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
-                            <columns>
-                                <TableColumn fx:id="partNameCol" text="Part Name" minWidth="180"/>
-                                <TableColumn fx:id="partNumberCol" text="Part Number" minWidth="130" maxWidth="160"/>
-                                <TableColumn fx:id="currentStockCol" text="Current Stock" minWidth="90" maxWidth="110"/>
-                                <TableColumn fx:id="reorderLevelCol" text="Reorder Level" minWidth="90" maxWidth="110"/>
-                                <TableColumn fx:id="stockStatusCol" text="Status" minWidth="80" maxWidth="110"/>
-                            </columns>
-                            <placeholder>
-                                <Label text="No low stock items" styleClass="status-text"/>
-                            </placeholder>
-                        </TableView>
+                    <TableView fx:id="lowStockTable" prefHeight="200" maxWidth="Infinity">
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
+                        <columns>
+                            <TableColumn fx:id="partNameCol" text="Part Name" prefWidth="220"/>
+                            <TableColumn fx:id="partNumberCol" text="Part Number" prefWidth="150"/>
+                            <TableColumn fx:id="currentStockCol" text="Current Stock" prefWidth="100"/>
+                            <TableColumn fx:id="reorderLevelCol" text="Reorder Level" prefWidth="100"/>
+                            <TableColumn fx:id="stockStatusCol" text="Status" prefWidth="100"/>
+                        </columns>
+                        <placeholder>
+                            <Label text="No low stock items" styleClass="status-text"/>
+                        </placeholder>
+                    </TableView>
 
-                        <HBox alignment="CENTER">
-                            <Pagination fx:id="stockPagination" pageCount="1" maxPageIndicatorCount="5"/>
-                        </HBox>
-                    </VBox>
-                </HBox>
+                    <HBox alignment="CENTER">
+                        <Pagination fx:id="stockPagination" pageCount="1" maxPageIndicatorCount="5"/>
+                    </HBox>
+                </VBox>
 
-                <!-- Status Label -->
                 <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
 
             </VBox>
@@ -123,4 +121,5 @@
     <bottom>
         <fx:include source="FooterComponent.fxml"/>
     </bottom>
+
 </BorderPane>

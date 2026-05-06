@@ -2,7 +2,6 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.InsurancePolicyController"
@@ -13,33 +12,37 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
-            <VBox spacing="20" alignment="TOP_CENTER"
-                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" alignment="TOP_CENTER" styleClass="dashboard-container">
+                <padding>
+                    <Insets top="25" right="40" bottom="30" left="40"/>
+                </padding>
 
                 <Label text="Insurance Policies" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
                 <Label text="Manage vehicle insurance policies" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
 
                 <Separator/>
 
-                <HBox spacing="20" alignment="CENTER">
+                <HBox spacing="25" alignment="CENTER" fillHeight="true">
                     <!-- Left Panel - Policies List -->
-                    <VBox spacing="10" alignment="CENTER" HBox.hgrow="ALWAYS">
-                        <VBox styleClass="profile-edit-card" alignment="CENTER">
+                    <VBox spacing="15" alignment="CENTER" HBox.hgrow="ALWAYS" prefWidth="550">
+                        <VBox styleClass="profile-edit-card" alignment="CENTER" prefWidth="550">
                             <Label text="Insurance Policies" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
                             <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="30"/>
 
-                            <TableView fx:id="policiesTable" prefHeight="400" minHeight="300" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
+                            <TableView fx:id="policiesTable" prefHeight="450" maxWidth="Infinity">
+                                <columnResizePolicy>
+                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                                </columnResizePolicy>
                                 <columns>
-                                    <TableColumn fx:id="policyNumberColumn" text="Policy Number" minWidth="120" maxWidth="160"/>
-                                    <TableColumn fx:id="vehicleColumn" text="Vehicle" minWidth="100" maxWidth="130"/>
-                                    <TableColumn fx:id="providerColumn" text="Provider" minWidth="120" maxWidth="160"/>
-                                    <TableColumn fx:id="startDateColumn" text="Start Date" minWidth="90" maxWidth="110"/>
-                                    <TableColumn fx:id="endDateColumn" text="End Date" minWidth="90" maxWidth="110"/>
-                                    <TableColumn fx:id="premiumColumn" text="Premium (M)" minWidth="90" maxWidth="110"/>
-                                    <TableColumn fx:id="policyStatusColumn" text="Status" minWidth="80" maxWidth="110"/>
+                                    <TableColumn fx:id="policyNumberColumn" text="Policy Number" prefWidth="140"/>
+                                    <TableColumn fx:id="vehicleColumn" text="Vehicle" prefWidth="120"/>
+                                    <TableColumn fx:id="providerColumn" text="Provider" prefWidth="140"/>
+                                    <TableColumn fx:id="startDateColumn" text="Start Date" prefWidth="100"/>
+                                    <TableColumn fx:id="endDateColumn" text="End Date" prefWidth="100"/>
+                                    <TableColumn fx:id="premiumColumn" text="Premium (M)" prefWidth="100"/>
+                                    <TableColumn fx:id="policyStatusColumn" text="Status" prefWidth="90"/>
                                 </columns>
                                 <placeholder>
                                     <Label text="No insurance policies found" styleClass="status-text"/>
@@ -52,33 +55,28 @@
 
                             <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
-                            <HBox alignment="CENTER">
-                                <Button fx:id="refreshButton" text="Refresh" styleClass="button-info" prefWidth="100">
-                                    <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                                </Button>
-                                <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100">
-                                    <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                                </Button>
+                            <HBox alignment="CENTER" spacing="15">
+                                <Button fx:id="refreshButton" text="Refresh" styleClass="button-info" prefWidth="100"/>
+                                <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100"/>
                             </HBox>
                         </VBox>
                     </VBox>
 
                     <!-- Right Panel - Policy Details -->
-                    <VBox spacing="15" alignment="CENTER" HBox.hgrow="ALWAYS">
-                        <VBox styleClass="profile-edit-card" alignment="CENTER">
+                    <VBox spacing="15" alignment="CENTER" HBox.hgrow="ALWAYS" prefWidth="450">
+                        <VBox styleClass="profile-edit-card" alignment="CENTER" prefWidth="450">
                             <Label text="Policy Details" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                            <GridPane hgap="10" vgap="10" alignment="CENTER">
+                            <GridPane hgap="15" vgap="12" alignment="CENTER">
                                 <columnConstraints>
-                                    <ColumnConstraints halignment="RIGHT" minWidth="120"/>
-                                    <ColumnConstraints minWidth="250"/>
+                                    <ColumnConstraints halignment="RIGHT" minWidth="120" prefWidth="120"/>
+                                    <ColumnConstraints minWidth="250" hgrow="ALWAYS"/>
                                 </columnConstraints>
-
                                 <Label text="Vehicle:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                                <ComboBox fx:id="vehicleComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250"/>
+                                <ComboBox fx:id="vehicleComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="280"/>
 
                                 <Label text="Provider:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                                <ComboBox fx:id="providerComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="250"/>
+                                <ComboBox fx:id="providerComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="280"/>
 
                                 <Label text="Policy Number:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
                                 <TextField fx:id="policyNumberField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
@@ -99,10 +97,8 @@
                             <Label text="Coverage Details:" style="-fx-font-weight: bold;" alignment="CENTER" maxWidth="Infinity"/>
                             <TextArea fx:id="coverageDetailsArea" prefHeight="80" wrapText="true"/>
 
-                            <HBox alignment="CENTER">
-                                <Button fx:id="addButton" text="Add Policy" styleClass="button-success" prefWidth="110">
-                                    <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                                </Button>
+                            <HBox alignment="CENTER" spacing="15">
+                                <Button fx:id="addButton" text="Add Policy" styleClass="button-success" prefWidth="110"/>
                                 <Button fx:id="updateButton" text="Update" styleClass="button-info" prefWidth="90"/>
                                 <Button fx:id="deleteButton" text="Delete" styleClass="button-danger" prefWidth="90"/>
                                 <Button fx:id="clearButton" text="Clear" styleClass="button-secondary" prefWidth="90"/>

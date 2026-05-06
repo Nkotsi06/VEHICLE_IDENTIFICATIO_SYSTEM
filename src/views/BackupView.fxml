@@ -13,10 +13,11 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
-            <VBox spacing="20" alignment="TOP_CENTER"
-                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" alignment="TOP_CENTER" styleClass="dashboard-container">
+                <padding>
+                    <Insets top="25" right="40" bottom="30" left="40"/>
+                </padding>
 
                 <Label text="Backup Management" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
                 <Label text="Create, schedule, and restore database backups" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
@@ -25,7 +26,6 @@
 
                 <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="40"/>
 
-                <!-- Backup Configuration Card -->
                 <HBox alignment="CENTER">
                     <VBox maxWidth="800" styleClass="profile-edit-card" alignment="CENTER">
                         <Label text="Backup Configuration" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
@@ -59,7 +59,6 @@
 
                 <Separator/>
 
-                <!-- Backup Statistics Card -->
                 <HBox alignment="CENTER">
                     <VBox maxWidth="800" styleClass="profile-edit-card" alignment="CENTER">
                         <Label text="Backup Statistics" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
@@ -84,13 +83,10 @@
                     </VBox>
                 </HBox>
 
-                <!-- Available Backups Card -->
                 <HBox alignment="CENTER">
                     <VBox maxWidth="800" styleClass="profile-edit-card" alignment="CENTER">
                         <Label text="Available Backups" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
-
                         <ListView fx:id="backupsList" prefHeight="200"/>
-
                         <HBox spacing="15" alignment="CENTER">
                             <Button fx:id="restoreButton" text="Restore Selected" styleClass="button-warning" prefWidth="130"/>
                             <Button fx:id="refreshButton" text="Refresh" styleClass="button-info" prefWidth="100"/>
@@ -99,7 +95,6 @@
                     </VBox>
                 </HBox>
 
-                <!-- Back Button -->
                 <HBox spacing="10" alignment="CENTER">
                     <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-secondary" prefWidth="150"/>
                 </HBox>

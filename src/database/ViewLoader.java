@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -222,6 +223,401 @@ public class ViewLoader {
         }
     }
 
+    /**
+     * Gets the sum of unpaid fines from violations.
+     *
+     * @return total sum of unpaid fines
+     * @throws SQLException if query fails
+     */
+    public double getSumUnpaidFines() throws SQLException {
+        String sql = "SELECT COALESCE(SUM(fine_amount), 0) as total_unpaid_fines FROM violations WHERE payment_status = 'UNPAID'";
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            conn = dbConnection.getConnection();
+            ps = conn.prepareStatement(sql);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble("total_unpaid_fines");
+            }
+            return 0.0;
+        } finally {
+            dbConnection.closeResources(rs, ps, conn);
+        }
+    }
+
+    /**
+     * Gets the sum of premiums for policies by provider.
+     *
+     * @param providerId the provider ID
+     * @return total sum of premiums
+     * @throws SQLException if query fails
+     */
+    public double getSumPremiumByProvider(int providerId) throws SQLException {
+        String sql = "SELECT COALESCE(SUM(premium), 0) as total_premium FROM insurance_policies WHERE provider_id = ? AND status = 'ACTIVE'";
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            conn = dbConnection.getConnection();
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1, providerId);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble("total_premium");
+            }
+            return 0.0;
+        } finally {
+            dbConnection.closeResources(rs, ps, conn);
+        }
+    }
+
+    /**
+     * Gets the sum of payments by vehicle.
+     *
+     * @param vehicleId the vehicle ID
+     * @return total sum of payments for the vehicle
+     * @throws SQLException if query fails
+     */
+    public double getSumPaymentsByVehicle(int vehicleId) throws SQLException {
+        String sql = "SELECT COALESCE(SUM(p.amount), 0) as total_payments FROM payments p " +
+                "JOIN violations v ON p.violation_id = v.id " +
+                "WHERE v.vehicle_id = ?";
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            conn = dbConnection.getConnection();
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1, vehicleId);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble("total_payments");
+            }
+            return 0.0;
+        } finally {
+            dbConnection.closeResources(rs, ps, conn);
+        }
+    }
+
+    /**
+     * Gets the sum of completed insurance payments.
+     *
+     * @return total sum of completed insurance payments
+     * @throws SQLException if query fails
+     */
+    public double getSumInsurancePaymentsCompleted() throws SQLException {
+        String sql = "SELECT COALESCE(SUM(amount), 0) as total_payments FROM insurance_payments WHERE status = 'COMPLETED'";
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            conn = dbConnection.getConnection();
+            ps = conn.prepareStatement(sql);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble("total_payments");
+            }
+            return 0.0;
+        } finally {
+            dbConnection.closeResources(rs, ps, conn);
+        }
+    }
+
+    /**
+     * Gets the sum of inventory value by workshop.
+     *
+     * @param workshopId the workshop ID
+     * @return total sum of inventory value
+     * @throws SQLException if query fails
+     */
+    public double getSumInventoryValueByWorkshop(int workshopId) throws SQLException {
+        String sql = "SELECT COALESCE(SUM(quantity * unit_price), 0) as total_inventory_value FROM parts_inventory WHERE workshop_id = ?";
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            conn = dbConnection.getConnection();
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1, workshopId);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble("total_inventory_value");
+            }
+            return 0.0;
+        } finally {
+            dbConnection.closeResources(rs, ps, conn);
+        }
+    }
+
+    /**
+     * Gets the sum of service costs by workshop.
+     *
+     * @param workshopId the workshop ID
+     * @return total sum of service costs
+     * @throws SQLException if query fails
+     */
+    public double getSumServiceCostByWorkshop(int workshopId) throws SQLException {
+        String sql = "SELECT COALESCE(SUM(cost), 0) as total_service_cost FROM service_records WHERE workshop_id = ?";
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            conn = dbConnection.getConnection();
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1, workshopId);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble("total_service_cost");
+            }
+            return 0.0;
+        } finally {
+            dbConnection.closeResources(rs, ps, conn);
+        }
+    }
+
+    /**
+     * Gets the average service cost by workshop.
+     *
+     * @param workshopId the workshop ID
+     * @return average service cost
+     * @throws SQLException if query fails
+     */
+    public double getAverageServiceCostByWorkshop(int workshopId) throws SQLException {
+        String sql = "SELECT COALESCE(AVG(cost), 0) as avg_service_cost FROM service_records WHERE workshop_id = ?";
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            conn = dbConnection.getConnection();
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1, workshopId);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble("avg_service_cost");
+            }
+            return 0.0;
+        } finally {
+            dbConnection.closeResources(rs, ps, conn);
+        }
+    }
+
+    /**
+     * Counts distinct vehicles by workshop and month.
+     *
+     * @param workshopId the workshop ID
+     * @param month the month date
+     * @return count of distinct vehicles
+     * @throws SQLException if query fails
+     */
+    public int countDistinctVehiclesByWorkshopAndMonth(int workshopId, LocalDate month) throws SQLException {
+        String sql = "SELECT COUNT(DISTINCT vehicle_id) as vehicle_count FROM service_records WHERE workshop_id = ? AND EXTRACT(YEAR FROM service_date) = ? AND EXTRACT(MONTH FROM service_date) = ?";
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            conn = dbConnection.getConnection();
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1, workshopId);
+            ps.setInt(2, month.getYear());
+            ps.setInt(3, month.getMonthValue());
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("vehicle_count");
+            }
+            return 0;
+        } finally {
+            dbConnection.closeResources(rs, ps, conn);
+        }
+    }
+
+    /**
+     * Gets the no claim bonus percentage for a policy.
+     *
+     * @param policyId the policy ID
+     * @return bonus percentage
+     * @throws SQLException if query fails
+     */
+    public double getNoClaimBonusPercentage(int policyId) throws SQLException {
+        String sql = "SELECT COALESCE(bonus_percentage, 0) as bonus_percentage FROM no_claim_bonus_records WHERE insurance_policy_id = ? ORDER BY calculated_date DESC LIMIT 1";
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            conn = dbConnection.getConnection();
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1, policyId);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble("bonus_percentage");
+            }
+            return 0.0;
+        } finally {
+            dbConnection.closeResources(rs, ps, conn);
+        }
+    }
+
+    /**
+     * Gets the sum of wallet transactions by type.
+     *
+     * @param walletId the wallet ID
+     * @param transactionType the transaction type
+     * @return total sum
+     * @throws SQLException if query fails
+     */
+    public double getSumWalletTransactionsByType(int walletId, String transactionType) throws SQLException {
+        String sql = "SELECT COALESCE(SUM(amount), 0) as total_amount FROM wallet_transactions WHERE wallet_id = ? AND transaction_type = ? AND status = 'COMPLETED'";
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            conn = dbConnection.getConnection();
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1, walletId);
+            ps.setString(2, transactionType);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble("total_amount");
+            }
+            return 0.0;
+        } finally {
+            dbConnection.closeResources(rs, ps, conn);
+        }
+    }
+
+    /**
+     * Gets the average query response time in hours.
+     *
+     * @return average response time in hours
+     * @throws SQLException if query fails
+     */
+    public double getAverageQueryResponseTimeHours() throws SQLException {
+        String sql = "SELECT COALESCE(AVG(EXTRACT(EPOCH FROM (response_date - query_date)) / 3600), 0) as avg_response_hours FROM customer_queries WHERE response_date IS NOT NULL";
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            conn = dbConnection.getConnection();
+            ps = conn.prepareStatement(sql);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble("avg_response_hours");
+            }
+            return 0.0;
+        } finally {
+            dbConnection.closeResources(rs, ps, conn);
+        }
+    }
+
+    /**
+     * Loads boolean value from a table.
+     *
+     * @param tableName the table name
+     * @param columnName the column name
+     * @param condition the WHERE clause
+     * @param params the parameters
+     * @return boolean value
+     * @throws SQLException if query fails
+     */
+    public boolean getBooleanValueFromTable(String tableName, String columnName, String condition, Object... params) throws SQLException {
+        String sql = "SELECT " + columnName + " FROM " + tableName + " WHERE " + condition;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            conn = dbConnection.getConnection();
+            ps = conn.prepareStatement(sql);
+            if (params != null) {
+                for (int i = 0; i < params.length; i++) {
+                    ps.setObject(i + 1, params[i]);
+                }
+            }
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getBoolean(1);
+            }
+            return false;
+        } finally {
+            dbConnection.closeResources(rs, ps, conn);
+        }
+    }
+
+    /**
+     * Loads integer value from a table.
+     *
+     * @param tableName the table name
+     * @param columnName the column name
+     * @param condition the WHERE clause
+     * @param params the parameters
+     * @return integer value
+     * @throws SQLException if query fails
+     */
+    public int getIntValueFromTable(String tableName, String columnName, String condition, Object... params) throws SQLException {
+        String sql = "SELECT " + columnName + " FROM " + tableName + " WHERE " + condition;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            conn = dbConnection.getConnection();
+            ps = conn.prepareStatement(sql);
+            if (params != null) {
+                for (int i = 0; i < params.length; i++) {
+                    ps.setObject(i + 1, params[i]);
+                }
+            }
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            return 0;
+        } finally {
+            dbConnection.closeResources(rs, ps, conn);
+        }
+    }
+
+    /**
+     * Loads string list from a view.
+     *
+     * @param viewName the view name
+     * @param valueColumn the column to get values from
+     * @param orderColumn the column to order by
+     * @return list of strings
+     * @throws SQLException if query fails
+     */
+    public List<String> loadStringListFromView(String viewName, String valueColumn, String orderColumn) throws SQLException {
+        String sql = "SELECT " + valueColumn + " FROM " + viewName + " ORDER BY " + orderColumn;
+        List<String> results = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            conn = dbConnection.getConnection();
+            ps = conn.prepareStatement(sql);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                results.add(rs.getString(1));
+            }
+            return results;
+        } finally {
+            dbConnection.closeResources(rs, ps, conn);
+        }
+    }
+
     // ============================================
     // VEHICLE VIEWS
     // ============================================
@@ -280,6 +676,22 @@ public class ViewLoader {
 
     public List<Map<String, Object>> loadUnpaidViolations() throws SQLException {
         return loadView("vw_unpaid_violations");
+    }
+
+    // ============================================
+    // PAYMENT VIEWS
+    // ============================================
+
+    public List<Map<String, Object>> loadPaymentsView() throws SQLException {
+        return loadView("vw_payments");
+    }
+
+    public List<Map<String, Object>> loadPaymentsByViolation(int violationId) throws SQLException {
+        return loadViewWithCondition("vw_payments", "violation_id = ? ORDER BY payment_date DESC", violationId);
+    }
+
+    public List<Map<String, Object>> loadPaymentsByVehicle(int vehicleId) throws SQLException {
+        return loadViewWithCondition("vw_payments", "vehicle_id = ? ORDER BY payment_date DESC", vehicleId);
     }
 
     // ============================================
@@ -487,6 +899,64 @@ public class ViewLoader {
     }
 
     // ============================================
+    // INCIDENT REPORT VIEWS (NEWLY ADDED)
+    // ============================================
+
+    /**
+     * Loads incident reports for the police dashboard.
+     * Tries to load from dedicated incident_reports view first,
+     * falls back to customer_complaints if not available.
+     *
+     * @return list of incident reports as maps
+     * @throws SQLException if database error occurs
+     */
+    public List<Map<String, Object>> loadIncidentReports() throws SQLException {
+        try {
+            // Try to load from dedicated incident reports view
+            return loadView("vw_incident_reports");
+        } catch (SQLException e) {
+            // Fallback to customer complaints if incident_reports view doesn't exist
+            LOGGER.warning("vw_incident_reports not found, falling back to vw_customer_complaints");
+            return loadCustomerComplaintsView();
+        }
+    }
+
+    /**
+     * Loads incident reports filtered by status.
+     *
+     * @param status the status to filter by (e.g., "PENDING", "INVESTIGATING", "RESOLVED")
+     * @return list of filtered incident reports
+     * @throws SQLException if database error occurs
+     */
+    public List<Map<String, Object>> loadIncidentReportsByStatus(String status) throws SQLException {
+        try {
+            return loadViewWithCondition("vw_incident_reports", "status = ?", status);
+        } catch (SQLException e) {
+            LOGGER.warning("vw_incident_reports not found, falling back to vw_pending_complaints for status: " + status);
+            if ("PENDING".equals(status)) {
+                return loadPendingComplaints();
+            }
+            return loadCustomerComplaintsView();
+        }
+    }
+
+    /**
+     * Loads incident reports for a specific vehicle.
+     *
+     * @param vehicleId the vehicle ID
+     * @return list of incident reports for the vehicle
+     * @throws SQLException if database error occurs
+     */
+    public List<Map<String, Object>> loadIncidentReportsByVehicle(int vehicleId) throws SQLException {
+        try {
+            return loadViewWithCondition("vw_incident_reports", "vehicle_id = ?", vehicleId);
+        } catch (SQLException e) {
+            LOGGER.warning("vw_incident_reports not found, falling back to vw_customer_complaints for vehicle: " + vehicleId);
+            return loadViewWithCondition("vw_customer_complaints", "vehicle_id = ?", vehicleId);
+        }
+    }
+
+    // ============================================
     // RISK SCORE VIEWS
     // ============================================
 
@@ -657,6 +1127,14 @@ public class ViewLoader {
 
     public List<Map<String, Object>> loadInspectionChecklistItems(int inspectionId) throws SQLException {
         return loadViewWithCondition("vw_inspection_checklist_items", "inspection_id = ?", inspectionId);
+    }
+
+    // ============================================
+    // SCHEDULED REPORTS VIEWS
+    // ============================================
+
+    public List<Map<String, Object>> loadScheduledReports() throws SQLException {
+        return loadView("vw_scheduled_reports");
     }
 
     // ============================================

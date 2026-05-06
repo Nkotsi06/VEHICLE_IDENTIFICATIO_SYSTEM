@@ -2,7 +2,6 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.VehicleRegistrationController"
@@ -13,16 +12,22 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
-            <VBox spacing="20" alignment="TOP_CENTER"
-                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" alignment="TOP_CENTER" styleClass="dashboard-container">
+                <padding>
+                    <Insets top="25" right="40" bottom="30" left="40"/>
+                </padding>
 
                 <Label text="Vehicle Registration" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
 
                 <HBox alignment="CENTER">
-                    <VBox maxWidth="800" styleClass="profile-edit-card" alignment="CENTER">
+                    <VBox maxWidth="800" minWidth="550" styleClass="profile-edit-card" alignment="CENTER">
                         <GridPane hgap="15" vgap="12" alignment="CENTER">
+                            <columnConstraints>
+                                <ColumnConstraints halignment="RIGHT" minWidth="120" prefWidth="120"/>
+                                <ColumnConstraints minWidth="250" hgrow="ALWAYS"/>
+                            </columnConstraints>
+
                             <Label text="Registration Number:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
                             <TextField fx:id="registrationNumberField" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250"/>
 
@@ -51,10 +56,8 @@
                             <ComboBox fx:id="statusComboBox" GridPane.rowIndex="8" GridPane.columnIndex="1" prefWidth="200"/>
                         </GridPane>
 
-                        <HBox alignment="CENTER">
-                            <Button fx:id="registerButton" text="Register Vehicle" styleClass="button-success" prefWidth="120">
-                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                            </Button>
+                        <HBox alignment="CENTER" spacing="15">
+                            <Button fx:id="registerButton" text="Register Vehicle" styleClass="button-success" prefWidth="130"/>
                             <Button fx:id="clearButton" text="Clear" styleClass="button-secondary" prefWidth="100"/>
                             <Button fx:id="backButton" text="Cancel" styleClass="button-secondary" prefWidth="100"/>
                         </HBox>

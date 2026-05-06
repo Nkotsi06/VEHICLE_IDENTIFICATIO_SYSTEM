@@ -2,7 +2,6 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.DigitalInspectionController"
@@ -13,10 +12,11 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
-            <VBox spacing="20" alignment="TOP_CENTER"
-                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" alignment="TOP_CENTER" styleClass="dashboard-container">
+                <padding>
+                    <Insets top="25" right="40" bottom="30" left="40"/>
+                </padding>
 
                 <Label text="Digital Vehicle Inspection" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
                 <Label text="Conduct digital vehicle inspections" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
@@ -27,13 +27,13 @@
 
                 <!-- Inspection Setup -->
                 <HBox alignment="CENTER">
-                    <VBox maxWidth="900" styleClass="profile-edit-card" alignment="CENTER">
+                    <VBox maxWidth="900" minWidth="600" styleClass="profile-edit-card" alignment="CENTER">
                         <Label text="Inspection Setup" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                        <GridPane hgap="15" vgap="10" alignment="CENTER">
+                        <GridPane hgap="15" vgap="12" alignment="CENTER">
                             <columnConstraints>
-                                <ColumnConstraints halignment="RIGHT" minWidth="120"/>
-                                <ColumnConstraints minWidth="250"/>
+                                <ColumnConstraints halignment="RIGHT" minWidth="120" prefWidth="120"/>
+                                <ColumnConstraints minWidth="250" hgrow="ALWAYS"/>
                             </columnConstraints>
 
                             <Label text="Service Record:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
@@ -44,12 +44,8 @@
                         </GridPane>
 
                         <HBox spacing="15" alignment="CENTER">
-                            <Button fx:id="startInspectionButton" text="Start Inspection" styleClass="button-success" prefWidth="130">
-                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                            </Button>
-                            <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100">
-                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                            </Button>
+                            <Button fx:id="startInspectionButton" text="Start Inspection" styleClass="button-success" prefWidth="140"/>
+                            <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100"/>
                         </HBox>
                     </VBox>
                 </HBox>
@@ -58,13 +54,13 @@
 
                 <!-- Inspection Info -->
                 <HBox alignment="CENTER">
-                    <VBox maxWidth="900" styleClass="profile-card" alignment="CENTER">
+                    <VBox maxWidth="900" minWidth="600" styleClass="profile-card" alignment="CENTER">
                         <GridPane hgap="20" vgap="10" alignment="CENTER">
                             <columnConstraints>
-                                <ColumnConstraints halignment="RIGHT" minWidth="120"/>
-                                <ColumnConstraints minWidth="200"/>
-                                <ColumnConstraints halignment="RIGHT" minWidth="120"/>
-                                <ColumnConstraints minWidth="200"/>
+                                <ColumnConstraints halignment="RIGHT" minWidth="120" prefWidth="120"/>
+                                <ColumnConstraints minWidth="200" hgrow="ALWAYS"/>
+                                <ColumnConstraints halignment="RIGHT" minWidth="120" prefWidth="120"/>
+                                <ColumnConstraints minWidth="200" hgrow="ALWAYS"/>
                             </columnConstraints>
 
                             <Label text="Inspection ID:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
@@ -84,11 +80,14 @@
                 <!-- Inspection Checklist -->
                 <Label text="Inspection Checklist" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                <TableView fx:id="checklistTable" prefHeight="250" minHeight="200" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
+                <TableView fx:id="checklistTable" prefHeight="250" minHeight="200" maxWidth="Infinity">
+                    <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                    </columnResizePolicy>
                     <columns>
-                        <TableColumn fx:id="itemNameColumn" text="Inspection Item" minWidth="200"/>
-                        <TableColumn fx:id="statusColumn" text="Status" minWidth="80" maxWidth="120"/>
-                        <TableColumn fx:id="notesColumn" text="Notes" minWidth="250"/>
+                        <TableColumn fx:id="itemNameColumn" text="Inspection Item" prefWidth="250"/>
+                        <TableColumn fx:id="statusColumn" text="Status" prefWidth="100"/>
+                        <TableColumn fx:id="notesColumn" text="Notes" prefWidth="300"/>
                     </columns>
                     <placeholder>
                         <Label text="No inspection items" styleClass="status-text"/>
@@ -101,13 +100,13 @@
 
                 <!-- Add Item Section -->
                 <HBox alignment="CENTER">
-                    <VBox maxWidth="900" styleClass="profile-edit-card" alignment="CENTER">
+                    <VBox maxWidth="900" minWidth="600" styleClass="profile-edit-card" alignment="CENTER">
                         <Label text="Add Inspection Item" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                        <GridPane hgap="15" vgap="10" alignment="CENTER">
+                        <GridPane hgap="15" vgap="12" alignment="CENTER">
                             <columnConstraints>
-                                <ColumnConstraints halignment="RIGHT" minWidth="100"/>
-                                <ColumnConstraints minWidth="250"/>
+                                <ColumnConstraints halignment="RIGHT" minWidth="100" prefWidth="100"/>
+                                <ColumnConstraints minWidth="250" hgrow="ALWAYS"/>
                             </columnConstraints>
 
                             <Label text="Item Name:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
@@ -121,9 +120,7 @@
                         </GridPane>
 
                         <HBox alignment="CENTER">
-                            <Button fx:id="addItemButton" text="Add Item" styleClass="button-info" prefWidth="120">
-                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                            </Button>
+                            <Button fx:id="addItemButton" text="Add Item" styleClass="button-info" prefWidth="120"/>
                         </HBox>
                     </VBox>
                 </HBox>
@@ -132,11 +129,11 @@
 
                 <!-- Overall Assessment -->
                 <HBox alignment="CENTER">
-                    <VBox maxWidth="900" styleClass="profile-edit-card" alignment="CENTER">
-                        <GridPane hgap="15" vgap="10" alignment="CENTER">
+                    <VBox maxWidth="900" minWidth="600" styleClass="profile-edit-card" alignment="CENTER">
+                        <GridPane hgap="15" vgap="12" alignment="CENTER">
                             <columnConstraints>
-                                <ColumnConstraints halignment="RIGHT" minWidth="120"/>
-                                <ColumnConstraints minWidth="250"/>
+                                <ColumnConstraints halignment="RIGHT" minWidth="120" prefWidth="120"/>
+                                <ColumnConstraints minWidth="250" hgrow="ALWAYS"/>
                             </columnConstraints>
 
                             <Label text="Overall Condition:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
@@ -150,12 +147,8 @@
 
                 <!-- Action Buttons -->
                 <HBox spacing="15" alignment="CENTER">
-                    <Button fx:id="completeInspectionButton" text="Complete Inspection" styleClass="button-success" prefWidth="180" disable="true">
-                        <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                    </Button>
-                    <Button fx:id="generateReportButton" text="Generate Report" styleClass="button-primary" prefWidth="150" disable="true">
-                        <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                    </Button>
+                    <Button fx:id="completeInspectionButton" text="Complete Inspection" styleClass="button-success" prefWidth="180" disable="true"/>
+                    <Button fx:id="generateReportButton" text="Generate Report" styleClass="button-primary" prefWidth="150" disable="true"/>
                 </HBox>
 
                 <Label fx:id="messageLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>

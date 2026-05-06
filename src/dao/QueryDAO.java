@@ -3,7 +3,9 @@ package dao;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import database.ProcedureCaller;
 import database.ViewLoader;
@@ -27,41 +29,52 @@ public class QueryDAO extends BaseDAO<CustomerQuery> {
 
     @Override
     public CustomerQuery findById(int id) throws SQLException {
-        List<CustomerQuery> results = viewLoader.loadViewWithCondition("vw_customer_queries", "id = ?", id);
-        return results.isEmpty() ? null : results.get(0);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_queries", "id = ?", id);
+        if (results.isEmpty()) {
+            return null;
+        }
+        return mapMapToCustomerQuery(results.get(0));
     }
 
     @Override
     public List<CustomerQuery> findAll() throws SQLException {
-        return viewLoader.loadView("vw_customer_queries");
+        List<Map<String, Object>> results = viewLoader.loadView("vw_customer_queries");
+        return mapMapsToCustomerQueries(results);
     }
 
     public List<CustomerQuery> findByCustomerId(int customerId) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_customer_queries", "customer_id = ? ORDER BY query_date DESC", customerId);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_queries", "customer_id = ? ORDER BY query_date DESC", customerId);
+        return mapMapsToCustomerQueries(results);
     }
 
     public List<CustomerQuery> findByCustomerName(String customerName) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_customer_queries", "customer_name ILIKE ? ORDER BY query_date DESC", "%" + customerName + "%");
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_queries", "customer_name ILIKE ? ORDER BY query_date DESC", "%" + customerName + "%");
+        return mapMapsToCustomerQueries(results);
     }
 
     public List<CustomerQuery> findByVehicleId(int vehicleId) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_customer_queries", "vehicle_id = ? ORDER BY query_date DESC", vehicleId);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_queries", "vehicle_id = ? ORDER BY query_date DESC", vehicleId);
+        return mapMapsToCustomerQueries(results);
     }
 
     public List<CustomerQuery> findByRegistrationNumber(String registrationNumber) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_customer_queries", "registration_number = ? ORDER BY query_date DESC", registrationNumber);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_queries", "registration_number = ? ORDER BY query_date DESC", registrationNumber);
+        return mapMapsToCustomerQueries(results);
     }
 
     public List<CustomerQuery> findPendingQueries() throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_pending_queries", "1=1 ORDER BY query_date");
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_pending_queries", "1=1 ORDER BY query_date");
+        return mapMapsToCustomerQueries(results);
     }
 
     public List<CustomerQuery> findByStatus(String status) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_customer_queries", "status = ? ORDER BY query_date DESC", status);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_queries", "status = ? ORDER BY query_date DESC", status);
+        return mapMapsToCustomerQueries(results);
     }
 
     public List<CustomerQuery> findByDateRange(LocalDateTime startDate, LocalDateTime endDate) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_customer_queries", "query_date BETWEEN ? AND ? ORDER BY query_date DESC", startDate, endDate);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_customer_queries", "query_date BETWEEN ? AND ? ORDER BY query_date DESC", startDate, endDate);
+        return mapMapsToCustomerQueries(results);
     }
 
     @Override
@@ -114,6 +127,72 @@ public class QueryDAO extends BaseDAO<CustomerQuery> {
 
     public double getAverageResponseTimeHours() throws SQLException {
         return viewLoader.getAverageQueryResponseTimeHours();
+    }
+
+    /**
+     * Converts a List of Maps to a List of CustomerQuery objects.
+     */
+    private List<CustomerQuery> mapMapsToCustomerQueries(List<Map<String, Object>> maps) {
+        List<CustomerQuery> queries = new ArrayList<>();
+        if (maps == null) {
+            return queries;
+        }
+        for (Map<String, Object> map : maps) {
+            CustomerQuery query = mapMapToCustomerQuery(map);
+            if (query != null) {
+                queries.add(query);
+            }
+        }
+        return queries;
+    }
+
+    /**
+     * Converts a Map to a CustomerQuery object.
+     */
+    private CustomerQuery mapMapToCustomerQuery(Map<String, Object> map) {
+        if (map == null) {
+            return null;
+        }
+
+        CustomerQuery query = new CustomerQuery();
+
+        query.setId(getIntValue(map, "id"));
+        query.setCustomerId(getIntValue(map, "customer_id"));
+        query.setCustomerName(getStringValue(map, "customer_name"));
+        query.setVehicleId(getIntValue(map, "vehicle_id"));
+        query.setRegistrationNumber(getStringValue(map, "registration_number"));
+        query.setQueryText(getStringValue(map, "query_text"));
+        query.setResponseText(getStringValue(map, "response_text"));
+        query.setStatus(getStringValue(map, "status"));
+
+        query.setQueryDate(getLocalDateTimeValue(map, "query_date"));
+        query.setResponseDate(getLocalDateTimeValue(map, "response_date"));
+        query.setCreatedAt(getLocalDateTimeValue(map, "created_at"));
+        query.setUpdatedAt(getLocalDateTimeValue(map, "updated_at"));
+
+        return query;
+    }
+
+    private Integer getIntValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) return 0;
+        if (value instanceof Integer) return (Integer) value;
+        if (value instanceof Long) return ((Long) value).intValue();
+        if (value instanceof Number) return ((Number) value).intValue();
+        return 0;
+    }
+
+    private String getStringValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        return value != null ? value.toString() : "";
+    }
+
+    private LocalDateTime getLocalDateTimeValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) return null;
+        if (value instanceof java.sql.Timestamp) return ((java.sql.Timestamp) value).toLocalDateTime();
+        if (value instanceof LocalDateTime) return (LocalDateTime) value;
+        return null;
     }
 
     @Override

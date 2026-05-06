@@ -305,8 +305,8 @@ public class TimestampOrderingUtil {
          */
         public double getEstimatedDistance() {
             if (startLocation == null || endLocation == null) return 0.0;
-            RouteCalculator calculator = new RouteCalculator();
-            return calculator.calculateDistance(
+            // FIXED: Call static method directly without creating instance
+            return RouteCalculator.calculateDistance(
                     startLocation.latitude, startLocation.longitude,
                     endLocation.latitude, endLocation.longitude
             );

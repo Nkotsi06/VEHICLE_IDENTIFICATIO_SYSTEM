@@ -15,14 +15,19 @@ public class IncidentReport extends BaseEntity {
     private int id;
     private int vehicleId;
     private String registrationNumber;
+    private String make;          // ADDED
+    private String model;         // ADDED
     private String incidentType;
     private LocalDateTime incidentDateTime;
     private String location;
     private String description;
     private String officerName;
-    private String status;
+    private String badgeNumber;    // ADDED
     private String caseNumber;
     private String witnesses;
+    private String status;
+    private double latitude;       // ADDED
+    private double longitude;      // ADDED
 
     // Incident type constants
     public static final String TYPE_ACCIDENT = "ACCIDENT";
@@ -43,17 +48,19 @@ public class IncidentReport extends BaseEntity {
     public IncidentReport() {
         super();
         this.status = STATUS_PENDING;
+        this.latitude = 0.0;
+        this.longitude = 0.0;
     }
 
     /**
      * Constructor for creating a new incident report.
      *
-     * @param vehicleId       the vehicle ID
-     * @param incidentType    the incident type
+     * @param vehicleId        the vehicle ID
+     * @param incidentType     the incident type
      * @param incidentDateTime the incident date and time
-     * @param location        the incident location
-     * @param description     the incident description
-     * @param officerName     the reporting officer's name
+     * @param location         the incident location
+     * @param description      the incident description
+     * @param officerName      the reporting officer's name
      */
     public IncidentReport(int vehicleId, String incidentType, LocalDateTime incidentDateTime,
                           String location, String description, String officerName) {
@@ -70,6 +77,16 @@ public class IncidentReport extends BaseEntity {
     // GETTERS AND SETTERS
     // ============================================
 
+    @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public int getVehicleId() {
         return vehicleId;
     }
@@ -84,6 +101,23 @@ public class IncidentReport extends BaseEntity {
 
     public void setRegistrationNumber(String registrationNumber) {
         this.registrationNumber = registrationNumber;
+    }
+
+    // ADDED GETTERS AND SETTERS
+    public String getMake() {
+        return make;
+    }
+
+    public void setMake(String make) {
+        this.make = make;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
     }
 
     public String getIncidentType() {
@@ -126,12 +160,13 @@ public class IncidentReport extends BaseEntity {
         this.officerName = officerName;
     }
 
-    public String getStatus() {
-        return status;
+    // ADDED GETTERS AND SETTERS
+    public String getBadgeNumber() {
+        return badgeNumber;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setBadgeNumber(String badgeNumber) {
+        this.badgeNumber = badgeNumber;
     }
 
     public String getCaseNumber() {
@@ -148,6 +183,31 @@ public class IncidentReport extends BaseEntity {
 
     public void setWitnesses(String witnesses) {
         this.witnesses = witnesses;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    // ADDED GETTERS AND SETTERS
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 
     // ============================================
@@ -227,6 +287,19 @@ public class IncidentReport extends BaseEntity {
     }
 
     /**
+     * Gets the vehicle information (make + model).
+     *
+     * @return vehicle info string
+     */
+    public String getVehicleInfo() {
+        String info = registrationNumber != null ? registrationNumber : "";
+        if (make != null && model != null) {
+            info += " (" + make + " " + model + ")";
+        }
+        return info;
+    }
+
+    /**
      * Checks if the incident is resolved.
      *
      * @return true if resolved or closed
@@ -261,16 +334,6 @@ public class IncidentReport extends BaseEntity {
     // ============================================
 
     @Override
-    public int getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    @Override
     public String toString() {
         return getIncidentTypeDisplay() + " - " + registrationNumber + " - " + getStatusDisplay();
     }
@@ -285,14 +348,19 @@ public class IncidentReport extends BaseEntity {
         copy.setId(this.id);
         copy.setVehicleId(this.vehicleId);
         copy.setRegistrationNumber(this.registrationNumber);
+        copy.setMake(this.make);
+        copy.setModel(this.model);
         copy.setIncidentType(this.incidentType);
         copy.setIncidentDateTime(this.incidentDateTime);
         copy.setLocation(this.location);
         copy.setDescription(this.description);
         copy.setOfficerName(this.officerName);
-        copy.setStatus(this.status);
+        copy.setBadgeNumber(this.badgeNumber);
         copy.setCaseNumber(this.caseNumber);
         copy.setWitnesses(this.witnesses);
+        copy.setStatus(this.status);
+        copy.setLatitude(this.latitude);
+        copy.setLongitude(this.longitude);
         copy.setCreatedAt(this.getCreatedAt());
         copy.setUpdatedAt(this.getUpdatedAt());
         return copy;

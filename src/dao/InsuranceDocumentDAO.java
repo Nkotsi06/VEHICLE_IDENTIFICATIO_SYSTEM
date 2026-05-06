@@ -2,7 +2,10 @@ package dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import database.ProcedureCaller;
 import database.ViewLoader;
@@ -26,21 +29,27 @@ public class InsuranceDocumentDAO extends BaseDAO<InsuranceDocument> {
 
     @Override
     public InsuranceDocument findById(int id) throws SQLException {
-        List<InsuranceDocument> results = viewLoader.loadViewWithCondition("vw_insurance_documents", "id = ?", id);
-        return results.isEmpty() ? null : results.get(0);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_insurance_documents", "id = ?", id);
+        if (results.isEmpty()) {
+            return null;
+        }
+        return mapMapToInsuranceDocument(results.get(0));
     }
 
     @Override
     public List<InsuranceDocument> findAll() throws SQLException {
-        return viewLoader.loadView("vw_insurance_documents");
+        List<Map<String, Object>> results = viewLoader.loadView("vw_insurance_documents");
+        return mapMapsToInsuranceDocuments(results);
     }
 
     public List<InsuranceDocument> findByInsuranceId(int insuranceId) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_insurance_documents", "insurance_id = ? ORDER BY upload_date DESC", insuranceId);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_insurance_documents", "insurance_id = ? ORDER BY upload_date DESC", insuranceId);
+        return mapMapsToInsuranceDocuments(results);
     }
 
     public List<InsuranceDocument> findByDocumentType(String documentType) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_insurance_documents", "document_type = ? ORDER BY upload_date DESC", documentType);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_insurance_documents", "document_type = ? ORDER BY upload_date DESC", documentType);
+        return mapMapsToInsuranceDocuments(results);
     }
 
     @Override
@@ -92,6 +101,78 @@ public class InsuranceDocumentDAO extends BaseDAO<InsuranceDocument> {
 
     public boolean deleteByInsuranceId(int insuranceId) throws SQLException {
         return procedureCaller.executeDeleteInsuranceDocumentsByInsurance(insuranceId);
+    }
+
+    /**
+     * Converts a List of Maps to a List of InsuranceDocument objects.
+     */
+    private List<InsuranceDocument> mapMapsToInsuranceDocuments(List<Map<String, Object>> maps) {
+        List<InsuranceDocument> documents = new ArrayList<>();
+        if (maps == null) {
+            return documents;
+        }
+        for (Map<String, Object> map : maps) {
+            InsuranceDocument doc = mapMapToInsuranceDocument(map);
+            if (doc != null) {
+                documents.add(doc);
+            }
+        }
+        return documents;
+    }
+
+    /**
+     * Converts a Map to an InsuranceDocument object.
+     */
+    private InsuranceDocument mapMapToInsuranceDocument(Map<String, Object> map) {
+        if (map == null) {
+            return null;
+        }
+
+        InsuranceDocument doc = new InsuranceDocument();
+
+        doc.setId(getIntValue(map, "id"));
+        doc.setInsuranceId(getIntValue(map, "insurance_id"));
+        doc.setFileName(getStringValue(map, "file_name"));
+        doc.setFilePath(getStringValue(map, "file_path"));
+        doc.setDocumentType(getStringValue(map, "document_type"));
+        doc.setFileSize(getLongValue(map, "file_size"));
+
+        doc.setUploadDate(getLocalDateTimeValue(map, "upload_date"));
+        doc.setCreatedAt(getLocalDateTimeValue(map, "created_at"));
+        doc.setUpdatedAt(getLocalDateTimeValue(map, "updated_at"));
+
+        return doc;
+    }
+
+    private Integer getIntValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) return 0;
+        if (value instanceof Integer) return (Integer) value;
+        if (value instanceof Long) return ((Long) value).intValue();
+        if (value instanceof Number) return ((Number) value).intValue();
+        return 0;
+    }
+
+    private Long getLongValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) return 0L;
+        if (value instanceof Long) return (Long) value;
+        if (value instanceof Integer) return ((Integer) value).longValue();
+        if (value instanceof Number) return ((Number) value).longValue();
+        return 0L;
+    }
+
+    private String getStringValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        return value != null ? value.toString() : "";
+    }
+
+    private LocalDateTime getLocalDateTimeValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) return null;
+        if (value instanceof java.sql.Timestamp) return ((java.sql.Timestamp) value).toLocalDateTime();
+        if (value instanceof LocalDateTime) return (LocalDateTime) value;
+        return null;
     }
 
     @Override

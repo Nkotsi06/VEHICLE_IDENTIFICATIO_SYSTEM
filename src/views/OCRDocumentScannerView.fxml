@@ -2,7 +2,6 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 
@@ -14,10 +13,11 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
-            <VBox spacing="20" alignment="TOP_CENTER"
-                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" alignment="TOP_CENTER" styleClass="dashboard-container">
+                <padding>
+                    <Insets top="25" right="40" bottom="30" left="40"/>
+                </padding>
 
                 <Label text="OCR Document Scanner" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
                 <Label text="Upload insurance or vehicle documents for automatic data extraction using Optical Character Recognition"
@@ -29,18 +29,13 @@
 
                 <!-- Document Upload Section -->
                 <HBox alignment="CENTER">
-                    <VBox maxWidth="900" styleClass="profile-edit-card" alignment="CENTER">
+                    <VBox maxWidth="900" minWidth="600" styleClass="profile-edit-card" alignment="CENTER">
                         <Label text="Document Upload" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                        <HBox spacing="10" alignment="CENTER">
-                            <Button fx:id="uploadButton" text="Upload Document" styleClass="button-primary" prefWidth="150">
-                                <graphic><Label text="📄" style="-fx-font-size: 14px;"/></graphic>
-                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                            </Button>
+                        <HBox spacing="15" alignment="CENTER">
+                            <Button fx:id="uploadButton" text="Upload Document" styleClass="button-primary" prefWidth="160"/>
                             <Label fx:id="fileNameLabel" text="No file selected" styleClass="status-text"/>
-                            <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100">
-                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                            </Button>
+                            <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100"/>
                         </HBox>
                     </VBox>
                 </HBox>
@@ -48,28 +43,26 @@
                 <ProgressBar fx:id="scanProgressBar" prefWidth="Infinity" progress="0" visible="false"/>
 
                 <!-- Document Preview and Extraction -->
-                <HBox spacing="20" alignment="CENTER">
+                <HBox spacing="25" alignment="CENTER" fillHeight="true">
                     <!-- Left Panel - Document Preview -->
-                    <VBox spacing="10" alignment="CENTER" HBox.hgrow="ALWAYS">
-                        <VBox styleClass="profile-edit-card" alignment="CENTER">
+                    <VBox spacing="15" alignment="CENTER" HBox.hgrow="ALWAYS" prefWidth="350">
+                        <VBox styleClass="profile-edit-card" alignment="CENTER" prefWidth="350">
                             <Label text="Document Preview" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
-                            <ImageView fx:id="documentImageView" fitWidth="300" fitHeight="250" preserveRatio="true"
+                            <ImageView fx:id="documentImageView" fitWidth="280" fitHeight="250" preserveRatio="true"
                                        styleClass="profile-card"/>
-                            <Button fx:id="scanButton" text="Scan Document" styleClass="button-warning" prefWidth="150" disable="true">
-                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                            </Button>
+                            <Button fx:id="scanButton" text="Scan Document" styleClass="button-warning" prefWidth="160" disable="true"/>
                         </VBox>
                     </VBox>
 
                     <!-- Right Panel - Extracted Data -->
-                    <VBox spacing="10" alignment="CENTER" HBox.hgrow="ALWAYS">
-                        <VBox styleClass="profile-edit-card" alignment="CENTER">
+                    <VBox spacing="15" alignment="CENTER" HBox.hgrow="ALWAYS" prefWidth="550">
+                        <VBox styleClass="profile-edit-card" alignment="CENTER" prefWidth="550">
                             <Label text="Extracted Data" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
-                            <GridPane hgap="10" vgap="8" alignment="CENTER">
+                            <GridPane hgap="15" vgap="10" alignment="CENTER">
                                 <columnConstraints>
-                                    <ColumnConstraints halignment="RIGHT" minWidth="120"/>
-                                    <ColumnConstraints minWidth="200"/>
+                                    <ColumnConstraints halignment="RIGHT" minWidth="130" prefWidth="130"/>
+                                    <ColumnConstraints minWidth="250" hgrow="ALWAYS"/>
                                 </columnConstraints>
 
                                 <Label text="Document Type:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
@@ -94,9 +87,7 @@
                                 <TextField fx:id="providerField" GridPane.rowIndex="6" GridPane.columnIndex="1" promptText="Auto-extracted"/>
                             </GridPane>
 
-                            <Button fx:id="importButton" text="Import to System" styleClass="button-success" prefWidth="150" disable="true">
-                                <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                            </Button>
+                            <Button fx:id="importButton" text="Import to System" styleClass="button-success" prefWidth="160" disable="true"/>
                         </VBox>
                     </VBox>
                 </HBox>
@@ -105,7 +96,7 @@
                 <HBox alignment="CENTER">
                     <VBox maxWidth="1000" styleClass="profile-edit-card" alignment="CENTER">
                         <Label text="Raw Extracted Text" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
-                        <TextArea fx:id="rawTextArea" prefHeight="120" editable="false" wrapText="true"
+                        <TextArea fx:id="rawTextArea" prefHeight="130" editable="false" wrapText="true"
                                   style="-fx-background-color: #1e1e1e; -fx-text-fill: #e0e0e0; -fx-font-family: monospace;" maxWidth="Infinity"/>
                     </VBox>
                 </HBox>
@@ -114,9 +105,9 @@
 
                 <Label fx:id="statusLabel" styleClass="status-text" alignment="CENTER" maxWidth="Infinity"/>
 
-                <HBox alignment="CENTER">
+                <HBox alignment="CENTER" spacing="15">
                     <Button fx:id="clearButton" text="Clear" styleClass="button-secondary" prefWidth="100"/>
-                    <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-primary" prefWidth="150"/>
+                    <Button fx:id="backButton" text="Back to Dashboard" styleClass="button-primary" prefWidth="160"/>
                 </HBox>
 
             </VBox>

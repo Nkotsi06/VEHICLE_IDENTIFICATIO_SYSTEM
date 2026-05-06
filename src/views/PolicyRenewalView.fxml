@@ -2,9 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.*?>
-<?import javafx.collections.FXCollections?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.PolicyRenewalController"
             stylesheets="@../css/application.css" styleClass="border-pane">
@@ -14,32 +12,36 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                    style="-fx-background-color: #f0f2f5; -fx-background: #f0f2f5;">
-            <VBox spacing="20" alignment="TOP_CENTER"
-                  style="-fx-background-color: #f0f2f5; -fx-padding: 25 40 30 40;">
+        <ScrollPane fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" alignment="TOP_CENTER" styleClass="dashboard-container">
+                <padding>
+                    <Insets top="25" right="40" bottom="30" left="40"/>
+                </padding>
 
                 <Label text="Policy Renewals" styleClass="label-title" alignment="CENTER" maxWidth="Infinity"/>
                 <Label text="Manage insurance policy renewals" styleClass="label-subtitle" alignment="CENTER" maxWidth="Infinity"/>
 
                 <Separator/>
 
-                <HBox spacing="20" alignment="CENTER">
+                <HBox spacing="25" alignment="CENTER" fillHeight="true">
                     <!-- Left Panel - Renewals List -->
-                    <VBox spacing="10" alignment="CENTER" HBox.hgrow="ALWAYS">
-                        <VBox styleClass="profile-edit-card" alignment="CENTER">
+                    <VBox spacing="15" alignment="CENTER" HBox.hgrow="ALWAYS" prefWidth="550">
+                        <VBox styleClass="profile-edit-card" alignment="CENTER" prefWidth="550">
                             <Label text="Policy Renewals" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
                             <ProgressIndicator fx:id="loadProgress" visible="false" maxWidth="30"/>
 
-                            <TableView fx:id="renewalsTable" prefHeight="400" maxWidth="Infinity" columnResizePolicy="CONSTRAINED_RESIZE_POLICY">
+                            <TableView fx:id="renewalsTable" prefHeight="450" maxWidth="Infinity">
+                                <columnResizePolicy>
+                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                                </columnResizePolicy>
                                 <columns>
-                                    <TableColumn fx:id="policyColumn" text="Policy Number" minWidth="120" maxWidth="160"/>
-                                    <TableColumn fx:id="vehicleColumn" text="Vehicle" minWidth="120" maxWidth="160"/>
-                                    <TableColumn fx:id="renewalDateColumn" text="Renewal Date" minWidth="100" maxWidth="130"/>
-                                    <TableColumn fx:id="premiumColumn" text="Premium (M)" minWidth="90" maxWidth="110"/>
-                                    <TableColumn fx:id="paymentStatusColumn" text="Payment Status" minWidth="90" maxWidth="110"/>
-                                    <TableColumn fx:id="renewalStatusColumn" text="Status" minWidth="80" maxWidth="110"/>
+                                    <TableColumn fx:id="policyColumn" text="Policy Number" prefWidth="140"/>
+                                    <TableColumn fx:id="vehicleColumn" text="Vehicle" prefWidth="140"/>
+                                    <TableColumn fx:id="renewalDateColumn" text="Renewal Date" prefWidth="110"/>
+                                    <TableColumn fx:id="premiumColumn" text="Premium (M)" prefWidth="100"/>
+                                    <TableColumn fx:id="paymentStatusColumn" text="Payment Status" prefWidth="100"/>
+                                    <TableColumn fx:id="renewalStatusColumn" text="Status" prefWidth="90"/>
                                 </columns>
                                 <placeholder>
                                     <Label text="No renewals found" styleClass="status-text"/>
@@ -50,25 +52,28 @@
                                 <Pagination fx:id="renewalsPagination" pageCount="1" maxPageIndicatorCount="5"/>
                             </HBox>
 
-                            <HBox alignment="CENTER">
-                                <Button fx:id="refreshButton" text="Refresh" styleClass="button-info"/>
-                                <Button fx:id="fadeButton" text="Animate" styleClass="button-warning">
-                                    <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                                </Button>
+                            <HBox alignment="CENTER" spacing="15">
+                                <Button fx:id="refreshButton" text="Refresh" styleClass="button-info" prefWidth="100"/>
+                                <Button fx:id="fadeButton" text="Animate" styleClass="button-warning" prefWidth="100"/>
                             </HBox>
                         </VBox>
                     </VBox>
 
                     <!-- Right Panel - Create Renewal -->
-                    <VBox spacing="15" alignment="CENTER" HBox.hgrow="ALWAYS">
-                        <VBox styleClass="profile-edit-card" alignment="CENTER">
+                    <VBox spacing="15" alignment="CENTER" HBox.hgrow="ALWAYS" prefWidth="450">
+                        <VBox styleClass="profile-edit-card" alignment="CENTER" prefWidth="450">
                             <Label text="Create Renewal" styleClass="section-title" alignment="CENTER" maxWidth="Infinity"/>
 
                             <ProgressBar fx:id="operationProgress" prefWidth="Infinity" progress="0" visible="false"/>
 
-                            <GridPane hgap="10" vgap="10" alignment="CENTER">
+                            <GridPane hgap="15" vgap="12" alignment="CENTER">
+                                <columnConstraints>
+                                    <ColumnConstraints halignment="RIGHT" minWidth="100" prefWidth="100"/>
+                                    <ColumnConstraints minWidth="250" hgrow="ALWAYS"/>
+                                </columnConstraints>
+
                                 <Label text="Policy:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
-                                <ComboBox fx:id="policyComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250"/>
+                                <ComboBox fx:id="policyComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="280"/>
 
                                 <Label text="Renewal Date:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
                                 <DatePicker fx:id="renewalDatePicker" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="200"/>
@@ -84,24 +89,12 @@
                             </GridPane>
 
                             <Label text="Payment Method:" style="-fx-font-weight: bold;" alignment="CENTER" maxWidth="Infinity"/>
-                            <ComboBox fx:id="paymentMethodComboBox" prefWidth="200">
-                                <items>
-                                    <FXCollections fx:factory="observableArrayList">
-                                        <String fx:value="Credit Card"/>
-                                        <String fx:value="Debit Card"/>
-                                        <String fx:value="Bank Transfer"/>
-                                        <String fx:value="Digital Wallet"/>
-                                        <String fx:value="Cash"/>
-                                    </FXCollections>
-                                </items>
-                            </ComboBox>
+                            <ComboBox fx:id="paymentMethodComboBox" prefWidth="250"/>
 
-                            <HBox alignment="CENTER">
-                                <Button fx:id="createButton" text="Create Renewal" styleClass="button-success">
-                                    <effect><DropShadow radius="3" color="rgba(0,0,0,0.2)"/></effect>
-                                </Button>
-                                <Button fx:id="processPaymentButton" text="Process Payment" styleClass="button-primary"/>
-                                <Button fx:id="clearButton" text="Clear" styleClass="button-secondary"/>
+                            <HBox alignment="CENTER" spacing="15">
+                                <Button fx:id="createButton" text="Create Renewal" styleClass="button-success" prefWidth="130"/>
+                                <Button fx:id="processPaymentButton" text="Process Payment" styleClass="button-primary" prefWidth="140"/>
+                                <Button fx:id="clearButton" text="Clear" styleClass="button-secondary" prefWidth="100"/>
                             </HBox>
 
                             <Separator/>

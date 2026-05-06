@@ -3,7 +3,10 @@ package dao;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import database.ProcedureCaller;
 import database.ViewLoader;
@@ -27,30 +30,65 @@ public class ExpiredDocumentAlertDAO extends BaseDAO<ExpiredDocumentAlert> {
 
     @Override
     public ExpiredDocumentAlert findById(int id) throws SQLException {
-        List<ExpiredDocumentAlert> results = viewLoader.loadViewWithCondition("vw_expired_documents", "id = ?", id);
-        return results.isEmpty() ? null : results.get(0);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_expired_documents", "id = ?", id);
+        if (results.isEmpty()) {
+            return null;
+        }
+        return mapToExpiredDocumentAlert(results.get(0));
     }
 
     @Override
     public List<ExpiredDocumentAlert> findAll() throws SQLException {
-        return viewLoader.loadView("vw_expired_documents");
+        List<Map<String, Object>> results = viewLoader.loadView("vw_expired_documents");
+        return mapToExpiredDocumentAlertList(results);
     }
 
     public List<ExpiredDocumentAlert> findByVehicleId(int vehicleId) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_expired_documents", "vehicle_id = ? ORDER BY expiry_date", vehicleId);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_expired_documents", "vehicle_id = ? ORDER BY expiry_date", vehicleId);
+        return mapToExpiredDocumentAlertList(results);
     }
 
     public List<ExpiredDocumentAlert> findByAlertLevel(String alertLevel) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_expired_documents", "expiry_status = ? ORDER BY expiry_date", alertLevel);
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_expired_documents", "expiry_status = ? ORDER BY expiry_date", alertLevel);
+        return mapToExpiredDocumentAlertList(results);
     }
 
     public List<ExpiredDocumentAlert> findCriticalAlerts() throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_expired_documents", "expiry_status IN ('EXPIRED', 'CRITICAL') ORDER BY expiry_date");
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_expired_documents", "expiry_status IN ('EXPIRED', 'CRITICAL') ORDER BY expiry_date");
+        return mapToExpiredDocumentAlertList(results);
     }
 
     public List<ExpiredDocumentAlert> findExpiringWithinDays(int days) throws SQLException {
-        return viewLoader.loadViewWithCondition("vw_vehicle_document_expiry",
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_vehicle_document_expiry",
                 "expiry_date BETWEEN CURRENT_DATE AND CURRENT_DATE + ? ORDER BY expiry_date", days);
+        return mapToExpiredDocumentAlertList(results);
+    }
+
+    /**
+     * Finds documents expiring within the specified number of days.
+     *
+     * @param days the number of days to look ahead
+     * @return list of expired document alerts
+     * @throws SQLException if database error occurs
+     */
+    public List<ExpiredDocumentAlert> findDocumentsExpiringWithin(int days) throws SQLException {
+        return findExpiringWithinDays(days);
+    }
+
+    /**
+     * Gets the count of vehicles with expired documents.
+     *
+     * @return number of vehicles with expired documents
+     * @throws SQLException if database error occurs
+     */
+    public int getVehiclesWithExpiredDocuments() throws SQLException {
+        // Count distinct vehicles with expired documents
+        List<Map<String, Object>> results = viewLoader.loadViewWithCondition("vw_expired_documents", "1=1");
+        if (results == null || results.isEmpty()) {
+            return 0;
+        }
+        // Get distinct vehicle IDs
+        return (int) results.stream().map(m -> m.get("vehicle_id")).distinct().count();
     }
 
     public void checkVehicleDocuments(String registrationNumber) throws SQLException {
@@ -89,6 +127,88 @@ public class ExpiredDocumentAlertDAO extends BaseDAO<ExpiredDocumentAlert> {
     public int countExpiringDocuments(int days) throws SQLException {
         return viewLoader.countViewRowsWithCondition("vw_vehicle_document_expiry",
                 "expiry_date BETWEEN CURRENT_DATE AND CURRENT_DATE + ?", days);
+    }
+
+    // ============================================
+    // HELPER METHODS FOR MAPPING
+    // ============================================
+
+    private ExpiredDocumentAlert mapToExpiredDocumentAlert(Map<String, Object> map) {
+        if (map == null) return null;
+
+        ExpiredDocumentAlert alert = new ExpiredDocumentAlert();
+
+        if (map.get("id") != null) alert.setId(((Number) map.get("id")).intValue());
+        if (map.get("vehicle_id") != null) alert.setVehicleId(((Number) map.get("vehicle_id")).intValue());
+        if (map.get("registration_number") != null) alert.setRegistrationNumber(map.get("registration_number").toString());
+        if (map.get("make") != null) alert.setMake(map.get("make").toString());
+        if (map.get("model") != null) alert.setModel(map.get("model").toString());
+        if (map.get("document_type") != null) alert.setDocumentType(map.get("document_type").toString());
+        if (map.get("document_number") != null) alert.setDocumentNumber(map.get("document_number").toString());
+
+        if (map.get("issue_date") != null) {
+            Object dateObj = map.get("issue_date");
+            if (dateObj instanceof java.sql.Date) {
+                alert.setIssueDate(((java.sql.Date) dateObj).toLocalDate());
+            } else if (dateObj instanceof LocalDate) {
+                alert.setIssueDate((LocalDate) dateObj);
+            }
+        }
+        if (map.get("expiry_date") != null) {
+            Object dateObj = map.get("expiry_date");
+            if (dateObj instanceof java.sql.Date) {
+                alert.setExpiryDate(((java.sql.Date) dateObj).toLocalDate());
+            } else if (dateObj instanceof LocalDate) {
+                alert.setExpiryDate((LocalDate) dateObj);
+            }
+        }
+
+        if (alert.getExpiryDate() != null) {
+            long daysOverdue = java.time.temporal.ChronoUnit.DAYS.between(alert.getExpiryDate(), LocalDate.now());
+            alert.setDaysOverdue((int) Math.max(0, daysOverdue));
+        }
+
+        String expiryStatus = map.get("expiry_status") != null ? map.get("expiry_status").toString() : "";
+        if ("EXPIRED".equals(expiryStatus)) {
+            alert.setAlertLevel("CRITICAL");
+            alert.setRecommendedAction("IMMEDIATE_VEHICLE_IMPOUND");
+        } else if ("CRITICAL".equals(expiryStatus)) {
+            alert.setAlertLevel("HIGH");
+            alert.setRecommendedAction("ON_THE_SPOT_FINE");
+        } else if ("WARNING".equals(expiryStatus)) {
+            alert.setAlertLevel("MEDIUM");
+            alert.setRecommendedAction("WARNING_NOTICE");
+        } else if ("DUE_SOON".equals(expiryStatus)) {
+            alert.setAlertLevel("LOW");
+            alert.setRecommendedAction("REMINDER");
+        } else {
+            alert.setAlertLevel("NONE");
+            alert.setRecommendedAction("NO_ACTION");
+        }
+
+        alert.setNotified(false);
+
+        if (map.get("created_at") instanceof java.sql.Timestamp) {
+            alert.setCreatedAt(((java.sql.Timestamp) map.get("created_at")).toLocalDateTime());
+        }
+        if (map.get("updated_at") instanceof java.sql.Timestamp) {
+            alert.setUpdatedAt(((java.sql.Timestamp) map.get("updated_at")).toLocalDateTime());
+        }
+
+        return alert;
+    }
+
+    private List<ExpiredDocumentAlert> mapToExpiredDocumentAlertList(List<Map<String, Object>> maps) {
+        List<ExpiredDocumentAlert> alerts = new ArrayList<>();
+        if (maps != null) {
+            for (Map<String, Object> map : maps) {
+                ExpiredDocumentAlert alert = mapToExpiredDocumentAlert(map);
+                if (alert != null) {
+                    alerts.add(alert);
+                }
+            }
+        }
+        return alerts;
     }
 
     @Override

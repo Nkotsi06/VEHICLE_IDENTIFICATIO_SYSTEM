@@ -28,8 +28,6 @@ public class VehicleTrackerReconstructor {
 
     private VehicleSightingDAO sightingDAO;
     private VehicleMovementRecordDAO movementDAO;
-    private RouteCalculator routeCalculator;
-    private TimestampOrderingUtil timestampUtil;
 
     // Suspicious detection thresholds
     private static final double HIGH_SPEED_THRESHOLD = 120.0;
@@ -44,8 +42,8 @@ public class VehicleTrackerReconstructor {
         try {
             this.sightingDAO = new VehicleSightingDAO();
             this.movementDAO = new VehicleMovementRecordDAO();
-            this.routeCalculator = new RouteCalculator();
-            this.timestampUtil = new TimestampOrderingUtil();
+            // REMOVED: routeCalculator = new RouteCalculator(); - RouteCalculator is a utility class with static methods
+            // REMOVED: timestampUtil = new TimestampOrderingUtil(); - TimestampOrderingUtil is a utility class with static methods
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to initialize VehicleTrackerReconstructor", e);
         }
@@ -175,9 +173,10 @@ public class VehicleTrackerReconstructor {
 
             report.sightings = sightings;
             report.sightingCount = sightings.size();
-            report.totalDistance = routeCalculator.calculateTotalDistance(sightings);
-            report.averageSpeed = routeCalculator.calculateAverageSpeed(sightings);
-            report.segments = routeCalculator.calculateRouteSegments(sightings);
+            // FIXED: Use static method calls directly
+            report.totalDistance = RouteCalculator.calculateTotalDistance(sightings);
+            report.averageSpeed = RouteCalculator.calculateAverageSpeed(sightings);
+            report.segments = RouteCalculator.calculateRouteSegments(sightings);
             report.timeGaps = TimestampOrderingUtil.findTimeGaps(sightings);
 
             report.suspiciousSegments = new ArrayList<>();
